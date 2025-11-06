@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V18.0 (LaTeX 修正版)</title>
+    <title>專案管理期中備考系統 V19.0 (角色詳解版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -186,6 +186,11 @@
         table:not(#sec0 table) tr:last-child td { border-bottom: none; } 
         table:not(#sec0 table) th:last-child, table:not(#sec0 table) td:last-child { border-right: none; }
 
+        #sec1-2 table:nth-of-type(1) { font-size: 0.95em; }
+        #sec1-2 table:nth-of-type(1) th { background: #e0f2fe; color: #075985; }
+        #sec1-2 table:nth-of-type(1) td:nth-child(1) { font-weight: bold; width: 20%; }
+
+
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 90; }
         .fab {
             width: 56px; height: 56px; border-radius: 28px; border: none; color: white;
@@ -239,8 +244,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V17.1</h3>
-            <div class="shortcuts-hint">名詞總表版</div>
+            <h3>🚀 備考系統 V19.0</h3>
+            <div class="shortcuts-hint">角色詳解版 (Final)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -250,7 +255,7 @@
             <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
             <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 五大流程</a>
             <a href="#sec1-4" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (KA)</a>
-            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責</a>
+            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責 (詳)</a>
             <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程 (詳)</a>
@@ -365,8 +370,11 @@
                     </thead>
                     <tbody>
                         <tr><td><span class="term" data-term="pmp_plan">專案管理計畫書</span></td><td>規劃核心</td><td>專案的總計畫，整合所有子計畫。</td><td>包含三大基準：<span class="quiz-mask">範疇、時程、成本</span>。</td></tr>
+                        <tr><td><span class="term" data-term="baseline">三大基準 (Baselines)</span></td><td>規劃核心</td><td>經正式批准的計畫版本，用於衡量績效的標準。</td><td>任何修改都需通過正式的<span class="quiz-mask">變更控制</span>。</td></tr>
+                        <tr><td><span class="term" data-term="sow">工作說明書 (SOW)</span></td><td>範疇輸入</td><td>專案的「高層級需求」文件。</td><td>來源通常是外部（客戶合約）或發起人。</td></tr>
                         <tr><td><span class="term" data-term="wbs">WBS (工作分解結構)</span></td><td>範疇工具</td><td>將專案總範疇，分解成更小的可交付成果的階層結構。</td><td>必須遵循「<span class="quiz-mask">百分之百原則</span>」；是可交付成果導向 (名詞)。</td></tr>
                         <tr><td><span class="term" data-term="work_package">工作包 (Work Package)</span></td><td>範疇工具</td><td>WBS <span class="quiz-mask">最底層</span>的項目。</td><td>是可以被可靠地估算時程與成本的<span class="quiz-mask">最小單位</span>。</td></tr>
+                        <tr><td><span class="term" data-term="wbs_dictionary">WBS 辭典 (WBS Dictionary)</span></td><td>範疇工具</td><td>WBS 每個項目的詳細文字描述文件。</td><td>包含工作包描述、負責人、時程、成本、允收標準等。</td></tr>
                         <tr><td><span class="term" data-term="control_account">管制帳戶 (Control Account)</span></td><td>範疇/成本</td><td>WBS 結構中的管理節點。</td><td>WBS (範疇) 與 <span class="quiz-mask">OBS</span> (組織) 的交會點。</td></tr>
                         <tr><td><span class="term" data-term="raci">RACI</span></td><td>責任分派</td><td>RAM 的一種，定義每個任務的責任類型。</td><td>Accountable (負全責，<span class="quiz-mask">A 只能有一人</span>)。</td></tr>
                     </tbody>
@@ -440,11 +448,34 @@
                 <div class="content-body">
                     <p>現代專案面臨 <strong><span class="term" data-term="vuca">VUCA</span></strong> (易變、不確定、複雜、模糊) 環境。</p>
                     <h4>(一) <span class="term" data-term="opm">組織級專案管理 (OPM)</span> 層級</h4>
-                    <ul>
-                        <li><strong><span class="term" data-term="portfolio">專案組合</span>：</strong>為達成<span class="quiz-mask">策略目標</span>，管理多個(不一定相關)專案。重點：「做對的事」。</li>
-                        <li><strong><span class="term" data-term="program">專案集</span>：</strong>管理一組<span class="quiz-mask">相互關聯</span>的專案，以獲取額外利益(1+1>2)。</li>
-                        <li><strong>專案：</strong>交付獨特成果。重點：「把事做對」。</li>
-                    </ul>
+                    <p>OPM 是一個策略框架，用於將組織的策略與「專案組合」、「專案集」和「專案」連結起來，以實現戰略目標。</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>層級</th>
+                                <th>目的</th>
+                                <th>焦點</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="term" data-term="portfolio">專案組合 (Portfolio)</span></td>
+                                <td>確保做「對的」事情 (<span class="quiz-mask">Do the right things</span>)。</td>
+                                <td>連結組織策略，管理多個（不一定相關）專案/專案集。</td>
+                            </tr>
+                            <tr>
+                                <td><span class="term" data-term="program">專案集 (Program)</span></td>
+                                <td>以協調的方式管理相關專案，獲取 <span class="quiz-mask">1+1>2 的利益</span>。</td>
+                                <td>管理「<span class="quiz-mask">相依性</span>」的一組相關專案。</td>
+                            </tr>
+                            <tr>
+                                <td>專案 (Project)</td>
+                                <td>把事情「做對」 (<span class="quiz-mask">Do things right</span>)。</td>
+                                <td>交付獨特的成果。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
                     <h4>(二) <span class="term" data-term="pmo">專案管理辦公室 (PMO)</span> 三種類型</h4>
                     <ul>
                         <li><strong>支援型 (Supportive)：</strong>顧問角色，提供範本。控制度：<span class="quiz-mask">低</span>。</li>
@@ -502,7 +533,7 @@
                 <div class="section-header"><h3>伍、PM 角色與職責</h3><div class="master-check" data-id="sec1-5"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <p>PM 是專案的整合者，需具備「做事」與「做人」兩大能力。</p>
-                    <p>PM 大部分（約 80%）時間花在**「喬人喬乾淨」**上。</p>
+                    <p>PM 核心角色：<span class="term" data-term="integration">整合者 (Integrator)</span>。時間分配： PM 絕大多數時間（<span class="quiz-mask">75%~90%</span>）花在溝通上。</p>
                     <table>
                         <tr><th>職責類型</th><th>核心內容</th></tr>
                         <tr><td><strong>做事 (技術/規劃)</strong></td><td>目標設定、規劃、進度與成本控管。</td></tr>
