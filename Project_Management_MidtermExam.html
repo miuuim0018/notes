@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V14.0 (知識領域強化版)</title>
+    <title>專案管理期中備考系統 V15.0 (終極詳解版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -215,8 +215,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V14.0</h3>
-            <div class="shortcuts-hint">知識領域強化版</div>
+            <h3>🚀 備考系統 V15.0</h3>
+            <div class="shortcuts-hint">終極詳解版 (Detailed)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -230,7 +230,7 @@
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程</a>
             <a href="#sec2-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-3"></span>利害關係人</a>
             <a href="#sec3" class="nav-link">🧱 規劃流程 (Planning)</a>
-            <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
+            <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準 (詳)</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
             <a href="#sec4" class="nav-link" style="color: var(--accent); font-weight: bold;">🏃 敏捷管理 (Agile)</a>
@@ -347,8 +347,8 @@
                     <h4>(二) 量化財務模型 (客觀判斷)</h4>
                     <table>
                         <tr><th>方法</th><th>定義與標準</th><th>優缺點</th></tr>
-                        <tr><td><span class="term" data-term="payback_period">還本期</span></td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span>貨幣時間價值(TVM)。</td></tr>
-                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減去投資。NPV > <span class="quiz-mask">0</span> 可接受，越高越好。</td><td>最重要的財務指標，<span class="quiz-mask">考量</span> TVM。</td></tr>
+                        <tr><td><span class="term" data-term="payback_period">還本期</span></td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span> <span class="term" data-term="tvm">貨幣時間價值(TVM)</span>。</td></tr>
+                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減去投資。NPV > <span class="quiz-mask">0</span> 可接受，越高越好。</td><td>最重要的財務指標，<span class="quiz-mask">考量</span> <span class="term" data-term="tvm">TVM</span>。</td></tr>
                         <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = 0 的折現率。越高越好。</td><td>代表真實投資報酬率。</td></tr>
                     </table>
                 </div>
@@ -390,8 +390,9 @@
             <div id="sec3-1" class="section-block">
                 <div class="section-header"><h3>壹、計畫書與基準</h3><div class="master-check" data-id="sec3-1"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <p><span class="term" data-term="baseline">基準 (Baseline)</span>是經核准的計畫版本。三大基準：<span class="quiz-mask">範疇</span>、<span class="quiz-mask">時程</span>、<span class="quiz-mask">成本</span>。</p>
-                    <div class="exam-tip">基準一旦確立，任何修改都必須走正式的<strong><span class="quiz-mask">變更管制流程 (CCB)</span></strong>。</div>
+                    <p><strong><span class="term" data-term="pmp_plan">專案管理計畫書</span></strong> 是專案的「操作手冊」，整合了所有子計畫。</p>
+                    <p><span class="term" data-term="baseline">基準 (Baseline)</span>是其中經核准的版本，用來衡量績效。三大基準：<span class="quiz-mask">範疇、時程、成本</span>。</p>
+                    <div class="exam-tip">基準一旦確立，任何修改都必須走正式的<strong><span class="term" data-term="ccb">變更管制流程 (CCB)</span></strong>。</div>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
@@ -527,14 +528,17 @@
             "operations": { title: "日常營運 (Operations)", def: "持續性、重複性的工作，旨在維持組織正常運作。", app: "與專案的「暫時性」形成對比。" },
             "opm": { title: "組織級專案管理 (OPM)", def: "連結策略與執行的框架，包含專案組合、專案集與專案管理。", app: "確保組織做對的事，並把事做對。" },
             "sacred_cow": { title: "聖牛 (Sacred Cow)", def: "源自印度文化，指高層基於個人偏好強制執行的專案。", app: "通常缺乏理性商業論證，但必須執行。" },
-            "payback_period": { title: "還本期 (Payback Period)", def: "回收初始投資成本所需的時間。", app: "時間越短越好，但缺點是忽略了貨幣時間價值。" },
+            "payback_period": { title: "還本期 (Payback Period)", def: "回收初始投資成本所需的時間。", app: "時間越短越好，但缺點是忽略了貨幣時間價值(TVM)。" },
             "po": { title: "產品負責人 (Product Owner)", def: "Scrum 角色，代表客戶利益，管理產品待辦清單(Backlog)。", app: "決定「做什麼」，對產品價值最大化負責。" },
             "sm": { title: "Scrum Master", def: "Scrum 角色，負責確保團隊遵循 Scrum 價值觀，並排除障礙。", app: "僕人式領導者，促進團隊自組織。" },
             "integration": { title: "整合管理 (Integration)", def: "識別、定義、結合、統一與協調各專案管理過程活動。", app: "PM 的核心職責，確保專案各部分協調運作。" },
-            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" }
+            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" },
+            "tvm": { title: "貨幣時間價值 (TVM)", def: "「今天的 1 元比明天的 1 元更有價值」，因為今天的錢可以投資生息。", app: "NPV 等財務指標的核心概念，忽略 TVM 會導致決策失準。" },
+            "pmp_plan": { title: "專案管理計畫書 (PM Plan)", def: "定義專案如何執行、監控、結案的綜合性文件。", app: "是整合所有子計畫的「母計畫」，也是專案執行的最高指導原則。" },
+            "ccb": { title: "變更管制委員會 (CCB)", def: "負責審查、評估、核准或否決專案變更請求的正式團體。", app: "基準確立後，任何變更都必須通過 CCB，以防止範疇潛變。" }
         };
 
-        const STORAGE_KEY = 'pm_v14_final';
+        const STORAGE_KEY = 'pm_v15_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
