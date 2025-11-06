@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中考終極完整複習筆記</title>
+    <title>專案管理期中備考系統 V7.0 (最終修正版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -78,7 +78,9 @@
         }
         #btn-dark { background: var(--text-main); color: var(--bg-main); }
         #btn-reset { background: #ef444422; color: #ef4444; }
+        #btn-reset:hover { background: #ef4444; color: white; }
         #btn-flashcard { background: var(--accent); color: #fff; grid-column: span 2; }
+        #btn-flashcard:hover { background: #d97706; }
         .main-content {
             margin-left: var(--sidebar-width); flex: 1; padding: 40px 60px;
             overflow-y: auto; scroll-behavior: smooth; height: 100vh;
@@ -111,6 +113,26 @@
             font-size: 0.9em; transition: all 0.2s;
         }
         .master-check.checked { background: var(--success); color: white; border-color: var(--success); }
+        
+        /* Improved Note Styles */
+        .note-area { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border); }
+        .note-toggle {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+            font-size: 0.95em; display: flex; align-items: center; gap: 6px; padding: 8px 0;
+            transition: color 0.2s; font-weight: 600;
+        }
+        .note-toggle:hover { color: var(--primary); }
+        .note-toggle::before { content: '✎'; font-size: 1.2em; }
+        .my-note {
+            width: 100%; min-height: 80px; margin-top: 10px; padding: 12px;
+            border: 2px solid var(--border); border-radius: 10px;
+            background: var(--bg-main); color: var(--text-main);
+            font-family: inherit; resize: vertical; outline: none;
+            display: none; /* Hidden by default */
+            transition: all 0.3s ease;
+        }
+        .my-note:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+
         .term {
             color: var(--term-highlight); font-weight: 600; border-bottom: 2px dashed var(--term-highlight);
             cursor: help; position: relative; transition: all 0.2s;
@@ -150,7 +172,8 @@
         }
         .fab:hover { transform: scale(1.1); opacity: 1; }
         #quiz-fab { background: var(--primary); }
-        body.quiz-mode #quiz-fab { background: var(--accent); }
+        body.quiz-mode #quiz-fab { background: var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
         #top-fab { background: var(--text-muted); opacity: 0; pointer-events: none; transform: translateY(20px); }
         #top-fab.visible { opacity: 0.8; pointer-events: auto; transform: translateY(0); }
         .modal-overlay {
@@ -160,17 +183,15 @@
         }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content {
-            background: var(--bg-sidebar); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px;
+            background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 90%; max-width: 500px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(20px); transition: transform 0.3s;
         }
         .modal-overlay.active .modal-content { transform: translateY(0); }
-        .close-modal { position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 1.5em; color: var(--text-muted); cursor: pointer; }
+        .close-modal { position: absolute; top: 20px; right: 20px; border: none; background: transparent; font-size: 1.8em; color: var(--text-muted); cursor: pointer; line-height: 1; }
         #glossary-modal .modal-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--term-highlight); }
         #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
         .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
         .glossary-text { font-size: 1.1em; line-height: 1.6; }
-        .analogy-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 25px; border-radius: 16px; margin: 25px 0; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
-        .analogy-card h4 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3em; }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-105%); } .sidebar.open { transform: translateX(0); box-shadow: 100px 0 0 rgba(0,0,0,0.5); }
@@ -186,8 +207,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 專案管理期中備考 V6.0</h3>
-            <div class="shortcuts-hint">終極完整收錄版</div>
+            <h3>🚀 備考系統 V7.0</h3>
+            <div class="shortcuts-hint">最終修正版 (Fixed)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -203,7 +224,6 @@
             <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
-            <a href="#sec4" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
             <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
@@ -213,7 +233,7 @@
     </nav>
 
     <main class="main-content" id="main-scroll">
-        <h1>📘 專案管理期中考終極完整筆記</h1>
+        <h1>📘 專案管理期中考終極筆記</h1>
         <p class="subtitle">點擊<span class="term" data-term="demo">紫色名詞</span>查看詳細解釋 | [Q]鍵切換背誦模式</p>
 
         <section id="sec1">
@@ -234,7 +254,7 @@
                         <tr><td>不確定性</td><td><span class="quiz-mask">高</span></td><td><span class="quiz-mask">低 (可預測)</span></td></tr>
                     </table>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
             <div id="sec1-2" class="section-block">
@@ -263,7 +283,7 @@
                         <tr><td>專案型</td><td><span class="quiz-mask">高~全權</span></td><td>PM</td><td>全職(大老闆)</td></tr>
                     </table>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
              <div id="sec1-3" class="section-block">
@@ -281,7 +301,7 @@
                     </ul>
                     <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
         </section>
 
@@ -304,7 +324,7 @@
                         <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = 0 的折現率。越高越好。</td><td>代表真實投資報酬率。</td></tr>
                     </table>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
             <div id="sec2-2" class="section-block">
@@ -318,7 +338,7 @@
                         <li>關鍵內容(高層級)：商業需求、<span class="term" data-term="smart">SMART 目標</span>、里程碑、總預算、假設限制。</li>
                     </ul>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
             <div id="sec2-3" class="section-block">
@@ -333,7 +353,7 @@
                         <li>低權力 / 低影響力 → <strong><span class="quiz-mask">監督</span></strong>。</li>
                     </ul>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
         </section>
 
@@ -345,7 +365,7 @@
                     <p><span class="term" data-term="baseline">基準 (Baseline)</span>是經核准的計畫版本。三大基準：<span class="quiz-mask">範疇</span>、<span class="quiz-mask">時程</span>、<span class="quiz-mask">成本</span>。</p>
                     <div class="exam-tip">基準一旦確立，任何修改都必須走正式的<strong><span class="quiz-mask">變更管制流程 (CCB)</span></strong>。</div>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
             <div id="sec3-2" class="section-block">
@@ -366,7 +386,7 @@
                         <strong>100% 原則：</strong>WBS 必須包含專案<span class="quiz-mask">所有</span>工作，不多也不少。
                     </div>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
             <div id="sec3-3" class="section-block">
@@ -382,23 +402,10 @@
                     <h4>(二) 溝通管理</h4>
                     <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。</p>
                 </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
         </section>
 
-        <section id="sec4">
-            <h2>🧠 觀念強化：經典類比</h2>
-            <div class="analogy-card">
-                <h4>🏗️ 蓋大樓比喻 (整體觀)</h4>
-                <p><strong>專案</strong>是這棟獨一無二的大樓。<strong>PM</strong>是建築師兼工頭。</p>
-                <p><strong>專案章程</strong>是土地許可證。<strong>WBS</strong>是詳細施工藍圖，把大樓拆解成「地基」、「10樓結構」等工作包，確保沒少蓋任何一層(100%原則)。</p>
-            </div>
-            <div class="analogy-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb);">
-                <h4>🎻 交響樂團比喻 (整合與溝通)</h4>
-                <p><strong>PM</strong>是指揮家，負責協調所有樂手(團隊資源)。</p>
-                <p><strong>計畫書</strong>是總樂譜，規定每個聲部何時進場(時程)、大小聲(資源分配)，是所有人共同遵循的基準。</p>
-            </div>
-        </section>
     </main>
 
     <div class="fab-container">
@@ -446,16 +453,67 @@
             "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" }
         };
 
-        const STORAGE_KEY = 'pm_v6_final_data';
+        const STORAGE_KEY = 'pm_v7_fixed';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
-        document.querySelectorAll('.my-note').forEach(el => { if(appData.notes[el.closest('.section-block').id]) el.value = appData.notes[el.closest('.section-block').id]; });
+        document.querySelectorAll('.my-note').forEach(el => { 
+            const id = el.closest('.section-block').id;
+            if(appData.notes[id]) { el.value = appData.notes[id]; el.style.display = 'block'; }
+        });
 
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
         document.getElementById('btn-dark').addEventListener('click', () => { appData.dark = !appData.dark; document.body.classList.toggle('dark-mode', appData.dark); saveData(); });
         document.getElementById('quiz-fab').addEventListener('click', () => { document.body.classList.toggle('quiz-mode'); });
         document.body.addEventListener('click', e => { if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) e.target.classList.add('revealed'); });
+        
+        // Improved Flashcard Extraction Logic
+        let flashcards = [];
+        // Defer extraction until page is fully loaded just in case
+        window.addEventListener('load', () => {
+             document.querySelectorAll('.section-block').forEach(section => {
+                section.querySelectorAll('.quiz-mask').forEach(originalMask => {
+                    if (!originalMask.innerText.trim()) return;
+                    // Find nearest suitable container
+                    let container = originalMask.closest('p') || originalMask.closest('li') || originalMask.closest('td') || originalMask.parentElement;
+                    if (container) {
+                        // Find index of this mask in its container to correctly replace it in the clone
+                        let allMasksInContainer = Array.from(container.querySelectorAll('.quiz-mask'));
+                        let maskIndex = allMasksInContainer.indexOf(originalMask);
+                        
+                        let clone = container.cloneNode(true);
+                        let masksInClone = clone.querySelectorAll('.quiz-mask');
+                        if(masksInClone[maskIndex]) {
+                            masksInClone[maskIndex].innerText = '【_____】';
+                            masksInClone[maskIndex].style.borderBottom = '3px solid var(--accent)';
+                        }
+                        flashcards.push({
+                            q: clone.innerHTML,
+                            a: originalMask.innerText,
+                            src: section.querySelector('h3')?.innerText.trim() || '未知章節'
+                        });
+                    }
+                });
+            });
+        });
+
+        const fModal = document.getElementById('flashcard-modal');
+        function showFlash() { 
+            if(!flashcards.length) { alert('題目載入中或無可用題目，請稍後再試。'); return; }
+            const c = flashcards[Math.floor(Math.random()*flashcards.length)]; 
+            document.getElementById('flash-q').innerHTML=c.q; 
+            document.getElementById('flash-a').innerText=c.a; 
+            document.getElementById('flash-context').innerText=`出處：${c.src}`; 
+            document.getElementById('flash-a').style.display='none'; 
+            document.getElementById('flash-reveal').style.display='block'; 
+            document.getElementById('flash-next').style.display='none'; 
+            fModal.classList.add('active'); 
+        }
+        function closeFlashcard() { fModal.classList.remove('active'); }
+        document.getElementById('btn-flashcard').addEventListener('click', showFlash);
+        document.getElementById('flash-reveal').addEventListener('click', function() { document.getElementById('flash-a').style.display='block'; this.style.display='none'; document.getElementById('flash-next').style.display='block'; });
+        document.getElementById('flash-next').addEventListener('click', showFlash);
+
         document.body.addEventListener('click', e => {
             const t = e.target.closest('.term');
             if(t && glossaryDB[t.dataset.term]) {
@@ -474,27 +532,30 @@
         function updateMasterUI(id, v) {
             const s = document.getElementById(id); if(s) { s.classList.toggle('mastered', v); s.querySelector('.master-check').innerHTML = v ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握'; const d = document.querySelector(`.progress-dot[data-target="${id}"]`); if(d) d.parentElement.classList.toggle('mastered', v); }
         }
-        document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => { const a = e.target.nextElementSibling; a.style.display = a.style.display==='block'?'none':'block'; }));
+        document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => { 
+            const a = e.target.nextElementSibling; 
+            a.style.display = a.style.display==='block'?'none':'block'; 
+            if(a.style.display==='block') a.focus();
+        }));
         document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => { appData.notes[el.closest('.section-block').id] = e.target.value; saveData(); }));
-        document.getElementById('main-scroll').addEventListener('scroll', () => {
-            const m = document.getElementById('main-scroll');
-            document.getElementById('progress-bar').style.width = (m.scrollTop / (m.scrollHeight - m.clientHeight)) * 100 + '%';
-            document.getElementById('top-fab').classList.toggle('visible', m.scrollTop > 300);
+        
+        const mainScroll = document.getElementById('main-scroll');
+        mainScroll.addEventListener('scroll', () => {
+            document.getElementById('progress-bar').style.width = (mainScroll.scrollTop / (mainScroll.scrollHeight - mainScroll.clientHeight)) * 100 + '%';
+            document.getElementById('top-fab').classList.toggle('visible', mainScroll.scrollTop > 300);
         });
-        document.getElementById('top-fab').addEventListener('click', () => document.getElementById('main-scroll').scrollTo({top:0, behavior:'smooth'}));
+        document.getElementById('top-fab').addEventListener('click', () => mainScroll.scrollTo({top:0, behavior:'smooth'}));
 
-        let flashcards = [];
-        document.querySelectorAll('.quiz-mask').forEach(m => { if(m.innerText.trim()) { let q = m.closest('p,li,td').cloneNode(true); q.querySelectorAll('.quiz-mask').forEach(zm => { if(zm.innerText===m.innerText) { zm.innerText='【_____】'; zm.style.borderBottom='3px solid var(--accent)'; }}); flashcards.push({q:q.innerHTML, a:m.innerText, src:m.closest('.section-block').querySelector('h3').innerText}); }});
-        const fModal = document.getElementById('flashcard-modal');
-        function showFlash() { if(!flashcards.length) return; const c = flashcards[Math.floor(Math.random()*flashcards.length)]; document.getElementById('flash-q').innerHTML=c.q; document.getElementById('flash-a').innerText=c.a; document.getElementById('flash-context').innerText=`出處：${c.src}`; document.getElementById('flash-a').style.display='none'; document.getElementById('flash-reveal').style.display='block'; document.getElementById('flash-next').style.display='none'; fModal.classList.add('active'); }
-        function closeFlashcard() { fModal.classList.remove('active'); }
-        document.getElementById('btn-flashcard').addEventListener('click', showFlash);
-        document.getElementById('flash-reveal').addEventListener('click', function() { document.getElementById('flash-a').style.display='block'; this.style.display='none'; document.getElementById('flash-next').style.display='block'; });
-        document.getElementById('flash-next').addEventListener('click', showFlash);
-        document.addEventListener('keydown', e => { if(['TEXTAREA','INPUT'].includes(e.target.tagName)) return; if(e.key.toLowerCase()==='q') document.body.classList.toggle('quiz-mode'); if(e.key.toLowerCase()==='f') showFlash(); if(e.key==='Escape') { closeGlossary(); closeFlashcard(); }});
-        document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('清空紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
+        document.addEventListener('keydown', e => { if(['TEXTAREA','INPUT'].includes(e.target.tagName)) return; if(e.key.toLowerCase()==='q') document.getElementById('quiz-fab').click(); if(e.key.toLowerCase()==='f') showFlash(); if(e.key==='Escape') { closeGlossary(); closeFlashcard(); }});
+        document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('確定清空所有紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
         document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.add('open'));
         document.addEventListener('click', e => { if(window.innerWidth<=768 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) document.getElementById('sidebar').classList.remove('open'); });
+        document.getElementById('search-input').addEventListener('input', e => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.section-block').forEach(sec => {
+                sec.style.display = sec.innerText.toLowerCase().includes(term) ? 'block' : 'none';
+            });
+        });
     </script>
 </body>
 </html>
