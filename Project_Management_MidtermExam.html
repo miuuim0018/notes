@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V7.0 (最終修正版)</title>
+    <title>專案管理期中備考系統 V8.0 (上下文修復版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -183,7 +183,7 @@
         }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content {
-            background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 90%; max-width: 500px;
+            background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 90%; max-width: 550px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(20px); transition: transform 0.3s;
         }
         .modal-overlay.active .modal-content { transform: translateY(0); }
@@ -192,6 +192,16 @@
         #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
         .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
         .glossary-text { font-size: 1.1em; line-height: 1.6; }
+        .analogy-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 25px; border-radius: 16px; margin: 25px 0; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
+        .analogy-card h4 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3em; }
+        
+        /* Flashcard Specific Styles */
+        .flash-blank-active {
+             color: var(--accent) !important;
+             border-bottom: 3px solid var(--accent) !important;
+             font-weight: bold;
+             padding: 0 5px;
+        }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-105%); } .sidebar.open { transform: translateX(0); box-shadow: 100px 0 0 rgba(0,0,0,0.5); }
@@ -207,8 +217,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V7.0</h3>
-            <div class="shortcuts-hint">最終修正版 (Fixed)</div>
+            <h3>🚀 備考系統 V8.0</h3>
+            <div class="shortcuts-hint">上下文修復版 (Fixed+)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -224,6 +234,7 @@
             <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
+            <a href="#sec4" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
             <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
@@ -406,6 +417,19 @@
             </div>
         </section>
 
+        <section id="sec4">
+            <h2>🧠 觀念強化：經典類比</h2>
+            <div class="analogy-card">
+                <h4>🏗️ 蓋大樓比喻 (整體觀)</h4>
+                <p><strong>專案</strong>是這棟獨一無二的大樓。<strong>PM</strong>是建築師兼工頭。</p>
+                <p><strong>專案章程</strong>是土地許可證。<strong>WBS</strong>是詳細施工藍圖，把大樓拆解成「地基」、「10樓結構」等工作包，確保沒少蓋任何一層(100%原則)。</p>
+            </div>
+            <div class="analogy-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb);">
+                <h4>🎻 交響樂團比喻 (整合與溝通)</h4>
+                <p><strong>PM</strong>是指揮家，負責協調所有樂手(團隊資源)。</p>
+                <p><strong>計畫書</strong>是總樂譜，規定每個聲部何時進場(時程)、大小聲(資源分配)，是所有人共同遵循的基準。</p>
+            </div>
+        </section>
     </main>
 
     <div class="fab-container">
@@ -424,7 +448,7 @@
         <div class="modal-content" style="text-align: center;">
             <button class="close-modal" onclick="closeFlashcard()">×</button>
             <h3 style="color:var(--primary);">🎲 隨機抽考</h3><p style="color:var(--text-muted);" id="flash-context"></p>
-            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px;"></div>
+            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px; line-height:1.6;"></div>
             <div id="flash-a" style="font-size:1.5em;color:var(--success);font-weight:bold;padding:20px;background:var(--primary-light);border-radius:12px;display:none;"></div>
             <button id="flash-reveal" class="tool-btn" style="width:100%;background:var(--primary);color:#fff;padding:15px;margin-top:20px;">看答案</button>
             <button id="flash-next" class="tool-btn" style="width:100%;background:var(--accent);color:#fff;padding:15px;margin-top:10px;display:none;">下一題 →</button>
@@ -453,7 +477,7 @@
             "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" }
         };
 
-        const STORAGE_KEY = 'pm_v7_fixed';
+        const STORAGE_KEY = 'pm_v8_fixed';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
@@ -467,26 +491,35 @@
         document.getElementById('quiz-fab').addEventListener('click', () => { document.body.classList.toggle('quiz-mode'); });
         document.body.addEventListener('click', e => { if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) e.target.classList.add('revealed'); });
         
-        // Improved Flashcard Extraction Logic
+        // V8: IMPROVED FLASHCARD EXTRACTION LOGIC
         let flashcards = [];
-        // Defer extraction until page is fully loaded just in case
         window.addEventListener('load', () => {
              document.querySelectorAll('.section-block').forEach(section => {
                 section.querySelectorAll('.quiz-mask').forEach(originalMask => {
                     if (!originalMask.innerText.trim()) return;
-                    // Find nearest suitable container
-                    let container = originalMask.closest('p') || originalMask.closest('li') || originalMask.closest('td') || originalMask.parentElement;
+                    // Try to find a substantial container that provides context
+                    let container = originalMask.closest('li') || originalMask.closest('p') || originalMask.closest('td') || originalMask.closest('.exam-tip') || originalMask.closest('.highlight-box');
+                    
+                    // Fallback if it's just naked text in a div (rare but possible)
+                    if (!container) {
+                        container = originalMask.parentElement;
+                         // Walk up if parent is too small (like just a <strong> tag)
+                        while (container && container.innerText.length < 30 && container.parentElement && !container.classList.contains('section-block')) {
+                             container = container.parentElement;
+                        }
+                    }
+
                     if (container) {
-                        // Find index of this mask in its container to correctly replace it in the clone
                         let allMasksInContainer = Array.from(container.querySelectorAll('.quiz-mask'));
                         let maskIndex = allMasksInContainer.indexOf(originalMask);
-                        
                         let clone = container.cloneNode(true);
                         let masksInClone = clone.querySelectorAll('.quiz-mask');
+                        
                         if(masksInClone[maskIndex]) {
-                            masksInClone[maskIndex].innerText = '【_____】';
-                            masksInClone[maskIndex].style.borderBottom = '3px solid var(--accent)';
+                            // Use the special blank style for the randomly selected question
+                            masksInClone[maskIndex].innerHTML = '<span class="flash-blank-active">【❓❓❓】</span>';
                         }
+
                         flashcards.push({
                             q: clone.innerHTML,
                             a: originalMask.innerText,
