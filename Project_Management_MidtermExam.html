@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V16.0 (終極增強版)</title>
+    <title>專案管理期中備考系統 V17.0 (終極統整版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -225,13 +225,13 @@
             <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
             <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 五大流程</a>
             <a href="#sec1-4" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (KA)</a>
-            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責 (NEW)</a>
+            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責</a>
             <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程 (詳)</a>
             <a href="#sec2-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-3"></span>利害關係人</a>
             <a href="#sec3" class="nav-link">🧱 規劃流程 (Planning)</a>
-            <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
+            <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準 (詳)</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通 (詳)</a>
             <a href="#sec4" class="nav-link" style="color: var(--accent); font-weight: bold;">🏃 敏捷管理 (Agile)</a>
@@ -307,11 +307,11 @@
                     <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
                     <h4>(二) 五大流程群組 (專案生命週期)</h4>
                     <ul>
-                        <li><strong>起始 (Initiating)：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
-                        <li><strong>規劃 (Planning)：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
-                        <li><strong>執行 (Executing)：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
-                        <li><strong>監控 (M&C)：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
-                        <li><strong>結束 (Closing)：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
+                        <li><strong>起始：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
+                        <li><strong>規劃：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
+                        <li><strong>執行：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
+                        <li><strong>監控：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
+                        <li><strong>結束：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
                     </ul>
                     <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
@@ -336,12 +336,14 @@
                 <div class="section-header"><h3>伍、PM 角色與職責</h3><div class="master-check" data-id="sec1-5"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <p>PM 是專案的整合者，需具備「做事」與「做人」兩大能力。</p>
-                    <ul>
-                        <li><strong>做事 (Doing)：</strong>規劃、分配工作、進度與成本控管。</li>
-                        <li><strong>做人 (Being)：</strong>領導團隊、溝通協調 (佔 80% 時間)、解決衝突。</li>
-                    </ul>
+                    <p>PM 大部分（約 80%）時間花在**「喬人喬乾淨」**上。</p>
+                    <table>
+                        <tr><th>職責類型</th><th>核心內容</th></tr>
+                        <tr><td><strong>做事 (技術/規劃)</strong></td><td>目標設定、規劃、進度與成本控管。</td></tr>
+                        <tr><td><strong>做人 (領導/協調)</strong></td><td>團隊組建、利害關係人溝通、衝突與問題解決。</td></tr>
+                    </table>
                     <div class="highlight-box">
-                        <strong>PM 是團隊的「盾牌」：</strong>負責排除外部干擾，讓團隊能專心於交付成果。同時需進行<span class="quiz-mask">變更管理</span>，避免任意變動導致重練。
+                        <strong>PM 的環境保護：</strong> PM 是團隊的「盾牌」，負責排除外部干擾，確保成員專心於交付物。同時需進行<span class="quiz-mask">變更管理</span>，避免任意變動導致重練。
                     </div>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
@@ -375,12 +377,16 @@
                 <div class="section-header"><h3>貳、專案章程</h3><div class="master-check" data-id="sec2-2"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <div class="highlight-box">
-                        <strong><span class="term" data-term="charter">專案章程</span>：</strong>專案的「出生證明」，正式<span class="quiz-mask">授權專案存在</span>，並任命 PM。
+                        <strong><span class="term" data-term="charter">專案章程</span>：</strong>專案的「出生證明」，正式<span class="quiz-mask">授權專案存在</span>，並任命 PM。由 <span class="term" data-term="sponsor">發起人</span> 發布。
                     </div>
+                    <h4>(一) SMART 原則 (目標界定)</h4>
+                    <p>目標必須：<span class="term" data-term="smart">明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)</span>。</p>
+                    <h4>(二) 章程關鍵內容</h4>
                     <ul>
-                        <li>由 <span class="term" data-term="sponsor">發起人 (Sponsor)</span> 發布。PM <span class="quiz-mask">不能</span>發布自己的章程。</li>
-                        <li><strong>關鍵內容 (高層級)：</strong>商業需求、里程碑、總預算、假設與限制。</li>
-                        <li><strong><span class="term" data-term="smart">SMART 目標</span>：</strong>明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。</li>
+                        <li><strong>緣起/商業需求：</strong>需站在老闆角度寫出重要性。</li>
+                        <li><strong>可交付成果：</strong>需具體、可驗收、有數字。</li>
+                        <li><strong>專案經理/贊助者：</strong>必須明確寫出**個人**姓名。</li>
+                        <li><strong>時程/預算摘要：</strong>包含起迄日期、里程碑、預算科目。</li>
                     </ul>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
@@ -419,7 +425,7 @@
                 <div class="content-body">
                     <h4>(一) 核心概念與風險</h4>
                     <ul>
-                        <li><strong>產品範疇(What) vs. 專案範疇(How)。</strong></li>
+                        <li><strong>產品範疇(What) vs. 專案範疇(How)。</strong> (開發三個關卡 vs. 開發三個關卡所需做的事)</li>
                         <li><strong><span class="term" data-term="scope_creep">範疇潛變</span>：</strong>未經核准的擴張 (壞的)。</li>
                         <li><strong><span class="term" data-term="gold_plating">範疇鍍金</span>：</strong>PM 主動增加非必要功能 (壞的)。</li>
                     </ul>
@@ -427,7 +433,7 @@
                      <p>訪談、焦點團體、<span class="term" data-term="delphi">德爾菲技術</span>(專家匿名共識)、問卷、標竿學習。</p>
                     <h4>(三) <span class="term" data-term="wbs">工作分解結構 (WBS)</span></h4>
                     <p>以「交付成果」為導向的層級結構。最底層為<strong><span class="quiz-mask">工作包 (WP)</span></strong>。</p>
-                    <p><span class="term" data-term="control_account">管制帳戶 (CA)</span> 是 WBS 與 OBS 的交會點，用於績效衡量。</p>
+                    <p><span class="term" data-term="control_account">管制帳戶 (CA)</span> 是 WBS 與 <span class="term" data-term="obs">OBS (組織分解結構)</span> 的交會點。</p>
                     <div class="highlight-box">
                         <strong>100% 原則：</strong>WBS 必須包含專案<span class="quiz-mask">所有</span>工作，不多也不少。
                     </div>
@@ -448,8 +454,7 @@
                     </ul>
                     <p><strong><span class="term" data-term="obs">組織分解結構 (OBS)</span>：</strong>顯示工作包由哪個部門負責。</p>
                     <h4>(二) 溝通管理</h4>
-                    <p>規劃「誰」需要「什麼資訊」，在「何時」，透過「什麼方式」提供。</p>
-                    <p>溝通類型：推式(Email)、拉式(網站)、互動式(會議)。PM 約 <span class="quiz-mask">75~90%</span> 時間在溝通。</p>
+                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。PM 約 <span class="quiz-mask">75~90%</span> 時間在溝通。</p>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
