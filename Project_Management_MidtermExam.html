@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理全功能複習系統 V5.0 (專家版)</title>
+    <title>專案管理期中考終極完整複習筆記</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -18,7 +18,7 @@
             --mask-bg: #cbd5e1;
             --sidebar-width: 280px;
             --success: #10b981;
-            --term-highlight: #8b5cf6; /* 名詞解釋的強調色 */
+            --term-highlight: #8b5cf6;
         }
         body.dark-mode {
             --primary: #60a5fa;
@@ -37,22 +37,15 @@
         html { scroll-behavior: smooth; }
         body {
             font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
-            line-height: 1.8;
+            line-height: 1.75;
             color: var(--text-main);
             background-color: var(--bg-main);
             margin: 0;
             display: flex;
             height: 100vh;
-            overflow: hidden; /* 防止雙重捲軸 */
+            overflow: hidden;
         }
-
-        /* --- Feature: Reading Progress Bar --- */
-        #progress-bar {
-            position: fixed; top: 0; left: 0; height: 4px; background: var(--accent);
-            width: 0%; z-index: 1002; transition: width 0.1s;
-        }
-
-        /* Sidebar */
+        #progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); width: 0%; z-index: 1002; transition: width 0.2s; }
         .sidebar {
             width: var(--sidebar-width); background: var(--bg-sidebar);
             border-right: 1px solid var(--border); display: flex; flex-direction: column;
@@ -69,8 +62,8 @@
         .search-box::after { content: '🔍'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
         .sidebar-nav { flex: 1; overflow-y: auto; padding: 15px; }
         .nav-link {
-            display: flex; align-items: center; padding: 10px 12px; color: var(--text-main);
-            text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.95em; transition: all 0.2s;
+            display: flex; align-items: center; padding: 8px 12px; color: var(--text-main);
+            text-decoration: none; border-radius: 8px; margin-bottom: 4px; font-size: 0.95em; transition: all 0.2s;
         }
         .nav-link:hover, .nav-link.active { background-color: var(--primary-light); color: var(--primary); font-weight: 600; }
         .progress-dot {
@@ -84,11 +77,8 @@
             transition: 0.2s; font-size: 0.9em; display: flex; align-items: center; justify-content: center; gap: 6px;
         }
         #btn-dark { background: var(--text-main); color: var(--bg-main); }
-        #btn-reset { background: #ef444433; color: #ef4444; }
-        #btn-reset:hover { background: #ef4444; color: white; }
+        #btn-reset { background: #ef444422; color: #ef4444; }
         #btn-flashcard { background: var(--accent); color: #fff; grid-column: span 2; }
-
-        /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width); flex: 1; padding: 40px 60px;
             overflow-y: auto; scroll-behavior: smooth; height: 100vh;
@@ -100,11 +90,9 @@
             padding: 15px 25px; border-radius: 12px; margin: 60px 0 30px 0;
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
         }
-
-        /* Section Blocks */
         .section-block {
             background: var(--bg-sidebar); padding: 30px; border-radius: 16px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border);
             margin-bottom: 35px; transition: all 0.3s;
         }
         .section-block.mastered { opacity: 0.6; filter: grayscale(0.8); }
@@ -122,35 +110,14 @@
             padding: 6px 12px; border-radius: 20px; border: 2px solid var(--border); font-weight: 600;
             font-size: 0.9em; transition: all 0.2s;
         }
-        .master-check:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
         .master-check.checked { background: var(--success); color: white; border-color: var(--success); }
-
-        /* --- New Feature: Glossary Terms --- */
         .term {
-            color: var(--term-highlight);
-            font-weight: 600;
-            border-bottom: 2px dashed var(--term-highlight);
-            cursor: help;
-            position: relative;
-            transition: all 0.2s;
+            color: var(--term-highlight); font-weight: 600; border-bottom: 2px dashed var(--term-highlight);
+            cursor: help; position: relative; transition: all 0.2s;
         }
-        .term:hover {
-            background-color: var(--term-highlight);
-            color: white;
-            border-bottom-style: solid;
-        }
-        /* Icon to indicate clickability */
-        .term::after {
-            content: '?';
-            font-size: 0.7em;
-            vertical-align: super;
-            margin-left: 2px;
-            opacity: 0.7;
-        }
-
-        /* Quiz Masks */
+        .term:hover { background-color: var(--term-highlight); color: white; border-bottom-style: solid; }
         .quiz-mask {
-            border-bottom: 2px dotted var(--text-muted); cursor: default; transition: all 0.3s; padding: 0 3px;
+            border-bottom: 2px dotted var(--text-muted); cursor: default; transition: all 0.3s; padding: 0 2px;
         }
         body.quiz-mode .quiz-mask {
             background-color: var(--mask-bg) !important; color: transparent !important;
@@ -161,8 +128,6 @@
             border-bottom: 2px solid var(--success); animation: pop 0.3s ease-out;
         }
         @keyframes pop { 50% { transform: scale(1.15); } }
-
-        /* Components */
         .highlight-box {
             background: var(--primary-light); border-left: 5px solid var(--primary);
             padding: 20px; border-radius: 0 12px 12px 0; margin: 25px 0;
@@ -173,30 +138,21 @@
         }
         .exam-tip::before { content: '💡'; font-size: 1.5em; line-height: 1; }
         body.dark-mode .exam-tip { background: #451a03; color: #fcd34d; }
-
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
-        th, td { padding: 15px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: top; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: top; }
         th { background: var(--primary-light); color: var(--secondary); font-weight: 700; }
         tr:last-child td { border-bottom: none; } th:last-child, td:last-child { border-right: none; }
-
-        /* Floating Buttons */
-        .fab-container {
-            position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 90;
-        }
+        .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 90; }
         .fab {
             width: 56px; height: 56px; border-radius: 28px; border: none; color: white;
             font-size: 1.5em; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;
-            opacity: 0.9;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s; opacity: 0.9;
         }
         .fab:hover { transform: scale(1.1); opacity: 1; }
         #quiz-fab { background: var(--primary); }
-        body.quiz-mode #quiz-fab { background: var(--accent); animation: pulse 2s infinite; }
+        body.quiz-mode #quiz-fab { background: var(--accent); }
         #top-fab { background: var(--text-muted); opacity: 0; pointer-events: none; transform: translateY(20px); }
         #top-fab.visible { opacity: 0.8; pointer-events: auto; transform: translateY(0); }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
-
-        /* Modals */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
             z-index: 1000; display: none; justify-content: center; align-items: center;
@@ -208,26 +164,18 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(20px); transition: transform 0.3s;
         }
         .modal-overlay.active .modal-content { transform: translateY(0); }
-        .close-modal {
-            position: absolute; top: 15px; right: 15px; border: none; background: transparent;
-            font-size: 1.5em; color: var(--text-muted); cursor: pointer;
-        }
-
-        /* Glossary Modal Specific */
-        #glossary-modal .modal-header {
-            display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--term-highlight);
-        }
+        .close-modal { position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 1.5em; color: var(--text-muted); cursor: pointer; }
+        #glossary-modal .modal-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--term-highlight); }
         #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
-        #glossary-icon { font-size: 2em; }
-        .glossary-section { margin-bottom: 15px; }
         .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
         .glossary-text { font-size: 1.1em; line-height: 1.6; }
+        .analogy-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 25px; border-radius: 16px; margin: 25px 0; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
+        .analogy-card h4 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3em; }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-105%); }
-            .sidebar.open { transform: translateX(0); box-shadow: 100px 0 0 rgba(0,0,0,0.5); }
+            .sidebar { transform: translateX(-105%); } .sidebar.open { transform: translateX(0); box-shadow: 100px 0 0 rgba(0,0,0,0.5); }
             .main-content { margin-left: 0; padding: 20px 15px 100px 15px; }
-            #menu-toggle { display: block !important; position: fixed; top: 15px; left: 15px; z-index: 101; background: var(--bg-sidebar); padding: 10px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            #menu-toggle { display: block !important; position: fixed; top: 15px; left: 15px; z-index: 101; background: var(--bg-sidebar); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         }
     </style>
 </head>
@@ -238,86 +186,122 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V5.0</h3>
-            <div class="shortcuts-hint">快速鍵: [Q]背誦 [D]深色 [F]抽題</div>
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="搜尋筆記...">
-            </div>
+            <h3>🚀 專案管理期中備考 V6.0</h3>
+            <div class="shortcuts-hint">終極完整收錄版</div>
+            <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
-            <a href="#sec1" class="nav-link">🎯 基礎概念與架構</a>
-            <a href="#sec1-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-1"></span>核心定義與環境</a>
-            <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>PMBOK 框架</a>
-            <a href="#sec2" class="nav-link">🧭 起始階段 (Initiating)</a>
+            <a href="#sec1" class="nav-link">🎯 基礎架構 (Foundations)</a>
+            <a href="#sec1-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-1"></span>核心定義與特性</a>
+            <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
+            <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 知識體系</a>
+            <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程</a>
             <a href="#sec2-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-3"></span>利害關係人</a>
-            <a href="#sec3" class="nav-link">🧱 規劃階段 (Planning)</a>
+            <a href="#sec3" class="nav-link">🧱 規劃流程 (Planning)</a>
             <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
-            <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任分派 (RACI)</a>
-            <a href="#sec3-4" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-4"></span>溝通與參與</a>
-            <a href="#sec4" class="nav-link">⚙️ PM 角色與組織</a>
+            <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
+            <a href="#sec4" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
             <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
             <button id="btn-reset" class="tool-btn">🗑️ 重置紀錄</button>
-            <button id="btn-flashcard" class="tool-btn">🎲 隨機抽題考我 (F)</button>
+            <button id="btn-flashcard" class="tool-btn">🎲 隨機抽題 (F)</button>
         </div>
     </nav>
 
     <main class="main-content" id="main-scroll">
-        <h1>📘 專案管理核心知識筆記</h1>
+        <h1>📘 專案管理期中考終極完整筆記</h1>
         <p class="subtitle">點擊<span class="term" data-term="demo">紫色名詞</span>查看詳細解釋 | [Q]鍵切換背誦模式</p>
 
         <section id="sec1">
-            <h2>🎯 第一部分：基礎概念與架構</h2>
+            <h2>🎯 第一部分：專案管理基礎架構</h2>
             <div id="sec1-1" class="section-block">
-                <div class="section-header"><h3>壹、核心定義與環境</h3><div class="master-check" data-id="sec1-1"><span>☐</span> 我已掌握</div></div>
+                <div class="section-header"><h3>壹、核心定義與特性</h3><div class="master-check" data-id="sec1-1"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <p><strong>專案 (Project)：</strong>為創造<span class="quiz-mask">獨一無二</span>的產品、服務或成果，而從事的<span class="quiz-mask">暫時性</span>努力。</p>
                     <ul>
-                        <li><strong>暫時性：</strong>有明確起訖。</li>
-                        <li><strong><span class="term" data-term="progressive_elaboration">逐步完善</span>：</strong>隨資訊明朗，計畫由粗到細。</li>
-                        <li><strong><span class="term" data-term="vuca">VUCA 時代</span>：</strong>現代專案面臨的高變動環境。</li>
+                        <li><strong>暫時性：</strong>有明確起訖，非永久持續。</li>
+                        <li><strong><span class="term" data-term="progressive_elaboration">逐步完善</span>：</strong>隨資訊明朗，計畫由粗到細的過程。</li>
                     </ul>
                     <h4>⚔️ 專案 vs. 日常營運 (Operations)</h4>
                     <table>
                         <tr><th>比較項目</th><th>專案 (Project)</th><th>日常營運 (Operations)</th></tr>
                         <tr><td>性質</td><td><span class="quiz-mask">獨特、一次性</span></td><td><span class="quiz-mask">重複性、持續性</span></td></tr>
-                        <tr><td>目的</td><td>驅動<span class="quiz-mask">變革</span></td><td>維持<span class="quiz-mask">正常運作</span></td></tr>
+                        <tr><td>目的</td><td>驅動變革</td><td>維持正常運作</td></tr>
+                        <tr><td>不確定性</td><td><span class="quiz-mask">高</span></td><td><span class="quiz-mask">低 (可預測)</span></td></tr>
                     </table>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
             </div>
 
             <div id="sec1-2" class="section-block">
-                <div class="section-header"><h3>貳、PMBOK 經典框架</h3><div class="master-check" data-id="sec1-2"><span>☐</span> 我已掌握</div></div>
+                <div class="section-header"><h3>貳、環境、組織與 PMO</h3><div class="master-check" data-id="sec1-2"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <p>專案管理聖經 <span class="term" data-term="pmbok">PMBOK</span> 定義了五大流程群組與十大知識領域。</p>
+                    <p>現代專案面臨 <strong><span class="term" data-term="vuca">VUCA</span></strong> (易變、不確定、複雜、模糊) 環境。</p>
+                    <h4>(一) 組織級專案管理 (OPM) 層級</h4>
                     <ul>
-                        <li><strong>起始 (Initiating)：</strong><span class="quiz-mask">挑、夠、文、人</span></li>
-                        <li><strong>規劃 (Planning)：</strong><span class="quiz-mask">工、資、排、險</span> (最大群組)</li>
-                        <li><strong>執行 (Executing)：</strong><span class="quiz-mask">人、管、助</span> (耗費最多資源)</li>
-                        <li><strong>監控 (M&C)：</strong><span class="quiz-mask">催、比、析、趕</span></li>
-                        <li><strong>結束 (Closing)：</strong><span class="quiz-mask">驗、約、錢、報</span></li>
+                        <li><strong><span class="term" data-term="portfolio">專案組合</span>：</strong>為達成<span class="quiz-mask">策略目標</span>，管理多個(不一定相關)專案。重點：「做對的事」。</li>
+                        <li><strong><span class="term" data-term="program">專案集</span>：</strong>管理一組<span class="quiz-mask">相互關聯</span>的專案，以獲取額外利益(1+1>2)。</li>
+                        <li><strong>專案：</strong>交付獨特成果。重點：「把事做對」。</li>
                     </ul>
+                    <h4>(二) <span class="term" data-term="pmo">專案管理辦公室 (PMO)</span> 三種類型</h4>
+                    <ul>
+                        <li><strong>支援型 (Supportive)：</strong>顧問角色，提供範本。控制度：<span class="quiz-mask">低</span>。</li>
+                        <li><strong>管制型 (Controlling)：</strong>要求遵循特定框架。控制度：<span class="quiz-mask">中</span>。</li>
+                        <li><strong>指令型 (Directive)：</strong>直接指派並管理 PM。控制度：<span class="quiz-mask">高</span>。</li>
+                    </ul>
+                    <h4>(三) 組織結構對 PM 權限的影響 (必考)</h4>
+                     <table>
+                        <tr><th>組織型態</th><th>PM 權限</th><th>預算控制</th><th>PM 角色</th></tr>
+                        <tr><td>功能型</td><td><span class="quiz-mask">極低/無</span></td><td>功能經理</td><td>兼職(聯絡員)</td></tr>
+                        <tr><td>弱矩陣</td><td>低</td><td>功能經理</td><td>兼職</td></tr>
+                        <tr><td>平衡矩陣</td><td>中</td><td>混合</td><td><span class="quiz-mask">全職</span>(雙老闆)</td></tr>
+                        <tr><td>強矩陣</td><td>中~高</td><td>PM</td><td>全職</td></tr>
+                        <tr><td>專案型</td><td><span class="quiz-mask">高~全權</span></td><td>PM</td><td>全職(大老闆)</td></tr>
+                    </table>
+                </div>
+                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+            </div>
+
+             <div id="sec1-3" class="section-block">
+                <div class="section-header"><h3>參、PMBOK 知識體系</h3><div class="master-check" data-id="sec1-3"><span>☐</span> 我已掌握</div></div>
+                <div class="content-body">
+                    <h4>(一) 專案成功定義 (三重限制)</h4>
+                    <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
+                    <h4>(二) 五大流程群組 (專案生命週期)</h4>
+                    <ul>
+                        <li><strong>起始：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
+                        <li><strong>規劃：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
+                        <li><strong>執行：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
+                        <li><strong>監控：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
+                        <li><strong>結束：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
+                    </ul>
+                    <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
             </div>
         </section>
 
         <section id="sec2">
-            <h2>🧭 第二部分：起始階段 (Initiating)</h2>
+            <h2>🧭 第二部分：起始流程群組 (Initiating)</h2>
             <div id="sec2-1" class="section-block">
                 <div class="section-header"><h3>壹、專案選擇模型</h3><div class="master-check" data-id="sec2-1"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <h4>財務指標 (必考)</h4>
+                    <h4>(一) 非量化模型 (策略判斷)</h4>
+                    <ul>
+                        <li><strong>聖牛 (Sacred Cow)：</strong><span class="quiz-mask">高層</span>意志，無須理由。</li>
+                        <li><strong>營運/競爭/法規需要：</strong>維持運作、生存或合規必須做。</li>
+                        <li><strong>Q 排序法：</strong>分類為「好、普通、差」。</li>
+                    </ul>
+                    <h4>(二) 量化財務模型 (客觀判斷)</h4>
                     <table>
-                        <tr><th>指標</th><th>核心概念</th><th>決策標準</th></tr>
-                        <tr><td>還本期</td><td>回收投資時間。<span class="quiz-mask">忽略</span>貨幣時間價值。</td><td>越<span class="quiz-mask">短</span>越好</td></tr>
-                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減投資。<span class="quiz-mask">考量</span>時間價值。</td><td>NPV > 0，越<span class="quiz-mask">高</span>越好</td></tr>
-                        <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = <span class="quiz-mask">0</span> 的折現率。</td><td>越高越好</td></tr>
+                        <tr><th>方法</th><th>定義與標準</th><th>優缺點</th></tr>
+                        <tr><td>還本期</td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span>貨幣時間價值(TVM)。</td></tr>
+                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減去投資。NPV > <span class="quiz-mask">0</span> 可接受，越高越好。</td><td>最重要的財務指標，<span class="quiz-mask">考量</span> TVM。</td></tr>
+                        <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = 0 的折現率。越高越好。</td><td>代表真實投資報酬率。</td></tr>
                     </table>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
@@ -327,11 +311,11 @@
                 <div class="section-header"><h3>貳、專案章程</h3><div class="master-check" data-id="sec2-2"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <div class="highlight-box">
-                        <strong><span class="term" data-term="charter">專案章程</span>：</strong>專案的「出生證明」，正式<span class="quiz-mask">授權專案存在</span>，並賦予 PM 動用資源的權力。
+                        <strong><span class="term" data-term="charter">專案章程</span>：</strong>專案的「出生證明」，正式<span class="quiz-mask">授權專案存在</span>，並任命 PM。
                     </div>
                     <ul>
-                        <li>由 <span class="term" data-term="sponsor">發起人 (Sponsor)</span> 發布。</li>
-                        <li>目標需符合 <span class="term" data-term="smart">SMART 原則</span>。</li>
+                        <li>由 <span class="term" data-term="sponsor">發起人 (Sponsor)</span> 發布。PM <span class="quiz-mask">不能</span>發布自己的章程。</li>
+                        <li>關鍵內容(高層級)：商業需求、<span class="term" data-term="smart">SMART 目標</span>、里程碑、總預算、假設限制。</li>
                     </ul>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
@@ -340,13 +324,13 @@
             <div id="sec2-3" class="section-block">
                 <div class="section-header"><h3>參、利害關係人管理</h3><div class="master-check" data-id="sec2-3"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <p><span class="term" data-term="stakeholder">利害關係人</span>的影響力在專案<span class="quiz-mask">初期</span>最大，變更成本最低。</p>
-                    <h4>權力/影響力方格圖：</h4>
+                    <p>需盡早辨識以管理期望，避免後期變更成本大增。</p>
+                    <h4>權力/影響力方格圖 (Power/Influence Grid)</h4>
                     <ul>
-                        <li>高權力、高影響力：<strong><span class="quiz-mask">重點管理</span></strong> (VVIP)。</li>
-                        <li>高權力、低影響力：<strong><span class="quiz-mask">保持滿意</span></strong>。</li>
-                        <li>低權力、高影響力：<strong><span class="quiz-mask">保持告知</span></strong>。</li>
-                        <li>低權力、低影響力：<strong><span class="quiz-mask">監督</span></strong>。</li>
+                        <li>高權力 / 高影響力 → <strong><span class="quiz-mask">重點管理</span></strong> (VVIP)。</li>
+                        <li>高權力 / 低影響力 → <strong><span class="quiz-mask">保持滿意</span></strong> (避免成為阻礙)。</li>
+                        <li>低權力 / 高影響力 → <strong><span class="quiz-mask">保持告知</span></strong> (善用專業)。</li>
+                        <li>低權力 / 低影響力 → <strong><span class="quiz-mask">監督</span></strong>。</li>
                     </ul>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
@@ -354,7 +338,7 @@
         </section>
 
         <section id="sec3">
-            <h2>🧱 第三部分：規劃階段 (Planning)</h2>
+            <h2>🧱 第三部分：規劃流程群組 (Planning)</h2>
             <div id="sec3-1" class="section-block">
                 <div class="section-header"><h3>壹、計畫書與基準</h3><div class="master-check" data-id="sec3-1"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
@@ -367,12 +351,17 @@
             <div id="sec3-2" class="section-block">
                 <div class="section-header"><h3>貳、範疇管理 (WBS)</h3><div class="master-check" data-id="sec3-2"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
+                    <h4>(一) 核心概念與風險</h4>
                     <ul>
-                        <li><span class="term" data-term="scope_creep">範疇潛變</span>：未經核准的擴張 (壞的)。</li>
-                        <li><span class="term" data-term="gold_plating">範疇鍍金</span>：PM 主動增加非必要功能 (壞的)。</li>
+                        <li><strong>產品範疇(What) vs. 專案範疇(How)。</strong></li>
+                        <li><strong><span class="term" data-term="scope_creep">範疇潛變</span>：</strong>未經核准的擴張 (壞的)。</li>
+                        <li><strong><span class="term" data-term="gold_plating">範疇鍍金</span>：</strong>PM 主動增加非必要功能 (壞的)。</li>
                     </ul>
-                    <h4><span class="term" data-term="wbs">工作分解結構 (WBS)</span></h4>
-                    <p>將交付成果分解為層級結構。最底層為<strong><span class="quiz-mask">工作包 (WP)</span></strong>。</p>
+                     <h4>(二) 蒐集需求技術</h4>
+                     <p>訪談、焦點團體、<span class="term" data-term="delphi">德爾菲技術</span>(專家匿名共識)、問卷、標竿學習。</p>
+                    <h4>(三) <span class="term" data-term="wbs">工作分解結構 (WBS)</span></h4>
+                    <p>以「交付成果」為導向的層級結構。最底層為<strong><span class="quiz-mask">工作包 (WP)</span></strong>。</p>
+                    <p><span class="term" data-term="control_account">管制帳戶 (CA)</span> 是 WBS 與 OBS 的交會點，用於績效衡量。</p>
                     <div class="highlight-box">
                         <strong>100% 原則：</strong>WBS 必須包含專案<span class="quiz-mask">所有</span>工作，不多也不少。
                     </div>
@@ -381,35 +370,33 @@
             </div>
 
             <div id="sec3-3" class="section-block">
-                <div class="section-header"><h3>參、責任分派 (RACI)</h3><div class="master-check" data-id="sec3-3"><span>☐</span> 我已掌握</div></div>
+                <div class="section-header"><h3>參、責任與溝通</h3><div class="master-check" data-id="sec3-3"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <p>使用 <span class="term" data-term="raci">RACI 矩陣</span>釐清職責：</p>
+                    <h4>(一) <span class="term" data-term="raci">責任分派矩陣 (RACI)</span></h4>
                     <ul>
-                        <li><strong>R (Responsible)：</strong>執行者。</li>
-                        <li><strong>A (Accountable)：</strong>當責者 (<span class="quiz-mask" style="color:red;">只能一人</span>)。</li>
+                        <li><strong>R (Responsible)：</strong>執行者 (可多人)。</li>
+                        <li><strong>A (Accountable)：</strong>當責者 (負全責，<span class="quiz-mask" style="color:red;">只能一人</span>)。</li>
                         <li><strong>C (Consult)：</strong>諮詢者 (雙向)。</li>
                         <li><strong>I (Inform)：</strong>告知者 (單向)。</li>
                     </ul>
+                    <h4>(二) 溝通管理</h4>
+                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。</p>
                 </div>
                 <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
             </div>
         </section>
 
         <section id="sec4">
-            <h2>⚙️ 第四部分：PM 角色與組織</h2>
-            <div id="sec4-1" class="section-block">
-                <div class="section-header"><h3>壹、組織結構對 PM 的影響</h3><div class="master-check" data-id="sec4-1"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <table>
-                        <tr><th>組織型態</th><th>PM 權限</th><th>PM 角色</th></tr>
-                        <tr><td>功能型</td><td><span class="quiz-mask">極低</span></td><td>兼職</td></tr>
-                        <tr><td>弱矩陣</td><td>低</td><td>兼職</td></tr>
-                        <tr><td>平衡矩陣</td><td>中</td><td><span class="quiz-mask">全職</span> (雙老闆)</td></tr>
-                        <tr><td>強矩陣</td><td>高</td><td>全職</td></tr>
-                        <tr><td>專案型</td><td><span class="quiz-mask">極高</span></td><td>全職</td></tr>
-                    </table>
-                </div>
-                <div class="note-area"><button class="note-toggle">📝 添加筆記</button><textarea class="my-note"></textarea></div>
+            <h2>🧠 觀念強化：經典類比</h2>
+            <div class="analogy-card">
+                <h4>🏗️ 蓋大樓比喻 (整體觀)</h4>
+                <p><strong>專案</strong>是這棟獨一無二的大樓。<strong>PM</strong>是建築師兼工頭。</p>
+                <p><strong>專案章程</strong>是土地許可證。<strong>WBS</strong>是詳細施工藍圖，把大樓拆解成「地基」、「10樓結構」等工作包，確保沒少蓋任何一層(100%原則)。</p>
+            </div>
+            <div class="analogy-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb);">
+                <h4>🎻 交響樂團比喻 (整合與溝通)</h4>
+                <p><strong>PM</strong>是指揮家，負責協調所有樂手(團隊資源)。</p>
+                <p><strong>計畫書</strong>是總樂譜，規定每個聲部何時進場(時程)、大小聲(資源分配)，是所有人共同遵循的基準。</p>
             </div>
         </section>
     </main>
@@ -418,269 +405,96 @@
         <button id="top-fab" class="fab" title="回到頂端">⬆</button>
         <button id="quiz-fab" class="fab" title="切換背誦模式 (Q)">🛡️</button>
     </div>
-
     <div class="modal-overlay" id="glossary-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeGlossary()">×</button>
-            <div class="modal-header">
-                <span id="glossary-icon">📖</span>
-                <h3 id="glossary-title">名詞標題</h3>
-            </div>
-            <div class="glossary-section">
-                <div class="glossary-label">定義</div>
-                <div class="glossary-text" id="glossary-def">...</div>
-            </div>
-            <div class="glossary-section" style="margin-top: 25px;">
-                <div class="glossary-label" style="color: var(--accent);">實務應用 / 考試重點</div>
-                <div class="glossary-text" id="glossary-app">...</div>
-            </div>
+            <div class="modal-header"><span style="font-size:2em;">📖</span><h3 id="glossary-title"></h3></div>
+            <div class="glossary-label">定義</div><div class="glossary-text" id="glossary-def"></div>
+            <div class="glossary-label" style="color:var(--accent);margin-top:20px;">實務/考試重點</div><div class="glossary-text" id="glossary-app"></div>
         </div>
     </div>
-
     <div class="modal-overlay" id="flashcard-modal">
         <div class="modal-content" style="text-align: center;">
             <button class="close-modal" onclick="closeFlashcard()">×</button>
-            <h3 style="color: var(--primary);">🎲 隨機抽考</h3>
-            <p style="color: var(--text-muted); font-size: 0.9em;" id="flash-context"></p>
-            <div id="flash-q" style="font-size: 1.3em; margin: 30px 0; min-height: 60px;"></div>
-            <div id="flash-a" style="font-size: 1.5em; color: var(--success); font-weight: bold; padding: 20px; background: var(--primary-light); border-radius: 12px; display: none;"></div>
-            <button id="flash-reveal" class="tool-btn" style="width:100%; background:var(--primary); color:#fff; padding:15px; margin-top:20px; font-size:1.1em;">看答案</button>
-            <button id="flash-next" class="tool-btn" style="width:100%; background:var(--accent); color:#fff; padding:15px; margin-top:10px; display:none; font-size:1.1em;">下一題 →</button>
+            <h3 style="color:var(--primary);">🎲 隨機抽考</h3><p style="color:var(--text-muted);" id="flash-context"></p>
+            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px;"></div>
+            <div id="flash-a" style="font-size:1.5em;color:var(--success);font-weight:bold;padding:20px;background:var(--primary-light);border-radius:12px;display:none;"></div>
+            <button id="flash-reveal" class="tool-btn" style="width:100%;background:var(--primary);color:#fff;padding:15px;margin-top:20px;">看答案</button>
+            <button id="flash-next" class="tool-btn" style="width:100%;background:var(--accent);color:#fff;padding:15px;margin-top:10px;display:none;">下一題 →</button>
         </div>
     </div>
 
     <script>
-        // === 1. GLOSSARY DATABASE (名詞解釋資料庫) ===
         const glossaryDB = {
-            "demo": {
-                title: "功能示範",
-                def: "這是一個名詞解釋視窗。點擊文中帶有虛線底線的紫色名詞，就會彈出這個視窗。",
-                app: "幫助您在閱讀時，隨時查閱不熟悉的專有名詞，而不用中斷學習流程。"
-            },
-            "progressive_elaboration": {
-                title: "逐步完善 (Progressive Elaboration)",
-                def: "隨著專案進展，資訊越來越明朗，計畫也從粗略逐漸變得詳細的過程。",
-                app: "適用於「滾動式規劃 (Rolling Wave Planning)」，近期工作詳細規劃，遠期工作僅規劃大方向。"
-            },
-            "vuca": {
-                title: "VUCA 時代",
-                def: "描述現代環境的四個特性：易變性 (Volatility)、不確定性 (Uncertainty)、複雜性 (Complexity)、模糊性 (Ambiguity)。",
-                app: "在 VUCA 環境下，傳統預測型(瀑布)管理可能失效，需引入敏捷(Agile)思維來快速應對變化。"
-            },
-            "pmbok": {
-                title: "專案管理知識體系 (PMBOK)",
-                def: "由 PMI 發布的專案管理標準指南，定義了 5 大流程群組與 10 大知識領域。",
-                app: "是 PMP 考試的核心依據，提供了全球通用的專案管理語言與架構。"
-            },
-            "npv": {
-                title: "淨現值 (NPV)",
-                def: "將未來所有預期的現金流入與流出，以特定折現率折算成「今天的價值」後相加的總和。",
-                app: "最重要的財務選擇指標。NPV > 0 代表專案賺錢。多個專案比較時，選擇 NPV 最高的。"
-            },
-            "irr": {
-                title: "內部報酬率 (IRR)",
-                def: "使專案淨現值 (NPV) 等於零時的折現率。代表專案本身能產生的預期投資報酬率。",
-                app: "IRR 越高越好。通常需大於公司設定的「最低門檻報酬率 (Hurdle Rate)」才值得投資。"
-            },
-            "charter": {
-                title: "專案章程 (Project Charter)",
-                def: "正式授權專案成立的文件，是專案的「出生證明」。",
-                app: "一旦簽署，PM 即獲得動用組織資源的權力。內容包含高層級需求、預算、里程碑與 PM 任命。"
-            },
-            "sponsor": {
-                title: "發起人 (Sponsor)",
-                def: "提供專案資金與資源的人，通常也是專案章程的簽署者。",
-                app: "是 PM 在組織內的靠山，負責解決 PM 無法處理的高層級政治問題或資源衝突。"
-            },
-            "smart": {
-                title: "SMART 原則",
-                def: "目標設定標準：Specific(明確)、Measurable(可衡量)、Attainable(可達成)、Relevant(相關)、Time-bound(有時限)。",
-                app: "撰寫專案目標或 KPI 時必須符合此五項，避免目標空泛無法驗收。"
-            },
-            "stakeholder": {
-                title: "利害關係人 (Stakeholder)",
-                def: "任何會影響專案、被專案影響，或自認會被影響的個人或團體。",
-                app: "PM 需盡早辨識他們，並依「權力/影響力」決定管理策略，避免他們在專案後期提出變更導致成本暴增。"
-            },
-            "baseline": {
-                title: "基準 (Baseline)",
-                def: "經由正式程序核准的計畫版本，包含範疇、時程、成本三大基準。",
-                app: "是衡量專案績效的「尺」。實際執行結果需與基準比較，以判斷專案是否偏離軌道。"
-            },
-            "scope_creep": {
-                title: "範疇潛變 (Scope Creep)",
-                def: "專案範疇在未經審查下，不知不覺地擴張（例如客戶私下要求工程師加功能）。",
-                app: "是專案常見的失敗原因。必須透過嚴格的「變更管制流程」來預防。"
-            },
-            "gold_plating": {
-                title: "範疇鍍金 (Gold Plating)",
-                def: "專案團隊為了取悅客戶，主動做了超出原定範疇的功能。",
-                app: "雖然立意良好，但增加了風險與成本且客戶不一定買單，PMBOK 不建議此行為。"
-            },
-            "wbs": {
-                title: "工作分解結構 (WBS)",
-                def: "將專案可交付成果和專案工作分解成較小的、更易於管理的組成部分（工作包）的層級結構。",
-                app: "規劃階段的核心工具。確保工作不遺漏（100%原則），並作為估算成本與時程的基礎。"
-            },
-            "raci": {
-                title: "責任分派矩陣 (RACI)",
-                def: "用來釐清每個工作包中角色職責的工具：當責者(A)、負責者(R)、諮詢者(C)、告知者(I)。",
-                app: "避免責任不清與推諉。關鍵原則：每個任務只能有一個當責者 (A)。"
-            }
+            "demo": { title: "功能示範", def: "點擊紫色虛線名詞可查看詳細解釋。", app: "閱讀時隨點隨查，不用中斷思緒。" },
+            "progressive_elaboration": { title: "逐步完善 (Progressive Elaboration)", def: "隨著資訊明朗，計畫由粗到細的過程。", app: "適用於滾動式規劃，近期詳細，遠期粗略。" },
+            "vuca": { title: "VUCA 時代", def: "易變性(V)、不確定性(U)、複雜性(C)、模糊性(A)的環境。", app: "需引入敏捷思維來應對。" },
+            "portfolio": { title: "專案組合 (Portfolio)", def: "為達成策略目標而組合在一起管理的專案、專案集。", app: "重點在「做對的事」(策略選擇)。" },
+            "program": { title: "專案集 (Program)", def: "一組相互關聯且被協調管理的專案。", app: "重點在獲取個別管理無法得到的利益 (1+1>2)。" },
+            "pmo": { title: "專案管理辦公室 (PMO)", def: "組織內負責標準化專案治理流程的單位。", app: "分為支援型(顧問)、管制型(警察)、指令型(老闆)。" },
+            "npv": { title: "淨現值 (NPV)", def: "未來現金流折現後的總和。", app: "最重要的財務指標。NPV > 0 才做，越高越好。" },
+            "irr": { title: "內部報酬率 (IRR)", def: "使 NPV = 0 的折現率。", app: "代表專案真實投資報酬率，越高越好。" },
+            "charter": { title: "專案章程 (Project Charter)", def: "正式授權專案成立的文件。", app: "PM 的尚方寶劍，一旦簽署即獲得動用資源權力。" },
+            "sponsor": { title: "發起人 (Sponsor)", def: "提供資金與資源的高層，章程簽署者。", app: "PM 在組織內的靠山，負責解決高層級衝突。" },
+            "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此原則才具體。" },
+            "baseline": { title: "基準 (Baseline)", def: "經核准的計畫版本(範疇/時程/成本)。", app: "衡量績效的尺，修改需走變更管制(CCB)。" },
+            "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
+            "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
+            "gold_plating": { title: "範疇鍍金", def: "PM 主動做超出需求的功能。", app: "增加成本與風險，PMI 不建議。" },
+            "wbs": { title: "工作分解結構 (WBS)", def: "將交付成果分解為層級結構。", app: "規劃核心工具，需符合 100% 原則。" },
+            "control_account": { title: "管制帳戶 (Control Account)", def: "WBS 與組織結構(OBS)的交會點。", app: "在此點上整合範疇、預算、時程以衡量績效(EVM)。" },
+            "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" }
         };
 
-        // === 2. CORE APP LOGIC ===
-        const STORAGE_KEY = 'pm_v5_data';
+        const STORAGE_KEY = 'pm_v6_final_data';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
-
-        // Init UI
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
-        document.querySelectorAll('.my-note').forEach(el => {
-            const id = el.closest('.section-block').id;
-            if(appData.notes[id]) { el.value = appData.notes[id]; el.style.display = 'block'; }
-        });
+        document.querySelectorAll('.my-note').forEach(el => { if(appData.notes[el.closest('.section-block').id]) el.value = appData.notes[el.closest('.section-block').id]; });
 
-        // Save Data Helper
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
-
-        // --- Event Listeners ---
-        // Dark Mode
-        function toggleDark() {
-            appData.dark = !appData.dark;
-            document.body.classList.toggle('dark-mode', appData.dark);
-            saveData();
-        }
-        document.getElementById('btn-dark').addEventListener('click', toggleDark);
-
-        // Quiz Mode
-        function toggleQuiz() {
-            const active = document.body.classList.toggle('quiz-mode');
-            const fab = document.getElementById('quiz-fab');
-            fab.textContent = active ? '📝' : '🛡️';
-            fab.title = active ? "退出背誦模式 (Q)" : "切換背誦模式 (Q)";
-            if(!active) document.querySelectorAll('.quiz-mask.revealed').forEach(el => el.classList.remove('revealed'));
-        }
-        document.getElementById('quiz-fab').addEventListener('click', toggleQuiz);
+        document.getElementById('btn-dark').addEventListener('click', () => { appData.dark = !appData.dark; document.body.classList.toggle('dark-mode', appData.dark); saveData(); });
+        document.getElementById('quiz-fab').addEventListener('click', () => { document.body.classList.toggle('quiz-mode'); });
+        document.body.addEventListener('click', e => { if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) e.target.classList.add('revealed'); });
         document.body.addEventListener('click', e => {
-            if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) {
-                e.target.classList.add('revealed');
-            }
-        });
-
-        // Glossary Click Handler
-        document.body.addEventListener('click', e => {
-            const termEl = e.target.closest('.term');
-            if(termEl) {
-                const key = termEl.dataset.term;
-                const data = glossaryDB[key];
-                if(data) {
-                    document.getElementById('glossary-title').textContent = data.title;
-                    document.getElementById('glossary-def').textContent = data.def;
-                    document.getElementById('glossary-app').textContent = data.app;
-                    document.getElementById('glossary-modal').classList.add('active');
-                }
+            const t = e.target.closest('.term');
+            if(t && glossaryDB[t.dataset.term]) {
+                const d = glossaryDB[t.dataset.term];
+                document.getElementById('glossary-title').textContent = d.title;
+                document.getElementById('glossary-def').textContent = d.def;
+                document.getElementById('glossary-app').textContent = d.app;
+                document.getElementById('glossary-modal').classList.add('active');
             }
         });
         function closeGlossary() { document.getElementById('glossary-modal').classList.remove('active'); }
-
-        // Master Checkbox
-        document.querySelectorAll('.master-check').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = btn.dataset.id;
-                appData.progress[id] = !appData.progress[id];
-                updateMasterUI(id, appData.progress[id]);
-                saveData();
-                e.stopPropagation();
-            });
-        });
-        function updateMasterUI(id, isMastered) {
-            const sec = document.getElementById(id);
-            if(sec) {
-                sec.classList.toggle('mastered', isMastered);
-                sec.querySelector('.master-check').innerHTML = isMastered ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握';
-                const dot = document.querySelector(`.progress-dot[data-target="${id}"]`);
-                if(dot) dot.parentElement.classList.toggle('mastered', isMastered);
-            }
+        document.querySelectorAll('.master-check').forEach(btn => btn.addEventListener('click', e => {
+            const id = btn.dataset.id; appData.progress[id] = !appData.progress[id];
+            updateMasterUI(id, appData.progress[id]); saveData(); e.stopPropagation();
+        }));
+        function updateMasterUI(id, v) {
+            const s = document.getElementById(id); if(s) { s.classList.toggle('mastered', v); s.querySelector('.master-check').innerHTML = v ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握'; const d = document.querySelector(`.progress-dot[data-target="${id}"]`); if(d) d.parentElement.classList.toggle('mastered', v); }
         }
-
-        // Notes
-        document.querySelectorAll('.note-toggle').forEach(btn => btn.addEventListener('click', e => {
-            const area = e.target.nextElementSibling;
-            area.style.display = area.style.display === 'block' ? 'none' : 'block';
-        }));
-        document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => {
-            appData.notes[el.closest('.section-block').id] = e.target.value;
-            saveData();
-        }));
-
-        // Reading Progress & Scroll to Top
-        const mainEl = document.getElementById('main-scroll');
-        const progressBar = document.getElementById('progress-bar');
-        const topFab = document.getElementById('top-fab');
-        mainEl.addEventListener('scroll', () => {
-            const scrolled = mainEl.scrollTop;
-            const maxScroll = mainEl.scrollHeight - mainEl.clientHeight;
-            const percentage = (scrolled / maxScroll) * 100;
-            progressBar.style.width = percentage + '%';
-            topFab.classList.toggle('visible', scrolled > 300);
+        document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => { const a = e.target.nextElementSibling; a.style.display = a.style.display==='block'?'none':'block'; }));
+        document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => { appData.notes[el.closest('.section-block').id] = e.target.value; saveData(); }));
+        document.getElementById('main-scroll').addEventListener('scroll', () => {
+            const m = document.getElementById('main-scroll');
+            document.getElementById('progress-bar').style.width = (m.scrollTop / (m.scrollHeight - m.clientHeight)) * 100 + '%';
+            document.getElementById('top-fab').classList.toggle('visible', m.scrollTop > 300);
         });
-        topFab.addEventListener('click', () => mainEl.scrollTo({top: 0, behavior: 'smooth'}));
+        document.getElementById('top-fab').addEventListener('click', () => document.getElementById('main-scroll').scrollTo({top:0, behavior:'smooth'}));
 
-        // --- Flashcard System (Simplified) ---
         let flashcards = [];
-        document.querySelectorAll('.quiz-mask').forEach(mask => {
-            if(mask.innerText.trim()) {
-                let q = mask.closest('p, li, td').cloneNode(true);
-                q.querySelectorAll('.quiz-mask').forEach(m => {
-                   if(m.innerText === mask.innerText) { m.innerText = '【_____】'; m.style.borderBottom = '3px solid var(--accent)'; }
-                });
-                flashcards.push({q: q.innerHTML, a: mask.innerText, src: mask.closest('.section-block').querySelector('h3').innerText});
-            }
-        });
-        const flashModal = document.getElementById('flashcard-modal');
-        function showFlashcard() {
-            if(!flashcards.length) return;
-            const card = flashcards[Math.floor(Math.random() * flashcards.length)];
-            document.getElementById('flash-q').innerHTML = card.q;
-            document.getElementById('flash-a').innerText = card.a;
-            document.getElementById('flash-context').innerText = `出處：${card.src}`;
-            document.getElementById('flash-a').style.display = 'none';
-            document.getElementById('flash-reveal').style.display = 'block';
-            document.getElementById('flash-next').style.display = 'none';
-            flashModal.classList.add('active');
-        }
-        function closeFlashcard() { flashModal.classList.remove('active'); }
-        document.getElementById('btn-flashcard').addEventListener('click', showFlashcard);
-        document.getElementById('flash-reveal').addEventListener('click', function() {
-            document.getElementById('flash-a').style.display = 'block';
-            this.style.display = 'none';
-            document.getElementById('flash-next').style.display = 'block';
-        });
-        document.getElementById('flash-next').addEventListener('click', showFlashcard);
-
-        // --- Keyboard Shortcuts ---
-        document.addEventListener('keydown', e => {
-            if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return; // Don't trigger when typing
-            switch(e.key.toLowerCase()) {
-                case 'q': toggleQuiz(); break;
-                case 'd': toggleDark(); break;
-                case 'f': showFlashcard(); break;
-                case 'escape': closeGlossary(); closeFlashcard(); break;
-            }
-        });
-
-        // Reset
-        document.getElementById('btn-reset').addEventListener('click', () => {
-            if(confirm('確定清空所有紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }
-        });
-        // Mobile Menu
+        document.querySelectorAll('.quiz-mask').forEach(m => { if(m.innerText.trim()) { let q = m.closest('p,li,td').cloneNode(true); q.querySelectorAll('.quiz-mask').forEach(zm => { if(zm.innerText===m.innerText) { zm.innerText='【_____】'; zm.style.borderBottom='3px solid var(--accent)'; }}); flashcards.push({q:q.innerHTML, a:m.innerText, src:m.closest('.section-block').querySelector('h3').innerText}); }});
+        const fModal = document.getElementById('flashcard-modal');
+        function showFlash() { if(!flashcards.length) return; const c = flashcards[Math.floor(Math.random()*flashcards.length)]; document.getElementById('flash-q').innerHTML=c.q; document.getElementById('flash-a').innerText=c.a; document.getElementById('flash-context').innerText=`出處：${c.src}`; document.getElementById('flash-a').style.display='none'; document.getElementById('flash-reveal').style.display='block'; document.getElementById('flash-next').style.display='none'; fModal.classList.add('active'); }
+        function closeFlashcard() { fModal.classList.remove('active'); }
+        document.getElementById('btn-flashcard').addEventListener('click', showFlash);
+        document.getElementById('flash-reveal').addEventListener('click', function() { document.getElementById('flash-a').style.display='block'; this.style.display='none'; document.getElementById('flash-next').style.display='block'; });
+        document.getElementById('flash-next').addEventListener('click', showFlash);
+        document.addEventListener('keydown', e => { if(['TEXTAREA','INPUT'].includes(e.target.tagName)) return; if(e.key.toLowerCase()==='q') document.body.classList.toggle('quiz-mode'); if(e.key.toLowerCase()==='f') showFlash(); if(e.key==='Escape') { closeGlossary(); closeFlashcard(); }});
+        document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('清空紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
         document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.add('open'));
-        document.addEventListener('click', e => {
-            if(window.innerWidth <= 768 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) {
-                document.getElementById('sidebar').classList.remove('open');
-            }
-        });
+        document.addEventListener('click', e => { if(window.innerWidth<=768 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) document.getElementById('sidebar').classList.remove('open'); });
     </script>
 </body>
 </html>
