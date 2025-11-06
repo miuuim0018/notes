@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V11.0 (終極全收錄)</title>
+    <title>專案管理期中備考系統 V13.0 (全面釋義版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -78,7 +78,9 @@
         }
         #btn-dark { background: var(--text-main); color: var(--bg-main); }
         #btn-reset { background: #ef444422; color: #ef4444; }
+        #btn-reset:hover { background: #ef4444; color: white; }
         #btn-flashcard { background: var(--accent); color: #fff; grid-column: span 2; }
+        #btn-flashcard:hover { background: #d97706; }
         .main-content {
             margin-left: var(--sidebar-width); flex: 1; padding: 40px 60px;
             overflow-y: auto; scroll-behavior: smooth; height: 100vh;
@@ -188,8 +190,6 @@
         #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
         .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
         .glossary-text { font-size: 1.1em; line-height: 1.6; }
-        .analogy-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 25px; border-radius: 16px; margin: 25px 0; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
-        .analogy-card h4 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3em; }
         #flash-q {
             font-size: 1.25em; margin: 30px 0; min-height: 80px; line-height: 1.8;
             background: var(--bg-main); padding: 20px; border-radius: 12px; border: 1px solid var(--border);
@@ -215,8 +215,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V11.0</h3>
-            <div class="shortcuts-hint">終極全收錄版</div>
+            <h3>🚀 備考系統 V13.0</h3>
+            <div class="shortcuts-hint">全面釋義版 (Glossary++)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -234,7 +234,6 @@
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
             <a href="#sec4" class="nav-link" style="color: var(--accent); font-weight: bold;">🏃 敏捷管理 (Agile)</a>
-            <a href="#sec5" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
             <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
@@ -258,7 +257,7 @@
                         <li><strong><span class="term" data-term="progressive_elaboration">逐步完善</span>：</strong>隨資訊明朗，計畫由粗到細的過程。</li>
                         <li><strong>驅動變革：</strong>改變組織現狀以實現目標。</li>
                     </ul>
-                    <h4>⚔️ 專案 vs. 日常營運 (Operations)</h4>
+                    <h4>⚔️ 專案 vs. <span class="term" data-term="operations">日常營運 (Operations)</span></h4>
                     <table>
                         <tr><th>比較項目</th><th>專案 (Project)</th><th>日常營運 (Operations)</th></tr>
                         <tr><td>性質</td><td><span class="quiz-mask">獨特、一次性</span></td><td><span class="quiz-mask">重複性、持續性</span></td></tr>
@@ -273,7 +272,7 @@
                 <div class="section-header"><h3>貳、環境、組織與 PMO</h3><div class="master-check" data-id="sec1-2"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <p>現代專案面臨 <strong><span class="term" data-term="vuca">VUCA</span></strong> (易變、不確定、複雜、模糊) 環境。</p>
-                    <h4>(一) 組織級專案管理 (OPM) 層級</h4>
+                    <h4>(一) <span class="term" data-term="opm">組織級專案管理 (OPM)</span> 層級</h4>
                     <ul>
                         <li><strong><span class="term" data-term="portfolio">專案組合</span>：</strong>為達成<span class="quiz-mask">策略目標</span>，管理多個(不一定相關)專案。重點：「做對的事」。</li>
                         <li><strong><span class="term" data-term="program">專案集</span>：</strong>管理一組<span class="quiz-mask">相互關聯</span>的專案，以獲取額外利益(1+1>2)。</li>
@@ -307,12 +306,13 @@
                     <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
                     <h4>(二) 五大流程群組 (專案生命週期)</h4>
                     <ul>
-                        <li><strong>起始 (Initiating)：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
-                        <li><strong>規劃 (Planning)：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
-                        <li><strong>執行 (Executing)：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
-                        <li><strong>監控 (M&C)：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
-                        <li><strong>結束 (Closing)：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
+                        <li><strong>起始：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
+                        <li><strong>規劃：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
+                        <li><strong>執行：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
+                        <li><strong>監控：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
+                        <li><strong>結束：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
                     </ul>
+                    <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
@@ -322,7 +322,7 @@
                 <div class="content-body">
                     <p><span class="term" data-term="pmbok">PMBOK</span> 定義了專案經理應具備的專業知識。</p>
                     <ul>
-                        <li><strong>整合管理 (Integration)：</strong><span class="quiz-mask">統籌全局</span>，協調所有其他領域。</li>
+                        <li><strong><span class="term" data-term="integration">整合管理 (Integration)</span>：</strong><span class="quiz-mask">統籌全局</span>，協調所有其他領域。</li>
                     </ul>
                     <h4>核心功能 (影響目標)：</h4>
                     <ul>
@@ -335,7 +335,7 @@
                     <ul>
                         <li><strong>資源 (Resource)</strong>：人力與實體資源。</li>
                         <li><strong>溝通 (Communications)</strong>：資訊傳遞。</li>
-                        <li><strong>風險 (Risk)</strong>：應對不確定性。</li>
+                        <li><strong><span class="term" data-term="risk">風險 (Risk)</span></strong>：應對不確定性。</li>
                         <li><strong>採購 (Procurement)</strong>：外部資源獲取。</li>
                         <li><strong>利害關係人 (Stakeholder)</strong>：管理期望與參與。</li>
                     </ul>
@@ -351,7 +351,7 @@
                 <div class="content-body">
                     <h4>(一) 非量化模型 (策略判斷)</h4>
                     <ul>
-                        <li><strong>聖牛 (Sacred Cow)：</strong><span class="quiz-mask">高層</span>意志，無須理由。</li>
+                        <li><strong><span class="term" data-term="sacred_cow">聖牛 (Sacred Cow)</span>：</strong><span class="quiz-mask">高層</span>意志，無須理由。</li>
                         <li><strong>營運/競爭/法規需要：</strong>維持運作、生存或合規必須做。</li>
                         <li><strong>Q 排序法：</strong>分類為「好、普通、差」。</li>
                         <li><strong>交叉比較法：</strong>兩兩對比，勝出者計分。</li>
@@ -359,7 +359,7 @@
                     <h4>(二) 量化財務模型 (客觀判斷)</h4>
                     <table>
                         <tr><th>方法</th><th>定義與標準</th><th>優缺點</th></tr>
-                        <tr><td>還本期</td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span>貨幣時間價值(TVM)。</td></tr>
+                        <tr><td><span class="term" data-term="payback_period">還本期</span></td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span>貨幣時間價值(TVM)。</td></tr>
                         <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減去投資。NPV > <span class="quiz-mask">0</span> 可接受，越高越好。</td><td>最重要的財務指標，<span class="quiz-mask">考量</span> TVM。</td></tr>
                         <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = 0 的折現率。越高越好。</td><td>代表真實投資報酬率。</td></tr>
                     </table>
@@ -476,7 +476,7 @@
                 <div class="content-body">
                     <p><span class="term" data-term="scrum">Scrum</span> 是最常見的敏捷框架。</p>
                     <ul>
-                         <li><strong>3 大角色：</strong>產品負責人(PO, 決定做什麼)、Scrum Master(SM, 排除障礙)、開發團隊(Dev, 執行)。</li>
+                         <li><strong>3 大角色：</strong><span class="term" data-term="po">產品負責人(PO)</span>、<span class="term" data-term="sm">Scrum Master(SM)</span>、開發團隊(Dev)。</li>
                          <li><strong><span class="term" data-term="sprint">衝刺 (Sprint)</span>：</strong>一個固定長度(通常1-4週)的開發週期，產出潛在可發布的產品增量。</li>
                          <li><strong><span class="term" data-term="kanban">看板 (Kanban)</span>：</strong>視覺化工作流程的工具(待辦/進行中/已完成)，限制在製品數量(WIP)。</li>
                     </ul>
@@ -485,7 +485,6 @@
             </div>
         </section>
 
-       
     </main>
 
     <div class="fab-container">
@@ -525,6 +524,7 @@
             "charter": { title: "專案章程 (Project Charter)", def: "正式授權專案成立的文件。", app: "PM 的尚方寶劍，一旦簽署即獲得動用資源權力。" },
             "sponsor": { title: "發起人 (Sponsor)", def: "提供資金與資源的高層，章程簽署者。", app: "PM 在組織內的靠山，負責解決高層級衝突。" },
             "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此原則才具體。" },
+            "stakeholder": { title: "利害關係人", def: "影響專案或被專案影響的人。", app: "初期影響力最大，需儘早辨識與管理。" },
             "baseline": { title: "基準 (Baseline)", def: "經核准的計畫版本(範疇/時程/成本)。", app: "衡量績效的尺，修改需走變更管制(CCB)。" },
             "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
             "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
@@ -535,10 +535,18 @@
             "agile": { title: "敏捷 (Agile)", def: "一種以人為本、迭代、漸進式的開發方法。", app: "適用於需求高度不確定的專案。" },
             "scrum": { title: "Scrum", def: "一種輕量級的敏捷框架，透過短週期的衝刺(Sprint)來交付價值。", app: "包含 3 個角色(PO/SM/Dev)、5 個事件、3 個產出物。" },
             "sprint": { title: "衝刺 (Sprint)", def: "Scrum 中的固定開發週期（通常 1-4 週）。", app: "每個衝刺結束都應產出潛在可發布的產品增量。" },
-            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" }
+            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" },
+            "operations": { title: "日常營運 (Operations)", def: "持續性、重複性的工作，旨在維持組織正常運作。", app: "與專案的「暫時性」形成對比。" },
+            "opm": { title: "組織級專案管理 (OPM)", def: "連結策略與執行的框架，包含專案組合、專案集與專案管理。", app: "確保組織做對的事，並把事做對。" },
+            "sacred_cow": { title: "聖牛 (Sacred Cow)", def: "源自印度文化，指高層基於個人偏好強制執行的專案。", app: "通常缺乏理性商業論證，但必須執行。" },
+            "payback_period": { title: "還本期 (Payback Period)", def: "回收初始投資成本所需的時間。", app: "時間越短越好，但缺點是忽略了貨幣時間價值。" },
+            "po": { title: "產品負責人 (Product Owner)", def: "Scrum 角色，代表客戶利益，管理產品待辦清單(Backlog)。", app: "決定「做什麼」，對產品價值最大化負責。" },
+            "sm": { title: "Scrum Master", def: "Scrum 角色，負責確保團隊遵循 Scrum 價值觀，並排除障礙。", app: "僕人式領導者，促進團隊自組織。" },
+            "integration": { title: "整合管理 (Integration)", def: "識別、定義、結合、統一與協調各專案管理過程活動。", app: "PM 的核心職責，確保專案各部分協調運作。" },
+            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" }
         };
 
-        const STORAGE_KEY = 'pm_v11_final';
+        const STORAGE_KEY = 'pm_v13_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
