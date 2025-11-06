@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V9.0 (絕對上下文版)</title>
+    <title>專案管理期中備考系統 V10.0 (終極完整版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -114,7 +114,6 @@
         }
         .master-check.checked { background: var(--success); color: white; border-color: var(--success); }
         
-        /* Note Styles */
         .note-area { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border); }
         .note-toggle {
             background: transparent; border: none; color: var(--text-muted); cursor: pointer;
@@ -191,21 +190,17 @@
         #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
         .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
         .glossary-text { font-size: 1.1em; line-height: 1.6; }
-        
-        /* Flashcard Specific Styles */
+        .analogy-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 25px; border-radius: 16px; margin: 25px 0; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
+        .analogy-card h4 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3em; }
         #flash-q {
             font-size: 1.25em; margin: 30px 0; min-height: 80px; line-height: 1.8;
             background: var(--bg-main); padding: 20px; border-radius: 12px; border: 1px solid var(--border);
-            text-align: left; /* Easier to read long context */
+            text-align: left;
         }
-        #flash-q table { margin: 10px 0; width: 100%; font-size: 0.9em; } /* Ensure tables fit in flashcard */
+        #flash-q table { margin: 10px 0; width: 100%; font-size: 0.9em; }
         .flash-blank-active {
-             color: var(--accent) !important;
-             border-bottom: 3px solid var(--accent) !important;
-             font-weight: 900;
-             padding: 2px 8px;
-             background-color: #fffbeb;
-             border-radius: 4px;
+             color: var(--accent) !important; border-bottom: 3px solid var(--accent) !important;
+             font-weight: 900; padding: 2px 8px; background-color: #fffbeb; border-radius: 4px;
         }
 
         @media (max-width: 768px) {
@@ -222,15 +217,16 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V9.0</h3>
-            <div class="shortcuts-hint">絕對上下文版 (Fix++)</div>
+            <h3>🚀 備考系統 V10.0</h3>
+            <div class="shortcuts-hint">終極完整版 (Final)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
             <a href="#sec1" class="nav-link">🎯 基礎架構 (Foundations)</a>
             <a href="#sec1-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-1"></span>核心定義與特性</a>
             <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
-            <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 知識體系</a>
+            <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 五大流程</a>
+            <a href="#sec1-4" class="nav-link" style="padding-left: 25px; color: var(--primary);"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (NEW)</a>
             <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程</a>
@@ -239,6 +235,8 @@
             <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
+            <a href="#sec4" class="nav-link" style="color: var(--accent);">🏃 敏捷管理 (Agile)</a>
+            <a href="#sec5" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
             <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
@@ -297,12 +295,14 @@
                         <tr><td>強矩陣</td><td>中~高</td><td>PM</td><td>全職</td></tr>
                         <tr><td>專案型</td><td><span class="quiz-mask">高~全權</span></td><td>PM</td><td>全職(大老闆)</td></tr>
                     </table>
+                    <h4>(四) PMI 人才金三角</h4>
+                    <p>工作方式 (技術)、商業敏銳度 (策略)、影響力技能 (領導)。</p>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
              <div id="sec1-3" class="section-block">
-                <div class="section-header"><h3>參、PMBOK 知識體系</h3><div class="master-check" data-id="sec1-3"><span>☐</span> 我已掌握</div></div>
+                <div class="section-header"><h3>參、PMBOK 五大流程</h3><div class="master-check" data-id="sec1-3"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <h4>(一) 專案成功定義 (三重限制)</h4>
                     <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
@@ -317,6 +317,32 @@
                     <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
+            </div>
+
+            <div id="sec1-4" class="section-block">
+                <div class="section-header"><h3>肆、十大知識領域 (10 KA)</h3><div class="master-check" data-id="sec1-4"><span>☐</span> 我已掌握</div></div>
+                <div class="content-body">
+                    <p><span class="term" data-term="pmbok">PMBOK</span> 定義了專案經理應具備的專業知識。</p>
+                    <ul>
+                        <li><strong>整合管理 (Integration)：</strong><span class="quiz-mask">統籌全局</span>，協調所有其他領域。</li>
+                    </ul>
+                    <h4>核心功能 (影響目標)：</h4>
+                    <ul>
+                        <li><strong>範疇 (Scope)</strong>：做且只做該做的事。</li>
+                        <li><strong>時程 (Schedule)</strong>：準時完成。</li>
+                        <li><strong>成本 (Cost)</strong>：預算內完成。</li>
+                        <li><strong>品質 (Quality)</strong>：滿足需求標準。</li>
+                    </ul>
+                    <h4>促進功能 (幫助執行)：</h4>
+                    <ul>
+                        <li><strong>資源 (Resource)</strong>：人力與實體資源。</li>
+                        <li><strong>溝通 (Communications)</strong>：資訊傳遞。</li>
+                        <li><strong>風險 (Risk)</strong>：應對不確定性。</li>
+                        <li><strong>採購 (Procurement)</strong>：外部資源獲取。</li>
+                        <li><strong>利害關係人 (Stakeholder)</strong>：管理期望與參與。</li>
+                    </ul>
+                </div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="口訣：整、範時成品、資溝風採利"></textarea></div>
             </div>
         </section>
 
@@ -421,6 +447,58 @@
             </div>
         </section>
 
+        <section id="sec4">
+            <h2>🏃 第四部分：敏捷管理 (Agile)</h2>
+            <div id="sec4-1" class="section-block">
+                <div class="section-header"><h3>壹、敏捷核心精神</h3><div class="master-check" data-id="sec4-1"><span>☐</span> 我已掌握</div></div>
+                <div class="content-body">
+                    <p><span class="term" data-term="agile">敏捷 (Agile)</span> 是一種適應變化的思維模式，適用於需求不明確的 VUCA 環境。</p>
+                    <h4>(一) 敏捷宣言 4 大價值觀 (右優於左)</h4>
+                    <ul>
+                        <li><strong><span class="quiz-mask">個人與互動</span></strong> 優於 流程與工具。</li>
+                        <li><strong><span class="quiz-mask">可用的軟體</span></strong> 優於 詳盡的文件。</li>
+                        <li><strong><span class="quiz-mask">與客戶合作</span></strong> 優於 合約協商。</li>
+                        <li><strong><span class="quiz-mask">回應變化</span></strong> 優於 遵循計畫。</li>
+                    </ul>
+                    <h4>(二) 開發方法比較</h4>
+                    <table>
+                         <tr><th>比較</th><th>預測型 (Waterfall)</th><th>適應型 (Agile)</th></tr>
+                         <tr><td>適用情境</td><td>需求明確、變動少</td><td>需求不明、<span class="quiz-mask">變動快</span></td></tr>
+                         <tr><td>規劃方式</td><td>前期詳細規劃 (一次性)</td><td><span class="quiz-mask">滾動式</span>規劃 (迭代)</td></tr>
+                         <tr><td>交付價值</td><td>專案結束時一次交付</td><td><span class="quiz-mask">頻繁交付</span>小批次成果</td></tr>
+                         <tr><td>變更態度</td><td>抗拒、嚴格管制</td><td><span class="quiz-mask">歡迎</span>變更</td></tr>
+                     </table>
+                </div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
+            </div>
+
+            <div id="sec4-2" class="section-block">
+                <div class="section-header"><h3>貳、Scrum 基礎框架</h3><div class="master-check" data-id="sec4-2"><span>☐</span> 我已掌握</div></div>
+                <div class="content-body">
+                    <p><span class="term" data-term="scrum">Scrum</span> 是最常見的敏捷框架。</p>
+                    <ul>
+                         <li><strong>3 大角色：</strong>產品負責人(PO, 決定做什麼)、Scrum Master(SM, 排除障礙)、開發團隊(Dev, 執行)。</li>
+                         <li><strong><span class="term" data-term="sprint">衝刺 (Sprint)</span>：</strong>一個固定長度(通常1-4週)的開發週期，產出潛在可發布的產品增量。</li>
+                         <li><strong><span class="term" data-term="kanban">看板 (Kanban)</span>：</strong>視覺化工作流程的工具(待辦/進行中/已完成)，限制在製品數量(WIP)。</li>
+                    </ul>
+                </div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
+            </div>
+        </section>
+
+        <section id="sec5">
+            <h2>🧠 第五部分：觀念強化 (經典類比)</h2>
+            <div class="analogy-card">
+                <h4>🏗️ 蓋大樓比喻 (整體觀)</h4>
+                <p><strong>專案</strong>是這棟獨一無二的大樓。<strong>PM</strong>是建築師兼工頭。</p>
+                <p><strong>專案章程</strong>是土地許可證。<strong>WBS</strong>是詳細施工藍圖，把大樓拆解成「地基」、「10樓結構」等工作包，確保沒少蓋任何一層(100%原則)。</p>
+            </div>
+            <div class="analogy-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb);">
+                <h4>🎻 交響樂團比喻 (整合與溝通)</h4>
+                <p><strong>PM</strong>是指揮家，負責協調所有樂手(團隊資源)。</p>
+                <p><strong>計畫書</strong>是總樂譜，規定每個聲部何時進場(時程)、大小聲(資源分配)，是所有人共同遵循的基準。</p>
+            </div>
+        </section>
     </main>
 
     <div class="fab-container">
@@ -439,7 +517,7 @@
         <div class="modal-content" style="text-align: center;">
             <button class="close-modal" onclick="closeFlashcard()">×</button>
             <h3 style="color:var(--primary);">🎲 隨機抽考</h3><p style="color:var(--text-muted);" id="flash-context"></p>
-            <div id="flash-q"></div>
+            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px; line-height:1.6;"></div>
             <div id="flash-a" style="font-size:1.5em;color:var(--success);font-weight:bold;padding:20px;background:var(--primary-light);border-radius:12px;display:none;"></div>
             <button id="flash-reveal" class="tool-btn" style="width:100%;background:var(--primary);color:#fff;padding:15px;margin-top:20px;">看答案</button>
             <button id="flash-next" class="tool-btn" style="width:100%;background:var(--accent);color:#fff;padding:15px;margin-top:10px;display:none;">下一題 →</button>
@@ -454,21 +532,27 @@
             "portfolio": { title: "專案組合 (Portfolio)", def: "為達成策略目標而組合在一起管理的專案、專案集。", app: "重點在「做對的事」(策略選擇)。" },
             "program": { title: "專案集 (Program)", def: "一組相互關聯且被協調管理的專案。", app: "重點在獲取個別管理無法得到的利益 (1+1>2)。" },
             "pmo": { title: "專案管理辦公室 (PMO)", def: "組織內負責標準化專案治理流程的單位。", app: "分為支援型(顧問)、管制型(警察)、指令型(老闆)。" },
+            "pmbok": { title: "專案管理知識體系 (PMBOK)", def: "PMI 發布的標準指南，含 5 大流程與 10 大知識領域。", app: "PMP 考試核心依據。" },
             "npv": { title: "淨現值 (NPV)", def: "未來現金流折現後的總和。", app: "最重要的財務指標。NPV > 0 才做，越高越好。" },
             "irr": { title: "內部報酬率 (IRR)", def: "使 NPV = 0 的折現率。", app: "代表專案真實投資報酬率，越高越好。" },
             "charter": { title: "專案章程 (Project Charter)", def: "正式授權專案成立的文件。", app: "PM 的尚方寶劍，一旦簽署即獲得動用資源權力。" },
             "sponsor": { title: "發起人 (Sponsor)", def: "提供資金與資源的高層，章程簽署者。", app: "PM 在組織內的靠山，負責解決高層級衝突。" },
             "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此原則才具體。" },
+            "stakeholder": { title: "利害關係人", def: "影響專案或被專案影響的人。", app: "初期影響力最大，需儘早辨識與管理。" },
             "baseline": { title: "基準 (Baseline)", def: "經核准的計畫版本(範疇/時程/成本)。", app: "衡量績效的尺，修改需走變更管制(CCB)。" },
             "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
             "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
             "gold_plating": { title: "範疇鍍金", def: "PM 主動做超出需求的功能。", app: "增加成本與風險，PMI 不建議。" },
             "wbs": { title: "工作分解結構 (WBS)", def: "將交付成果分解為層級結構。", app: "規劃核心工具，需符合 100% 原則。" },
             "control_account": { title: "管制帳戶 (Control Account)", def: "WBS 與組織結構(OBS)的交會點。", app: "在此點上整合範疇、預算、時程以衡量績效(EVM)。" },
-            "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" }
+            "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" },
+            "agile": { title: "敏捷 (Agile)", def: "一種以人為本、迭代、漸進式的開發方法。", app: "適用於需求高度不確定的專案。" },
+            "scrum": { title: "Scrum", def: "一種輕量級的敏捷框架，透過短週期的衝刺(Sprint)來交付價值。", app: "包含 3 個角色(PO/SM/Dev)、5 個事件、3 個產出物。" },
+            "sprint": { title: "衝刺 (Sprint)", def: "Scrum 中的固定開發週期（通常 1-4 週）。", app: "每個衝刺結束都應產出潛在可發布的產品增量。" },
+            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" }
         };
 
-        const STORAGE_KEY = 'pm_v9_fixed';
+        const STORAGE_KEY = 'pm_v10_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
@@ -482,48 +566,25 @@
         document.getElementById('quiz-fab').addEventListener('click', () => { document.body.classList.toggle('quiz-mode'); });
         document.body.addEventListener('click', e => { if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) e.target.classList.add('revealed'); });
         
-        // V9: CRITICAL FIX FOR TABLE CONTEXT
         let flashcards = [];
         window.addEventListener('load', () => {
              document.querySelectorAll('.section-block').forEach(section => {
                 section.querySelectorAll('.quiz-mask').forEach(originalMask => {
                     if (!originalMask.innerText.trim()) return;
-                    // PRIORITY 1: Table Rows - Crucial for "專案型 -> 高權限" type questions
                     let container = originalMask.closest('tr');
-                    // PRIORITY 2: Lists, Paragraphs, Special Boxes
-                    if (!container) {
-                        container = originalMask.closest('li') || originalMask.closest('p') || originalMask.closest('.exam-tip') || originalMask.closest('.highlight-box');
-                    }
-                    // FALLBACK: Parent, climbing up a bit if it's too small (like just a <strong> tag)
+                    if (!container) container = originalMask.closest('li') || originalMask.closest('p') || originalMask.closest('.exam-tip') || originalMask.closest('.highlight-box');
                     if (!container) {
                         container = originalMask.parentElement;
-                        while (container && container.innerText.length < 30 && container.parentElement && !container.classList.contains('section-block')) {
-                             container = container.parentElement;
-                        }
+                        while (container && container.innerText.length < 30 && container.parentElement && !container.classList.contains('section-block')) { container = container.parentElement; }
                     }
-
                     if (container) {
                         let allMasksInContainer = Array.from(container.querySelectorAll('.quiz-mask'));
                         let maskIndex = allMasksInContainer.indexOf(originalMask);
                         let clone = container.cloneNode(true);
-                        
-                        // If it's a TR, wrap it in a TABLE for proper display in flashcard
-                        if (container.tagName === 'TR') {
-                            let wrapper = document.createElement('table');
-                            wrapper.appendChild(clone);
-                            clone = wrapper; // Now clone refers to the table containing the row
-                        }
-
+                        if (container.tagName === 'TR') { let wrapper = document.createElement('table'); wrapper.appendChild(clone); clone = wrapper; }
                         let masksInClone = clone.querySelectorAll('.quiz-mask');
-                        if(masksInClone[maskIndex]) {
-                            masksInClone[maskIndex].innerHTML = '<span class="flash-blank-active">【❓❓❓】</span>';
-                        }
-
-                        flashcards.push({
-                            q: clone.outerHTML || clone.innerHTML, // Use outerHTML if we wrapped it
-                            a: originalMask.innerText,
-                            src: section.querySelector('h3')?.innerText.trim() || '未知章節'
-                        });
+                        if(masksInClone[maskIndex]) { masksInClone[maskIndex].innerHTML = '<span class="flash-blank-active">【❓❓❓】</span>'; }
+                        flashcards.push({ q: clone.outerHTML || clone.innerHTML, a: originalMask.innerText, src: section.querySelector('h3')?.innerText.trim() || '未知章節' });
                     }
                 });
             });
@@ -565,9 +626,7 @@
             const s = document.getElementById(id); if(s) { s.classList.toggle('mastered', v); s.querySelector('.master-check').innerHTML = v ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握'; const d = document.querySelector(`.progress-dot[data-target="${id}"]`); if(d) d.parentElement.classList.toggle('mastered', v); }
         }
         document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => { 
-            const a = e.target.nextElementSibling; 
-            a.style.display = a.style.display==='block'?'none':'block'; 
-            if(a.style.display==='block') a.focus();
+            const a = e.target.nextElementSibling; a.style.display = a.style.display==='block'?'none':'block'; if(a.style.display==='block') a.focus();
         }));
         document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => { appData.notes[el.closest('.section-block').id] = e.target.value; saveData(); }));
         
