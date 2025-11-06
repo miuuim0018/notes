@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V13.0 (全面釋義版)</title>
+    <title>專案管理期中備考系統 V14.0 (知識領域強化版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -215,8 +215,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V13.0</h3>
-            <div class="shortcuts-hint">全面釋義版 (Glossary++)</div>
+            <h3>🚀 備考系統 V14.0</h3>
+            <div class="shortcuts-hint">知識領域強化版</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -321,24 +321,12 @@
                 <div class="section-header"><h3>肆、十大知識領域 (10 KA)</h3><div class="master-check" data-id="sec1-4"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
                     <p><span class="term" data-term="pmbok">PMBOK</span> 定義了專案經理應具備的專業知識。</p>
-                    <ul>
-                        <li><strong><span class="term" data-term="integration">整合管理 (Integration)</span>：</strong><span class="quiz-mask">統籌全局</span>，協調所有其他領域。</li>
-                    </ul>
-                    <h4>核心功能 (影響目標)：</h4>
-                    <ul>
-                        <li><strong>範疇 (Scope)</strong>：做且只做該做的事。</li>
-                        <li><strong>時程 (Schedule)</strong>：準時完成。</li>
-                        <li><strong>成本 (Cost)</strong>：預算內完成。</li>
-                        <li><strong>品質 (Quality)</strong>：滿足需求標準。</li>
-                    </ul>
-                    <h4>促進功能 (幫助執行)：</h4>
-                    <ul>
-                        <li><strong>資源 (Resource)</strong>：人力與實體資源。</li>
-                        <li><strong>溝通 (Communications)</strong>：資訊傳遞。</li>
-                        <li><strong><span class="term" data-term="risk">風險 (Risk)</span></strong>：應對不確定性。</li>
-                        <li><strong>採購 (Procurement)</strong>：外部資源獲取。</li>
-                        <li><strong>利害關係人 (Stakeholder)</strong>：管理期望與參與。</li>
-                    </ul>
+                    <table>
+                         <tr><th>類別</th><th>包含領域</th><th>關聯重點</th></tr>
+                         <tr><td><strong>整體</strong></td><td><span class="term" data-term="integration">整合管理</span></td><td>總體統籌，掌握全局</td></tr>
+                         <tr><td><strong>成果相關</strong> (4項)</td><td><span class="quiz-mask">範疇、時程、成本、品質</span></td><td>影響交付<span class="quiz-mask">結果</span></td></tr>
+                         <tr><td><strong>過程相關</strong> (5項)</td><td>資源、溝通、<span class="term" data-term="risk">風險</span>、採購、<span class="term" data-term="stakeholder">利害關係人</span></td><td>影響過程<span class="quiz-mask">順利度</span></td></tr>
+                    </table>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="口訣：整、範時成品、資溝風採利"></textarea></div>
             </div>
@@ -546,7 +534,7 @@
             "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" }
         };
 
-        const STORAGE_KEY = 'pm_v13_final';
+        const STORAGE_KEY = 'pm_v14_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
