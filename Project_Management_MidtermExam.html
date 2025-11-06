@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V10.0 (終極完整版)</title>
+    <title>專案管理期中備考系統 V11.0 (終極全收錄)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -78,9 +78,7 @@
         }
         #btn-dark { background: var(--text-main); color: var(--bg-main); }
         #btn-reset { background: #ef444422; color: #ef4444; }
-        #btn-reset:hover { background: #ef4444; color: white; }
         #btn-flashcard { background: var(--accent); color: #fff; grid-column: span 2; }
-        #btn-flashcard:hover { background: #d97706; }
         .main-content {
             margin-left: var(--sidebar-width); flex: 1; padding: 40px 60px;
             overflow-y: auto; scroll-behavior: smooth; height: 100vh;
@@ -217,8 +215,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V10.0</h3>
-            <div class="shortcuts-hint">終極完整版 (Final)</div>
+            <h3>🚀 備考系統 V11.0</h3>
+            <div class="shortcuts-hint">終極全收錄版</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -226,7 +224,7 @@
             <a href="#sec1-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-1"></span>核心定義與特性</a>
             <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
             <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 五大流程</a>
-            <a href="#sec1-4" class="nav-link" style="padding-left: 25px; color: var(--primary);"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (NEW)</a>
+            <a href="#sec1-4" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (KA)</a>
             <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程</a>
@@ -235,7 +233,7 @@
             <a href="#sec3-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-1"></span>計畫書與基準</a>
             <a href="#sec3-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-2"></span>範疇管理 (WBS)</a>
             <a href="#sec3-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec3-3"></span>責任與溝通</a>
-            <a href="#sec4" class="nav-link" style="color: var(--accent);">🏃 敏捷管理 (Agile)</a>
+            <a href="#sec4" class="nav-link" style="color: var(--accent); font-weight: bold;">🏃 敏捷管理 (Agile)</a>
             <a href="#sec5" class="nav-link" style="color: var(--term-highlight);">🧠 觀念強化：經典類比</a>
         </div>
         <div class="sidebar-footer">
@@ -258,6 +256,7 @@
                     <ul>
                         <li><strong>暫時性：</strong>有明確起訖，非永久持續。</li>
                         <li><strong><span class="term" data-term="progressive_elaboration">逐步完善</span>：</strong>隨資訊明朗，計畫由粗到細的過程。</li>
+                        <li><strong>驅動變革：</strong>改變組織現狀以實現目標。</li>
                     </ul>
                     <h4>⚔️ 專案 vs. 日常營運 (Operations)</h4>
                     <table>
@@ -308,13 +307,12 @@
                     <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
                     <h4>(二) 五大流程群組 (專案生命週期)</h4>
                     <ul>
-                        <li><strong>起始：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
-                        <li><strong>規劃：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
-                        <li><strong>執行：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
-                        <li><strong>監控：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
-                        <li><strong>結束：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
+                        <li><strong>起始 (Initiating)：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
+                        <li><strong>規劃 (Planning)：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
+                        <li><strong>執行 (Executing)：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
+                        <li><strong>監控 (M&C)：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
+                        <li><strong>結束 (Closing)：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
                     </ul>
-                    <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
@@ -356,6 +354,7 @@
                         <li><strong>聖牛 (Sacred Cow)：</strong><span class="quiz-mask">高層</span>意志，無須理由。</li>
                         <li><strong>營運/競爭/法規需要：</strong>維持運作、生存或合規必須做。</li>
                         <li><strong>Q 排序法：</strong>分類為「好、普通、差」。</li>
+                        <li><strong>交叉比較法：</strong>兩兩對比，勝出者計分。</li>
                     </ul>
                     <h4>(二) 量化財務模型 (客觀判斷)</h4>
                     <table>
@@ -385,7 +384,7 @@
             <div id="sec2-3" class="section-block">
                 <div class="section-header"><h3>參、利害關係人管理</h3><div class="master-check" data-id="sec2-3"><span>☐</span> 我已掌握</div></div>
                 <div class="content-body">
-                    <p>需盡早辨識以管理期望，避免後期變更成本大增。</p>
+                    <p>需盡早辨識以管理期望，避免後期變更成本大增。PM 須預設多數人因慣性而<span class="quiz-mask">反對改變</span>。</p>
                     <h4>權力/影響力方格圖 (Power/Influence Grid)</h4>
                     <ul>
                         <li>高權力 / 高影響力 → <strong><span class="quiz-mask">重點管理</span></strong> (VVIP)。</li>
@@ -441,7 +440,7 @@
                         <li><strong>I (Inform)：</strong>告知者 (單向)。</li>
                     </ul>
                     <h4>(二) 溝通管理</h4>
-                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。</p>
+                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。PM 約 75~90% 時間在溝通。</p>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
@@ -538,7 +537,6 @@
             "charter": { title: "專案章程 (Project Charter)", def: "正式授權專案成立的文件。", app: "PM 的尚方寶劍，一旦簽署即獲得動用資源權力。" },
             "sponsor": { title: "發起人 (Sponsor)", def: "提供資金與資源的高層，章程簽署者。", app: "PM 在組織內的靠山，負責解決高層級衝突。" },
             "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此原則才具體。" },
-            "stakeholder": { title: "利害關係人", def: "影響專案或被專案影響的人。", app: "初期影響力最大，需儘早辨識與管理。" },
             "baseline": { title: "基準 (Baseline)", def: "經核准的計畫版本(範疇/時程/成本)。", app: "衡量績效的尺，修改需走變更管制(CCB)。" },
             "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
             "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
@@ -552,7 +550,7 @@
             "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" }
         };
 
-        const STORAGE_KEY = 'pm_v10_final';
+        const STORAGE_KEY = 'pm_v11_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
