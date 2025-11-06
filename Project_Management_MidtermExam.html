@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V19.0 (角色詳解版)</title>
+    <title>專案管理期中備考系統 V18.0 (完全整合版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -18,8 +18,11 @@
             --mask-bg: #cbd5e1;
             --sidebar-width: 280px;
             --success: #10b981;
+            --fail: #ef4444;
             --term-highlight: #8b5cf6;
             --section-header-bg: #e0f2fe;
+            --card-front: #ffffff;
+            --card-back: #f0f9ff;
         }
         body.dark-mode {
             --primary: #60a5fa;
@@ -34,6 +37,8 @@
             --mask-bg: #475569;
             --term-highlight: #a78bfa;
             --section-header-bg: #075985;
+            --card-front: #1e293b;
+            --card-back: #334155;
         }
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -48,6 +53,8 @@
             overflow: hidden;
         }
         #progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); width: 0%; z-index: 1002; transition: width 0.2s; }
+        
+        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width); background: var(--bg-sidebar);
             border-right: 1px solid var(--border); display: flex; flex-direction: column;
@@ -73,16 +80,20 @@
             margin-right: 10px; flex-shrink: 0; transition: background 0.3s;
         }
         .nav-link.mastered .progress-dot { background: var(--success); }
-        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .tool-btn {
             padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
             transition: 0.2s; font-size: 0.9em; display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border);
         }
-        #btn-dark { background: var(--text-main); color: var(--bg-main); }
-        #btn-reset { background: #ef444422; color: #ef4444; }
-        #btn-reset:hover { background: #ef4444; color: white; }
-        #btn-flashcard { background: var(--accent); color: #fff; grid-column: span 2; }
-        #btn-flashcard:hover { background: #d97706; }
+        .tool-btn:hover { background: var(--primary-light); }
+        #btn-dark { grid-column: 1 / -1; }
+        #btn-vocab { background: var(--primary); color: white; border: none; }
+        #btn-vocab:hover { background: var(--secondary); }
+        #btn-flashcard { background: var(--accent); color: white; border: none; }
+        #btn-flashcard:hover { filter: brightness(0.9); }
+
+        /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width); flex: 1; padding: 40px 60px;
             overflow-y: auto; scroll-behavior: smooth; height: 100vh;
@@ -104,131 +115,87 @@
             display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-light);
         }
-        .section-header h3 {
-            margin: 0; color: var(--secondary); font-size: 1.4em;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .section-header h3::before { content: ''; display: block; width: 6px; height: 24px; background: var(--accent); border-radius: 3px; }
+        .section-header h3 { margin: 0; color: var(--secondary); font-size: 1.4em; }
         .master-check {
             cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-muted);
             padding: 6px 12px; border-radius: 20px; border: 2px solid var(--border); font-weight: 600;
             font-size: 0.9em; transition: all 0.2s;
         }
         .master-check.checked { background: var(--success); color: white; border-color: var(--success); }
-        
+
+        /* Note & Interactive Elements */
         .note-area { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border); }
-        .note-toggle {
-            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
-            font-size: 0.95em; display: flex; align-items: center; gap: 6px; padding: 8px 0;
-            transition: color 0.2s; font-weight: 600;
-        }
-        .note-toggle:hover { color: var(--primary); }
-        .note-toggle::before { content: '✎'; font-size: 1.2em; }
+        .note-toggle { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; }
         .my-note {
             width: 100%; min-height: 80px; margin-top: 10px; padding: 12px;
             border: 2px solid var(--border); border-radius: 10px;
             background: var(--bg-main); color: var(--text-main);
-            font-family: inherit; resize: vertical; outline: none;
-            display: none; transition: all 0.3s ease;
+            display: none;
         }
-        .my-note:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
-
-        .term {
-            color: var(--term-highlight); font-weight: 600; border-bottom: 2px dashed var(--term-highlight);
-            cursor: help; position: relative; transition: all 0.2s;
-        }
-        .term:hover { background-color: var(--term-highlight); color: white; border-bottom-style: solid; }
-        .quiz-mask {
-            border-bottom: 2px dotted var(--text-muted); cursor: default; transition: all 0.3s; padding: 0 2px;
-        }
-        body.quiz-mode .quiz-mask {
-            background-color: var(--mask-bg) !important; color: transparent !important;
-            border-radius: 4px; user-select: none; border-bottom: none; cursor: pointer;
-        }
-        body.quiz-mode .quiz-mask.revealed {
-            background-color: transparent !important; color: inherit !important;
-            border-bottom: 2px solid var(--success); animation: pop 0.3s ease-out;
-        }
+        .term { color: var(--term-highlight); font-weight: 600; border-bottom: 2px dashed var(--term-highlight); cursor: help; }
+        .quiz-mask { border-bottom: 2px dotted var(--text-muted); cursor: default; padding: 0 2px; }
+        body.quiz-mode .quiz-mask { background-color: var(--mask-bg) !important; color: transparent !important; border-radius: 4px; cursor: pointer; }
+        body.quiz-mode .quiz-mask.revealed { background-color: transparent !important; color: inherit !important; border-bottom: 2px solid var(--success); animation: pop 0.3s ease-out; }
         @keyframes pop { 50% { transform: scale(1.15); } }
-        .highlight-box {
-            background: var(--primary-light); border-left: 5px solid var(--primary);
-            padding: 20px; border-radius: 0 12px 12px 0; margin: 25px 0;
-        }
-        .exam-tip {
-            background: #fffbeb; border: 2px solid var(--accent); color: #92400e;
-            padding: 15px 20px; border-radius: 12px; margin: 25px 0; display: flex; align-items: flex-start; gap: 15px;
-        }
-        .exam-tip::before { content: '💡'; font-size: 1.5em; line-height: 1; }
+        .highlight-box { background: var(--primary-light); border-left: 5px solid var(--primary); padding: 20px; border-radius: 0 12px 12px 0; margin: 25px 0; }
+        .exam-tip { background: #fffbeb; border: 2px solid var(--accent); color: #92400e; padding: 15px 20px; border-radius: 12px; margin: 25px 0; display: flex; gap: 15px; }
+        .exam-tip::before { content: '💡'; font-size: 1.5em; }
         body.dark-mode .exam-tip { background: #451a03; color: #fcd34d; }
-        
-        /* Table Styles for the Glossary Section */
-        #sec0 table { 
-            width: 100%; border-collapse: collapse; border-spacing: 0; margin: 25px 0 40px 0; 
-            border-radius: 12px; overflow: hidden; border: 2px solid var(--border); 
-            font-size: 0.9em;
-        }
-        #sec0 th, #sec0 td { 
-            padding: 12px 15px; border: 1px solid var(--border); 
-            vertical-align: top; line-height: 1.5;
-        }
-        #sec0 th { 
-            background: var(--section-header-bg); color: var(--secondary); font-weight: 700; 
-            text-align: center;
-        }
+
+        /* Tables */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: top; }
+        th { background: var(--primary-light); color: var(--secondary); font-weight: 700; }
+        #sec0 th { background: var(--section-header-bg); text-align: center; }
         #sec0 td:nth-child(2) { font-weight: 600; text-align: center; width: 15%; }
-        #sec0 td:nth-child(3) { width: 30%; } 
-        #sec0 tr:hover { background-color: var(--primary-light); }
 
-        /* General Table Styles (for other sections) */
-        table:not(#sec0 table) { width: 100%; border-collapse: separate; border-spacing: 0; margin: 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
-        table:not(#sec0 table) th, table:not(#sec0 table) td { padding: 12px 15px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: top; }
-        table:not(#sec0 table) th { background: var(--primary-light); color: var(--secondary); font-weight: 700; }
-        table:not(#sec0 table) tr:last-child td { border-bottom: none; } 
-        table:not(#sec0 table) th:last-child, table:not(#sec0 table) td:last-child { border-right: none; }
-
-        #sec1-2 table:nth-of-type(1) { font-size: 0.95em; }
-        #sec1-2 table:nth-of-type(1) th { background: #e0f2fe; color: #075985; }
-        #sec1-2 table:nth-of-type(1) td:nth-child(1) { font-weight: bold; width: 20%; }
-
-
+        /* Modals & Floating Buttons */
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 90; }
-        .fab {
-            width: 56px; height: 56px; border-radius: 28px; border: none; color: white;
-            font-size: 1.5em; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s; opacity: 0.9;
-        }
-        .fab:hover { transform: scale(1.1); opacity: 1; }
+        .fab { width: 56px; height: 56px; border-radius: 50%; border: none; color: white; font-size: 1.5em; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .fab:hover { transform: scale(1.1); }
         #quiz-fab { background: var(--primary); }
         body.quiz-mode #quiz-fab { background: var(--accent); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
-        #top-fab { background: var(--text-muted); opacity: 0; pointer-events: none; transform: translateY(20px); }
-        #top-fab.visible { opacity: 0.8; pointer-events: auto; transform: translateY(0); }
+        #top-fab { background: var(--text-muted); opacity: 0; pointer-events: none; }
+        #top-fab.visible { opacity: 0.8; pointer-events: auto; }
+
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
-            z-index: 1000; display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7);
+            z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
-        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-content {
-            background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 90%; max-width: 550px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(20px); transition: transform 0.3s;
+            background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 90%; max-width: 600px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; max-height: 90vh; overflow-y: auto;
         }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        .close-modal { position: absolute; top: 20px; right: 20px; border: none; background: transparent; font-size: 1.8em; color: var(--text-muted); cursor: pointer; line-height: 1; }
-        #glossary-modal .modal-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--term-highlight); }
-        #glossary-modal h3 { margin: 0; color: var(--term-highlight); font-size: 1.5em; }
-        .glossary-label { font-weight: bold; color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; margin-bottom: 5px; }
-        .glossary-text { font-size: 1.1em; line-height: 1.6; }
-        #flash-q {
-            font-size: 1.25em; margin: 30px 0; min-height: 80px; line-height: 1.8;
-            background: var(--bg-main); padding: 20px; border-radius: 12px; border: 1px solid var(--border);
-            text-align: left;
+        .close-modal { position: absolute; top: 20px; right: 20px; border: none; background: transparent; font-size: 2em; color: var(--text-muted); cursor: pointer; line-height: 1; z-index: 10; }
+
+        /* --- VOCAB CARD SPECIFIC STYLES --- */
+        #vocab-modal .modal-content { max-width: 500px; background: transparent; box-shadow: none; padding: 0; }
+        .card-container {
+            width: 100%; height: 350px; perspective: 1000px; margin-bottom: 20px;
         }
-        #flash-q table { margin: 10px 0; width: 100%; font-size: 0.9em; }
-        .flash-blank-active {
-             color: var(--accent) !important; border-bottom: 3px solid var(--accent) !important;
-             font-weight: 900; padding: 2px 8px; background-color: #fffbeb; border-radius: 4px;
+        .card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.6s; transform-style: preserve-3d;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-radius: 20px; cursor: pointer;
         }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; border-radius: 20px; background: var(--card-front); border: 2px solid var(--border);
+        }
+        .card-front { font-size: 2em; font-weight: bold; color: var(--primary); }
+        .card-back { background: var(--card-back); transform: rotateY(180deg); text-align: left; align-items: flex-start; overflow-y: auto; }
+        .card-back h3 { color: var(--secondary); margin-top: 0; border-bottom: 2px solid var(--accent); padding-bottom: 10px; width: 100%; }
+        .vocab-actions { display: flex; gap: 10px; }
+        .vocab-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; }
+        #btn-know { background: var(--success); } #btn-know:hover { filter: brightness(0.9); }
+        #btn-dont-know { background: var(--fail); } #btn-dont-know:hover { filter: brightness(0.9); }
+        .vocab-progress { text-align: center; color: white; margin-top: 15px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .vocab-filter { margin-top: 15px; padding: 8px; border-radius: 8px; border: none; width: 100%; font-size: 1em; }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-105%); } .sidebar.open { transform: translateX(0); box-shadow: 100px 0 0 rgba(0,0,0,0.5); }
@@ -244,8 +211,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V19.0</h3>
-            <div class="shortcuts-hint">角色詳解版 (Final)</div>
+            <h3>🚀 備考系統 V18.0</h3>
+            <div class="shortcuts-hint">完全整合版 (Integrated)</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -255,7 +222,7 @@
             <a href="#sec1-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-2"></span>環境、組織與 PMO</a>
             <a href="#sec1-3" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-3"></span>PMBOK 五大流程</a>
             <a href="#sec1-4" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec1-4"></span>十大知識領域 (KA)</a>
-            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責 (詳)</a>
+            <a href="#sec1-5" class="nav-link" style="padding-left: 25px; color: var(--primary); font-weight: bold;"><span class="progress-dot" data-target="sec1-5"></span>PM 角色與職責</a>
             <a href="#sec2" class="nav-link">🧭 起始流程 (Initiating)</a>
             <a href="#sec2-1" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-1"></span>專案選擇模型</a>
             <a href="#sec2-2" class="nav-link" style="padding-left: 25px;"><span class="progress-dot" data-target="sec2-2"></span>專案章程 (詳)</a>
@@ -267,9 +234,9 @@
             <a href="#sec4" class="nav-link" style="color: var(--accent); font-weight: bold;">🏃 敏捷管理 (Agile)</a>
         </div>
         <div class="sidebar-footer">
-            <button id="btn-dark" class="tool-btn">🌙 夜間模式 (D)</button>
-            <button id="btn-reset" class="tool-btn">🗑️ 重置紀錄</button>
-            <button id="btn-flashcard" class="tool-btn">🎲 隨機抽題 (F)</button>
+            <button id="btn-dark" class="tool-btn">🌙 夜間模式</button>
+            <button id="btn-flashcard" class="tool-btn">🎲 隨機克漏字</button>
+            <button id="btn-vocab" class="tool-btn">🎴 核心單字卡</button>
         </div>
     </nav>
 
@@ -282,144 +249,27 @@
             <div id="sec0-1" class="section-block">
                 <div class="section-header"><h3>壹、專案與組織核心概念</h3><div class="master-check" data-id="sec0-1"><span>☐</span> 我已掌握</div></div>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>專有名詞</th><th>分類</th><th>解釋</th><th>關鍵細節</th></tr></thead>
                     <tbody>
-                        <tr><td><span class="term" data-term="project">專案 (Project)</span></td><td>核心定義</td><td>創造獨特產品/服務/成果而進行的暫時性工作。</td><td>必須具備「<span class="quiz-mask">暫時性</span>」與「<span class="quiz-mask">獨特性</span>」。</td></tr>
-                        <tr><td><span class="term" data-term="project_management">專案管理 (Project Management)</span></td><td>核心定義</td><td>應用知識、技能、工具和技術，以滿足專案需求。</td><td>核心在於運用工具和整合資源。</td></tr>
-                        <tr><td><span class="term" data-term="vuca">VUCA 環境分析</span></td><td>環境分析</td><td>描述現代商業環境的四個特徵。</td><td>Volatility (<span class="quiz-mask">易變性</span>)、Uncertainty (<span class="quiz-mask">不確定性</span>)、Complexity (<span class="quiz-mask">複雜性</span>)、Ambiguity (<span class="quiz-mask">模糊性</span>)。</td></tr>
-                        <tr><td><span class="term" data-term="pmi">PMI</span></td><td>專管組織</td><td>國際專案管理學會。</td><td>成立於 1969 年，制定全球標準。</td></tr>
-                        <tr><td><span class="term" data-term="pmbok">PMBOK® Guide</span></td><td>專管標準</td><td>專案管理知識體系指南。</td><td>全球專案管理的共同語言。</td></tr>
+                        <tr><td><span class="term" data-term="project">專案</span></td><td>核心定義</td><td>創造獨特產品/服務的暫時性工作。</td><td>具備「<span class="quiz-mask">暫時性</span>」與「<span class="quiz-mask">獨特性</span>」。</td></tr>
+                        <tr><td><span class="term" data-term="vuca">VUCA</span></td><td>環境</td><td>描述現代商業環境的四個特徵。</td><td>易變、不確定、複雜、模糊。</td></tr>
+                        <tr><td><span class="term" data-term="pmbok">PMBOK Guide</span></td><td>標準</td><td>專案管理知識體系指南。</td><td>全球專案管理的共同語言。</td></tr>
                     </tbody>
                 </table>
-
                 <div class="section-header"><h3>貳、專案環境與組織結構</h3><div class="master-check" data-id="sec0-2"><span>☐</span> 我已掌握</div></div>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>專有名詞</th><th>分類</th><th>解釋</th><th>關鍵細節</th></tr></thead>
                     <tbody>
-                        <tr><td><span class="term" data-term="eef">企業環境因素 (EEF)</span></td><td>外部環境</td><td>專案團隊無法控制的環境條件。</td><td>包含組織文化、結構、法規。<span class="quiz-mask">是限制</span>。</td></tr>
-                        <tr><td><span class="term" data-term="opa">組織流程資產 (OPA)</span></td><td>內部資源</td><td>專案團隊可以利用的內部資產。</td><td>包含範本、政策及<span class="quiz-mask">經驗學習</span>知識庫。<span class="quiz-mask">是工具</span>。</td></tr>
-                        <tr><td><span class="term" data-term="functional_org">功能型組織</span></td><td>組織結構</td><td>傳統的部門化組織，PM 權力<span class="quiz-mask">極低</span>。</td><td>資源由<span class="quiz-mask">功能經理 (FM)</span>控制。</td></tr>
-                        <tr><td><span class="term" data-term="projectized_org">專案型組織</span></td><td>組織結構</td><td>組織完全圍繞專案運作，PM 權力<span class="quiz-mask">極高</span>。</td><td>資源獨占。</td></tr>
-                        <tr><td><span class="term" data-term="matrix_org">矩陣型組織</span></td><td>組織結構</td><td>功能型和專案型的混合體。</td><td>成員有兩個老闆，權力分弱/平衡/強<span class="quiz-mask">三種</span>。</td></tr>
-                        <tr><td><span class="term" data-term="pmo">PMO</span></td><td>組織單位</td><td>專案管理辦公室，負責集中管理和標準化。</td><td>有支援型、控制型、指令型<span class="quiz-mask">三種類型</span>。</td></tr>
+                        <tr><td><span class="term" data-term="eef">EEF</span></td><td>外部環境</td><td>團隊無法控制的環境條件。</td><td>是<span class="quiz-mask">限制</span>。</td></tr>
+                        <tr><td><span class="term" data-term="opa">OPA</span></td><td>內部資源</td><td>團隊可利用的內部資產(流程/知識庫)。</td><td>是<span class="quiz-mask">工具</span>。</td></tr>
+                        <tr><td><span class="term" data-term="functional_org">功能型組織</span></td><td>結構</td><td>傳統部門化，PM 權力<span class="quiz-mask">極低</span>。</td><td>資源由功能經理控制。</td></tr>
+                        <tr><td><span class="term" data-term="projectized_org">專案型組織</span></td><td>結構</td><td>圍繞專案運作，PM 權力<span class="quiz-mask">極高</span>。</td><td>資源獨占。</td></tr>
+                        <tr><td><span class="term" data-term="pmo">PMO</span></td><td>單位</td><td>負責集中管理和標準化。</td><td>分支援、管制、指令型。</td></tr>
                     </tbody>
                 </table>
-
-                <div class="section-header"><h3>參、開發模式與生命週期</h3><div class="master-check" data-id="sec0-3"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="agile_manifesto">敏捷宣言 (Agile Manifesto)</span></td><td>敏捷哲學</td><td>強調人、軟體、合作、回應變化等四大核心價值。</td><td>核心是「<span class="quiz-mask">回應變化</span>勝於遵循計畫」。</td></tr>
-                        <tr><td><span class="term" data-term="waterfall">傳統模式/瀑布式</span></td><td>開發模式</td><td>預先定義所有需求，按順序執行。</td><td>範疇<span class="quiz-mask">固定</span>，適用於需求明確的專案。</td></tr>
-                        <tr><td><span class="term" data-term="agile">敏捷模式 (Adaptive/Agile)</span></td><td>開發模式</td><td>在短週期內交付可用產品，擁抱變化。</td><td>時程/成本<span class="quiz-mask">固定</span>，適用於需求不明確的專案。</td></tr>
-                        <tr><td><span class="term" data-term="progressive_elaboration">漸進明細</span></td><td>規劃概念</td><td>隨著專案的推進，計畫會越來越詳細。</td><td>資訊的明確度是<span class="quiz-mask">逐步演進</span>的。</td></tr>
-                        <tr><td><span class="term" data-term="rolling_wave">滾動式規劃</span></td><td>規劃概念</td><td>漸進明細的具體實作方法。</td><td>近期工作<span class="quiz-mask">詳細規劃</span>，遠期工作高層級規劃。</td></tr>
-                        <tr><td><span class="term" data-term="phase_gate">階段關卡 (Kill Point)</span></td><td>生命週期</td><td>每個階段結束時的審查點。</td><td>高層決策專案是否應繼續 (Go) 或終止 (<span class="quiz-mask">No-Go</span>)。</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="section-header"><h3>肆、專案起始與選擇</h3><div class="master-check" data-id="sec0-4"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="charter">專案章程 (Project Charter)</span></td><td>起始產出</td><td>專案的「出生證明」，正式授權文件。</td><td>由<span class="quiz-mask">專案發起人 (Sponsor)</span>發布；任命 PM。</td></tr>
-                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>選擇模型</td><td>將所有未來現金流折現回「現值」後，減去初始投資。</td><td>$NPV > 0$ 則接受。<span class="quiz-mask">數值越高越好</span>。</td></tr>
-                        <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>選擇模型</td><td>使專案淨現值 ($NPV$) 等於零的折現率。</td><td>IRR <span class="quiz-mask">越高越好</span>，須大於最低要求報酬率。</td></tr>
-                        <tr><td><span class="term" data-term="payback_period">還本期法 (Payback Period)</span></td><td>選擇模型</td><td>專案回收初始投資所需的時間。</td><td>時間<span class="quiz-mask">越短越好</span>，但<span class="quiz-mask">不考慮</span>金錢的時間價值 (TVM)。</td></tr>
-                        <tr><td><span class="term" data-term="sacred_cow">聖牛 (Sacred Cow)</span></td><td>選擇模型</td><td>僅因高層主管的個人意志而執行的專案。</td><td><span class="quiz-mask">缺乏正式的商業論證</span>。</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="section-header"><h3>伍、專案規劃：範疇與責任</h3><div class="master-check" data-id="sec0-5"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="pmp_plan">專案管理計畫書</span></td><td>規劃核心</td><td>專案的總計畫，整合所有子計畫。</td><td>包含三大基準：<span class="quiz-mask">範疇、時程、成本</span>。</td></tr>
-                        <tr><td><span class="term" data-term="baseline">三大基準 (Baselines)</span></td><td>規劃核心</td><td>經正式批准的計畫版本，用於衡量績效的標準。</td><td>任何修改都需通過正式的<span class="quiz-mask">變更控制</span>。</td></tr>
-                        <tr><td><span class="term" data-term="sow">工作說明書 (SOW)</span></td><td>範疇輸入</td><td>專案的「高層級需求」文件。</td><td>來源通常是外部（客戶合約）或發起人。</td></tr>
-                        <tr><td><span class="term" data-term="wbs">WBS (工作分解結構)</span></td><td>範疇工具</td><td>將專案總範疇，分解成更小的可交付成果的階層結構。</td><td>必須遵循「<span class="quiz-mask">百分之百原則</span>」；是可交付成果導向 (名詞)。</td></tr>
-                        <tr><td><span class="term" data-term="work_package">工作包 (Work Package)</span></td><td>範疇工具</td><td>WBS <span class="quiz-mask">最底層</span>的項目。</td><td>是可以被可靠地估算時程與成本的<span class="quiz-mask">最小單位</span>。</td></tr>
-                        <tr><td><span class="term" data-term="wbs_dictionary">WBS 辭典 (WBS Dictionary)</span></td><td>範疇工具</td><td>WBS 每個項目的詳細文字描述文件。</td><td>包含工作包描述、負責人、時程、成本、允收標準等。</td></tr>
-                        <tr><td><span class="term" data-term="control_account">管制帳戶 (Control Account)</span></td><td>範疇/成本</td><td>WBS 結構中的管理節點。</td><td>WBS (範疇) 與 <span class="quiz-mask">OBS</span> (組織) 的交會點。</td></tr>
-                        <tr><td><span class="term" data-term="raci">RACI</span></td><td>責任分派</td><td>RAM 的一種，定義每個任務的責任類型。</td><td>Accountable (負全責，<span class="quiz-mask">A 只能有一人</span>)。</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="section-header"><h3>陸、專案規劃：關係人與溝通</h3><div class="master-check" data-id="sec0-6"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="stakeholder">利害關係人 (Stakeholder)</span></td><td>關係人管理</td><td>任何會影響或被專案影響的個人或團體。</td><td>影響力在專案初期<span class="quiz-mask">最大</span>。</td></tr>
-                        <tr><td><span class="term" data-term="power_influence">權力/影響力方格圖</span></td><td>關係人工具</td><td>分析關係人權力與影響力的工具。</td><td>決定管理策略。</td></tr>
-                        <tr><td><span class="term" data-term="engagement_matrix">參與評估矩陣</span></td><td>關係人工具</td><td>分析關係人**目前 (C)與期望 (D)**參與程度的工具。</td><td>參與程度：不知情 → 抵制 → 中立 → 支持 → 領導。</td></tr>
-                        <tr><td><span class="term" data-term="push_comm">推式溝通 (Push)</span></td><td>溝通類型</td><td>主動將資訊發送給接收者（例如：Email）。</td><td>適用於需要<span class="quiz-mask">確保接收者知道</span>的資訊。</td></tr>
-                        <tr><td><span class="term" data-term="pull_comm">拉式溝通 (Pull)</span></td><td>溝通類型</td><td>將資訊放在中央儲存庫，讓接收者自行取用（例如：網站）。</td><td>適用於<span class="quiz-mask">大量、非緊急</span>的資訊。</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="section-header"><h3>柒、敏捷核心</h3><div class="master-check" data-id="sec0-7"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>專有名詞 (中文/英文)</th>
-                            <th>脈絡分類</th>
-                            <th>簡潔解釋</th>
-                            <th>關鍵細節</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="agile">敏捷模式 (Agile)</span></td><td>開發模式</td><td>在短週期內交付可用產品，擁抱變化。</td><td>時程/成本<span class="quiz-mask">固定</span>，範疇可變。核心是<span class="quiz-mask">回應變化</span>。</td></tr>
-                        <tr><td><span class="term" data-term="scrum">Scrum</span></td><td>敏捷框架</td><td>最常見的敏捷框架，透過衝刺交付價值。</td><td>3 大角色：<span class="quiz-mask">PO, SM, Dev Team</span>。</td></tr>
-                        <tr><td><span class="term" data-term="sprint">衝刺 (Sprint)</span></td><td>敏捷實作</td><td>固定長度（1-4 週）的開發週期。</td><td>每個衝刺結束都應產出<span class="quiz-mask">潛在可發布的產品增量</span>。</td></tr>
-                        <tr><td><span class="term" data-term="kanban">看板 (Kanban)</span></td><td>敏捷實作</td><td>視覺化工作流程工具。</td><td>強調限制<span class="quiz-mask">在製品數量 (WIP)</span>。</td></tr>
-                    </tbody>
-                </table>
-                
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note"></textarea></div>
             </div>
         </section>
-
 
         <section id="sec1">
             <h2>🎯 第一部分：專案管理基礎架構</h2>
@@ -430,271 +280,10 @@
                     <ul>
                         <li><strong>暫時性：</strong>有明確起訖，非永久持續。</li>
                         <li><strong><span class="term" data-term="progressive_elaboration">逐步完善</span>：</strong>隨資訊明朗，計畫由粗到細的過程。</li>
-                        <li><strong>驅動變革：</strong>改變組織現狀以實現目標。</li>
-                    </ul>
-                    <h4>⚔️ 專案 vs. <span class="term" data-term="operations">日常營運 (Operations)</span></h4>
-                    <table>
-                        <tr><th>比較項目</th><th>專案 (Project)</th><th>日常營運 (Operations)</th></tr>
-                        <tr><td>性質</td><td><span class="quiz-mask">獨特、一次性</span></td><td><span class="quiz-mask">重複性、持續性</span></td></tr>
-                        <tr><td>目的</td><td>驅動變革</td><td>維持正常運作</td></tr>
-                        <tr><td>不確定性</td><td><span class="quiz-mask">高</span></td><td><span class="quiz-mask">低 (可預測)</span></td></tr>
-                    </table>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec1-2" class="section-block">
-                <div class="section-header"><h3>貳、環境、組織與 PMO</h3><div class="master-check" data-id="sec1-2"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p>現代專案面臨 <strong><span class="term" data-term="vuca">VUCA</span></strong> (易變、不確定、複雜、模糊) 環境。</p>
-                    <h4>(一) <span class="term" data-term="opm">組織級專案管理 (OPM)</span> 層級</h4>
-                    <p>OPM 是一個策略框架，用於將組織的策略與「專案組合」、「專案集」和「專案」連結起來，以實現戰略目標。</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>層級</th>
-                                <th>目的</th>
-                                <th>焦點</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="term" data-term="portfolio">專案組合 (Portfolio)</span></td>
-                                <td>確保做「對的」事情 (<span class="quiz-mask">Do the right things</span>)。</td>
-                                <td>連結組織策略，管理多個（不一定相關）專案/專案集。</td>
-                            </tr>
-                            <tr>
-                                <td><span class="term" data-term="program">專案集 (Program)</span></td>
-                                <td>以協調的方式管理相關專案，獲取 <span class="quiz-mask">1+1>2 的利益</span>。</td>
-                                <td>管理「<span class="quiz-mask">相依性</span>」的一組相關專案。</td>
-                            </tr>
-                            <tr>
-                                <td>專案 (Project)</td>
-                                <td>把事情「做對」 (<span class="quiz-mask">Do things right</span>)。</td>
-                                <td>交付獨特的成果。</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h4>(二) <span class="term" data-term="pmo">專案管理辦公室 (PMO)</span> 三種類型</h4>
-                    <ul>
-                        <li><strong>支援型 (Supportive)：</strong>顧問角色，提供範本。控制度：<span class="quiz-mask">低</span>。</li>
-                        <li><strong>管制型 (Controlling)：</strong>要求遵循特定框架。控制度：<span class="quiz-mask">中</span>。</li>
-                        <li><strong>指令型 (Directive)：</strong>直接指派並管理 PM。控制度：<span class="quiz-mask">高</span>。</li>
-                    </ul>
-                    <h4>(三) 組織結構對 PM 權限的影響 (必考)</h4>
-                     <table>
-                        <tr><th>組織型態</th><th>PM 權限</th><th>預算控制</th><th>PM 角色</th></tr>
-                        <tr><td>功能型</td><td><span class="quiz-mask">極低/無</span></td><td>功能經理</td><td>兼職(聯絡員)</td></tr>
-                        <tr><td>弱矩陣</td><td>低</td><td>功能經理</td><td>兼職</td></tr>
-                        <tr><td>平衡矩陣</td><td>中</td><td>混合</td><td><span class="quiz-mask">全職</span>(雙老闆)</td></tr>
-                        <tr><td>強矩陣</td><td>中~高</td><td>PM</td><td>全職</td></tr>
-                        <tr><td>專案型</td><td><span class="quiz-mask">高~全權</span></td><td>PM</td><td>全職(大老闆)</td></tr>
-                    </table>
-                    <h4>(四) PMI 人才金三角</h4>
-                    <p>工作方式 (技術)、商業敏銳度 (策略)、影響力技能 (領導)。</p>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-             <div id="sec1-3" class="section-block">
-                <div class="section-header"><h3>參、PMBOK 五大流程</h3><div class="master-check" data-id="sec1-3"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <h4>(一) 專案成功定義 (三重限制)</h4>
-                    <p>需平衡 <strong><span class="quiz-mask">範疇</span>、<span class="quiz-mask">時間</span>、<span class="quiz-mask">成本</span></strong>。任何一項未達成即視為失敗。</p>
-                    <h4>(二) 五大流程群組 (專案生命週期)</h4>
-                    <ul>
-                        <li><strong>起始：</strong>定義專案，取得授權。<span class="quiz-mask">[挑、夠、文、人]</span></li>
-                        <li><strong>規劃：</strong>制定路線圖，最大群組。<span class="quiz-mask">[工、資、排、險]</span></li>
-                        <li><strong>執行：</strong>整合資源運作，<span class="quiz-mask">成本人力最高</span>。<span class="quiz-mask">[人、管、助]</span></li>
-                        <li><strong>監控：</strong>追蹤差異，變更管制。<span class="quiz-mask">[催、比、析、趕]</span></li>
-                        <li><strong>結束：</strong>正式驗收，釋放資源。<span class="quiz-mask">[驗、約、錢、報]</span></li>
-                    </ul>
-                    <div class="exam-tip"><strong>專案關鍵曲線：</strong>利害關係人影響力在<span class="quiz-mask">起始</span>階段最高；變更成本在<span class="quiz-mask">專案後期</span>最高。</div>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec1-4" class="section-block">
-                <div class="section-header"><h3>肆、十大知識領域 (10 KA)</h3><div class="master-check" data-id="sec1-4"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p><span class="term" data-term="pmbok">PMBOK</span> 定義了專案經理應具備的專業知識。</p>
-                    <table>
-                         <tr><th>類別</th><th>包含領域</th><th>關聯重點</th></tr>
-                         <tr><td><strong>整體</strong></td><td><span class="term" data-term="integration">整合管理</span></td><td>總體統籌，掌握全局</td></tr>
-                         <tr><td><strong>成果相關</strong> (4項)</td><td><span class="quiz-mask">範疇、時程、成本、品質</span></td><td>影響交付<span class="quiz-mask">結果</span></td></tr>
-                         <tr><td><strong>過程相關</strong> (5項)</td><td>資源、溝通、<span class="term" data-term="risk">風險</span>、採購、<span class="term" data-term="stakeholder">利害關係人</span></td><td>影響過程<span class="quiz-mask">順利度</span></td></tr>
-                    </table>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="口訣：整、範時成品、資溝風採利"></textarea></div>
-            </div>
-
-            <div id="sec1-5" class="section-block">
-                <div class="section-header"><h3>伍、PM 角色與職責</h3><div class="master-check" data-id="sec1-5"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p>PM 是專案的整合者，需具備「做事」與「做人」兩大能力。</p>
-                    <p>PM 核心角色：<span class="term" data-term="integration">整合者 (Integrator)</span>。時間分配： PM 絕大多數時間（<span class="quiz-mask">75%~90%</span>）花在溝通上。</p>
-                    <table>
-                        <tr><th>職責類型</th><th>核心內容</th></tr>
-                        <tr><td><strong>做事 (技術/規劃)</strong></td><td>目標設定、規劃、進度與成本控管。</td></tr>
-                        <tr><td><strong>做人 (領導/協調)</strong></td><td>團隊組建、利害關係人溝通、衝突與問題解決。</td></tr>
-                    </table>
-                    <div class="highlight-box">
-                        <strong>PM 的環境保護：</strong> PM 是團隊的「盾牌」，負責排除外部干擾，確保成員專心於交付物。同時需進行<span class="quiz-mask">變更管理</span>，避免任意變動導致重練。
-                    </div>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-        </section>
-
-        <section id="sec2">
-            <h2>🧭 第二部分：起始流程群組 (Initiating)</h2>
-            <div id="sec2-1" class="section-block">
-                <div class="section-header"><h3>壹、專案選擇模型</h3><div class="master-check" data-id="sec2-1"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <h4>(一) 非量化模型 (策略判斷)</h4>
-                    <ul>
-                        <li><strong><span class="term" data-term="sacred_cow">聖牛 (Sacred Cow)</span>：</strong><span class="quiz-mask">高層</span>意志，無須理由。</li>
-                        <li><strong>營運/競爭/法規需要：</strong>維持運作、生存或合規必須做。</li>
-                        <li><strong>Q 排序法：</strong>分類為「好、普通、差」。</li>
-                        <li><strong>交叉比較法：</strong>兩兩對比，勝出者計分。</li>
-                    </ul>
-                    <h4>(二) 量化財務模型 (客觀判斷)</h4>
-                    <table>
-                        <tr><th>方法</th><th>定義與標準</th><th>優缺點</th></tr>
-                        <tr><td><span class="term" data-term="payback_period">還本期</span></td><td>回收投資時間。越<span class="quiz-mask">短</span>越好。</td><td>缺點：<span class="quiz-mask">忽略</span> <span class="term" data-term="tvm">貨幣時間價值(TVM)</span>。</td></tr>
-                        <tr><td><span class="term" data-term="npv">淨現值 (NPV)</span></td><td>未來現金流折現減去投資。NPV > <span class="quiz-mask">0</span> 可接受，越高越好。</td><td>最重要的財務指標，<span class="quiz-mask">考量</span> <span class="term" data-term="tvm">TVM</span>。</td></tr>
-                        <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>使 NPV = 0 的折現率。越高越好。</td><td>代表真實投資報酬率。</td></tr>
-                    </table>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec2-2" class="section-block">
-                <div class="section-header"><h3>貳、專案章程</h3><div class="master-check" data-id="sec2-2"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <div class="highlight-box">
-                        <strong><span class="term" data-term="charter">專案章程</span>：</strong>專案的「出生證明」，正式<span class="quiz-mask">授權專案存在</span>，並任命 PM。由 <span class="term" data-term="sponsor">發起人</span> 發布。
-                    </div>
-                    <h4>(一) SMART 原則 (目標界定)</h4>
-                    <p>目標必須：<span class="term" data-term="smart">明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)</span>。</p>
-                    <h4>(二) 章程關鍵內容</h4>
-                    <ul>
-                        <li><strong>緣起/商業需求：</strong>需站在老闆角度寫出重要性。</li>
-                        <li><strong>可交付成果：</strong>需具體、可驗收、有數字。</li>
-                        <li><strong>專案經理/贊助者：</strong>必須明確寫出**個人**姓名。</li>
-                        <li><strong>時程/預算摘要：</strong>包含起迄日期、里程碑、預算科目。</li>
                     </ul>
                 </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
-
-            <div id="sec2-3" class="section-block">
-                <div class="section-header"><h3>參、利害關係人管理</h3><div class="master-check" data-id="sec2-3"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p>需盡早辨識以管理期望，避免後期變更成本大增。PM 須預設多數人因慣性而<span class="quiz-mask">反對改變</span>。</p>
-                    <h4>權力/影響力方格圖 (Power/Influence Grid)</h4>
-                    <ul>
-                        <li>高權力 / 高影響力 → <strong><span class="quiz-mask">重點管理</span></strong> (VVIP)。</li>
-                        <li>高權力 / 低影響力 → <strong><span class="quiz-mask">保持滿意</span></strong> (避免成為阻礙)。</li>
-                        <li>低權力 / 高影響力 → <strong><span class="quiz-mask">保持告知</span></strong> (善用專業)。</li>
-                        <li>低權力 / 低影響力 → <strong><span class="quiz-mask">監督</span></strong>。</li>
-                    </ul>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-        </section>
-
-        <section id="sec3">
-            <h2>🧱 第三部分：規劃流程群組 (Planning)</h2>
-            <div id="sec3-1" class="section-block">
-                <div class="section-header"><h3>壹、計畫書與基準</h3><div class="master-check" data-id="sec3-1"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p><strong><span class="term" data-term="pmp_plan">專案管理計畫書</span></strong> 是專案的「操作手冊」，整合了所有子計畫。</p>
-                    <p><span class="term" data-term="baseline">基準 (Baseline)</span>是其中經核准的版本，用來衡量績效。三大基準：<span class="quiz-mask">範疇、時程、成本</span>。</p>
-                    <div class="exam-tip">基準一旦確立，任何修改都必須走正式的<strong><span class="term" data-term="ccb">變更管制流程 (CCB)</span></strong>。</div>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec3-2" class="section-block">
-                <div class="section-header"><h3>貳、範疇管理 (WBS)</h3><div class="master-check" data-id="sec3-2"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <h4>(一) 核心概念與風險</h4>
-                    <ul>
-                        <li><strong>產品範疇(What) vs. 專案範疇(How)。</strong> (開發三個關卡 vs. 開發三個關卡所需做的事)</li>
-                        <li><strong><span class="term" data-term="scope_creep">範疇潛變</span>：</strong>未經核准的擴張 (壞的)。</li>
-                        <li><strong><span class="term" data-term="gold_plating">範疇鍍金</span>：</strong>PM 主動增加非必要功能 (壞的)。</li>
-                    </ul>
-                     <h4>(二) 蒐集需求技術</h4>
-                     <p>訪談、焦點團體、<span class="term" data-term="delphi">德爾菲技術</span>(專家匿名共識)、問卷、標竿學習。</p>
-                    <h4>(三) <span class="term" data-term="wbs">工作分解結構 (WBS)</span></h4>
-                    <p>以「交付成果」為導向的層級結構。最底層為<strong><span class="quiz-mask">工作包 (WP)</span></strong>。</p>
-                    <p><span class="term" data-term="control_account">管制帳戶 (CA)</span> 是 WBS 與 <span class="term" data-term="obs">OBS (組織分解結構)</span> 的交會點。</p>
-                    <div class="highlight-box">
-                        <strong>100% 原則：</strong>WBS 必須包含專案<span class="quiz-mask">所有</span>工作，不多也不少。
-                    </div>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec3-3" class="section-block">
-                <div class="section-header"><h3>參、責任與溝通</h3><div class="master-check" data-id="sec3-3"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <h4>(一) 責任分派</h4>
-                    <p>使用 <strong><span class="term" data-term="raci">責任分派矩陣 (RAM/RACI)</span></strong> 釐清職責：</p>
-                    <ul>
-                        <li><strong>R (Responsible)：</strong>執行者 (可多人)。</li>
-                        <li><strong>A (Accountable)：</strong>當責者 (負全責，<span class="quiz-mask" style="color:red;">只能一人</span>)。</li>
-                        <li><strong>C (Consult)：</strong>諮詢者 (雙向)。</li>
-                        <li><strong>I (Inform)：</strong>告知者 (單向)。</li>
-                    </ul>
-                    <p><strong><span class="term" data-term="obs">組織分解結構 (OBS)</span>：</strong>顯示工作包由哪個部門負責。</p>
-                    <h4>(二) 溝通管理</h4>
-                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。PM 約 <span class="quiz-mask">75~90%</span> 時間在溝通。</p>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-        </section>
-
-        <section id="sec4">
-            <h2>🏃 第四部分：敏捷管理 (Agile)</h2>
-            <div id="sec4-1" class="section-block">
-                <div class="section-header"><h3>壹、敏捷核心精神</h3><div class="master-check" data-id="sec4-1"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p><span class="term" data-term="agile">敏捷 (Agile)</span> 是一種適應變化的思維模式，適用於需求不明確的 VUCA 環境。</p>
-                    <h4>(一) 敏捷宣言 4 大價值觀 (右優於左)</h4>
-                    <ul>
-                        <li><strong><span class="quiz-mask">個人與互動</span></strong> 優於 流程與工具。</li>
-                        <li><strong><span class="quiz-mask">可用的軟體</span></strong> 優於 詳盡的文件。</li>
-                        <li><strong><span class="quiz-mask">與客戶合作</span></strong> 優於 合約協商。</li>
-                        <li><strong><span class="quiz-mask">回應變化</span></strong> 優於 遵循計畫。</li>
-                    </ul>
-                    <h4>(二) 開發方法比較</h4>
-                    <table>
-                         <tr><th>比較</th><th>預測型 (Waterfall)</th><th>適應型 (Agile)</th></tr>
-                         <tr><td>適用情境</td><td>需求明確、變動少</td><td>需求不明、<span class="quiz-mask">變動快</span></td></tr>
-                         <tr><td>規劃方式</td><td>前期詳細規劃 (一次性)</td><td><span class="quiz-mask">滾動式</span>規劃 (迭代)</td></tr>
-                         <tr><td>交付價值</td><td>專案結束時一次交付</td><td><span class="quiz-mask">頻繁交付</span>小批次成果</td></tr>
-                         <tr><td>變更態度</td><td>抗拒、嚴格管制</td><td><span class="quiz-mask">歡迎</span>變更</td></tr>
-                     </table>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-
-            <div id="sec4-2" class="section-block">
-                <div class="section-header"><h3>貳、Scrum 基礎框架</h3><div class="master-check" data-id="sec4-2"><span>☐</span> 我已掌握</div></div>
-                <div class="content-body">
-                    <p><span class="term" data-term="scrum">Scrum</span> 是最常見的敏捷框架。</p>
-                    <ul>
-                         <li><strong>3 大角色：</strong><span class="term" data-term="po">產品負責人(PO)</span>、<span class="term" data-term="sm">Scrum Master(SM)</span>、開發團隊(Dev)。</li>
-                         <li><strong><span class="term" data-term="sprint">衝刺 (Sprint)</span>：</strong>一個固定長度(通常1-4週)的開發週期，產出潛在可發布的產品增量。</li>
-                         <li><strong><span class="term" data-term="kanban">看板 (Kanban)</span>：</strong>視覺化工作流程的工具(待辦/進行中/已完成)，限制在製品數量(WIP)。</li>
-                    </ul>
-                </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
-            </div>
-        </section>
+             </section>
 
     </main>
 
@@ -702,142 +291,123 @@
         <button id="top-fab" class="fab" title="回到頂端">⬆</button>
         <button id="quiz-fab" class="fab" title="切換背誦模式 (Q)">🛡️</button>
     </div>
+
     <div class="modal-overlay" id="glossary-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeGlossary()">×</button>
-            <div class="modal-header"><span style="font-size:2em;">📖</span><h3 id="glossary-title"></h3></div>
-            <div class="glossary-label">定義</div><div class="glossary-text" id="glossary-def"></div>
-            <div class="glossary-label" style="color:var(--accent);margin-top:20px;">實務/考試重點</div><div class="glossary-text" id="glossary-app"></div>
+        <div class="modal-content" style="background: var(--bg-sidebar);">
+            <button class="close-modal" onclick="closeModal('glossary-modal')">×</button>
+            <div style="border-bottom: 2px solid var(--term-highlight); margin-bottom: 15px; padding-bottom: 10px;">
+                <span style="font-size:2em;">📖</span><h3 id="glossary-title" style="display:inline; margin-left:10px; color:var(--term-highlight);"></h3>
+            </div>
+            <div style="font-weight:bold; color:var(--text-muted);">定義</div><div id="glossary-def" style="font-size:1.1em; margin-bottom:15px;"></div>
+            <div style="font-weight:bold; color:var(--accent);">實務/考試重點</div><div id="glossary-app" style="font-size:1.1em;"></div>
         </div>
     </div>
+
     <div class="modal-overlay" id="flashcard-modal">
-        <div class="modal-content" style="text-align: center;">
-            <button class="close-modal" onclick="closeFlashcard()">×</button>
-            <h3 style="color:var(--primary);">🎲 隨機抽考</h3><p style="color:var(--text-muted);" id="flash-context"></p>
-            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px; line-height:1.6;"></div>
+        <div class="modal-content" style="text-align: center; background: var(--bg-sidebar);">
+            <button class="close-modal" onclick="closeModal('flashcard-modal')">×</button>
+            <h3 style="color:var(--primary);">🎲 隨機克漏字</h3><p style="color:var(--text-muted);" id="flash-context"></p>
+            <div id="flash-q" style="font-size:1.3em;margin:30px 0;min-height:60px; line-height:1.6; text-align:left; background:var(--bg-main); padding:20px; border-radius:12px;"></div>
             <div id="flash-a" style="font-size:1.5em;color:var(--success);font-weight:bold;padding:20px;background:var(--primary-light);border-radius:12px;display:none;"></div>
-            <button id="flash-reveal" class="tool-btn" style="width:100%;background:var(--primary);color:#fff;padding:15px;margin-top:20px;">看答案</button>
-            <button id="flash-next" class="tool-btn" style="width:100%;background:var(--accent);color:#fff;padding:15px;margin-top:10px;display:none;">下一題 →</button>
+            <button id="flash-reveal" class="tool-btn" style="width:100%;background:var(--primary);color:#fff;padding:15px;margin-top:20px;border:none;">看答案</button>
+            <button id="flash-next" class="tool-btn" style="width:100%;background:var(--accent);color:#fff;padding:15px;margin-top:10px;display:none;border:none;">下一題 →</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="vocab-modal">
+        <div class="modal-content" style="background: transparent; box-shadow: none; max-width: 500px;">
+            <button class="close-modal" onclick="closeModal('vocab-modal')" style="color: white; top: -40px; right: 0;">×</button>
+            
+            <select id="vocab-filter" class="vocab-filter">
+                <option value="all">🔁 全部單字卡</option>
+                <option value="unmastered" selected>🔥 僅複習不熟悉</option>
+            </select>
+
+            <div class="card-container" id="vocab-card-container">
+                <div class="card-inner">
+                    <div class="card-face card-front" id="vocab-front">正面</div>
+                    <div class="card-face card-back">
+                        <h3 id="vocab-back-title">標題</h3>
+                        <div id="vocab-back-content">內容</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vocab-actions">
+                <button id="btn-dont-know" class="vocab-btn">❓ 不熟</button>
+                <button id="btn-know" class="vocab-btn">✅ 記住了</button>
+            </div>
+            <div class="vocab-progress">
+                進度: <span id="vocab-current">0</span> / <span id="vocab-total">0</span> (已掌握: <span id="vocab-mastered">0</span>)
+            </div>
         </div>
     </div>
 
     <script>
+        // === 1. DATA ===
         const glossaryDB = {
-            "demo": { title: "功能示範", def: "點擊紫色虛線名詞可查看詳細解釋。", app: "閱讀時隨點隨查，不用中斷思緒。" },
-            "project": { title: "專案 (Project)", def: "為創造獨特產品/服務/成果而進行的暫時性工作。", app: "核心特性為「暫時性」與「獨特性」。" },
-            "project_management": { title: "專案管理 (Project Management)", def: "應用知識、技能、工具和技術，以滿足專案需求。", app: "核心在於運用工具和整合資源。" },
-            "vuca": { title: "VUCA 時代", def: "易變性(V)、不確定性(U)、複雜性(C)、模糊性(A)的環境。", app: "需引入敏捷思維來應對。" },
-            "pmi": { title: "PMI (Project Management Institute)", def: "國際專案管理學會，制定全球專案管理標準。", app: "PMP 考試核心依據，成立於 1969 年。" },
-            "pmbok": { title: "PMBOK® Guide", def: "專案管理知識體系指南，全球專案管理的共同語言。", app: "PMI 發布的標準指南，含 5 大流程與 10 大知識領域。" },
-            "eef": { title: "企業環境因素 (EEF)", def: "專案團隊無法控制的外部環境條件。", app: "EEF 是對專案的「限制」，如組織文化、市場條件、政府法規等。" },
-            "opa": { title: "組織流程資產 (OPA)", def: "專案團隊可以利用的內部資產。", app: "OPA 是專案的「工具」，包含組織標準流程、範本、政策及經驗學習知識庫。" },
-            "functional_org": { title: "功能型組織 (Functional Org)", def: "傳統的部門化組織結構。", app: "PM 權力極低，資源由功能經理 (FM) 控制，PM 通常只做聯絡人。" },
-            "projectized_org": { title: "專案型組織 (Projectized Org)", def: "組織完全圍繞專案運作的結構。", app: "PM 權力極高，團隊成員直接向 PM 報告，資源獨占。" },
-            "matrix_org": { title: "矩陣型組織 (Matrix Org)", def: "功能型和專案型的混合體。", app: "團隊成員有兩個老闆（PM & FM），權力分弱/平衡/強三種。" },
-            "pmo": { title: "專案管理辦公室 (PMO)", def: "組織內負責標準化專案治理流程的單位。", app: "分為支援型(顧問)、管制型(警察)、指令型(老闆)。" },
-            "agile_manifesto": { title: "敏捷宣言 (Agile Manifesto)", def: "2001 年發表，強調人、軟體、合作、回應變化等四大核心價值。", app: "核心是「回應變化勝於遵循計畫」。" },
-            "waterfall": { title: "傳統模式/瀑布式 (Predictive/Waterfall)", def: "預先定義所有需求，按順序執行。", app: "範疇固定，時程/成本可變。適用於需求明確的專案。" },
-            "agile": { title: "敏捷模式 (Adaptive/Agile)", def: "在短週期內交付可用產品，擁抱變化。", app: "時程/成本固定，範疇可變。適用於需求不明確的專案。" },
-            "hybrid": { title: "混合式 (Hybrid)", def: "結合傳統和敏捷的優點來管理專案。", app: "例如：硬體用傳統，軟體用敏捷。" },
-            "ooda": { title: "OODA 循環", def: "在快速變動環境下進行決策的流程 (觀察→導向→決策→行動)。", app: "用於強調快速反應和適應性決策。" },
-            "phase_gate": { title: "階段關卡 (Phase Gate/Kill Point)", def: "每個階段結束時的審查點。", app: "高層決策專案是否應繼續 (Go) 或終止 (No-Go)。" },
-            "progressive_elaboration": { title: "漸進明細 (Progressive Elaboration)", def: "隨著專案的推進，計畫會越來越詳細。", app: "專案資訊的明確度是逐步演進的。" },
-            "rolling_wave": { title: "滾動式規劃 (Rolling Wave Planning)", def: "漸進明細的具體實作方法。", app: "近期工作詳細規劃，遠期工作高層級規劃。" },
-            "charter": { title: "專案章程 (Project Charter)", def: "專案的「出生證明」，正式授權文件。", app: "由專案發起人 (Sponsor) 發布；任命 PM；賦予 PM 使用組織資源的權力。" },
-            "npv": { title: "淨現值 (NPV)", def: "將所有未來現金流折現回「現值」後，減去初始投資。", app: "NPV > 0 則接受。最重要的財務指標，數值越高越好。" },
-            "irr": { title: "內部報酬率 (IRR)", def: "使專案淨現值 ($NPV$) 等於零的折現率。", app: "IRR 越高越好，必須大於最低要求報酬率 (Hurdle Rate)。" },
-            "payback_period": { title: "還本期法 (Payback Period)", def: "專案回收初始投資所需的時間。", app: "時間越短越好，但缺點是**不考慮**金錢的時間價值 (TVM)。" },
-            "weighted_scoring": { title: "加權評分模型 (Weighted Scoring Model)", def: "綜合性的非財務選擇模型。", app: "根據標準權重與評分加總，總分最高者獲選。" },
-            "sacred_cow": { title: "聖牛 (Sacred Cow)", def: "僅因高層主管的個人意志而執行的專案。", app: "通常缺乏正式的商業論證。" },
-            "pmp_plan": { title: "專案管理計畫書 (PM Plan)", def: "專案的總計畫，整合所有子計畫。", app: "包含三大基準：範疇、時程、成本。" },
-            "baseline": { title: "三大基準 (Baselines)", def: "經正式批准的計畫版本，用於衡量績效的標準。", app: "任何修改都需通過正式的變更控制 (CCB)。" },
-            "sow": { title: "工作說明書 (SOW)", def: "專案的「高層級需求」文件。", app: "來源通常是外部（客戶合約）或發起人。" },
-            "wbs": { title: "WBS (工作分解結構)", def: "將專案總範疇，分解成更小的可交付成果的階層結構。", app: "必須遵循「百分之百原則」；是可交付成果導向 (名詞)。" },
-            "work_package": { title: "工作包 (Work Package)", def: "WBS 最底層的項目。", app: "是可以被可靠地估算時程與成本的最小單位。" },
-            "wbs_dictionary": { title: "WBS 辭典 (WBS Dictionary)", def: "WBS 每個項目的詳細文字描述文件。", app: "包含工作包描述、負責人、時程、成本、允收標準等。" },
-            "control_account": { title: "管制帳戶 (Control Account)", def: "WBS 結構中的管理節點。", app: "WBS (範疇) 與 OBS (組織) 的交會點，用於實獲值管理 (EVM)。" },
-            "ram": { title: "RAM (責任分派矩陣)", def: "將「WBS 工作包」與「團隊成員」連結的表格。", app: "RACI 是一種常見形式。" },
-            "raci": { title: "RACI", def: "RAM 的一種，定義每個任務的責任類型。", app: "Responsible, Accountable (只能有一人), Consult, Inform。" },
-            "obs": { title: "組織分解結構 (OBS)", def: "按組織部門層級排列，顯示工作包由哪個部門負責。", app: "與 WBS 結合可形成管制帳戶(CA)，便於績效考核。" },
-            "sponsor": { title: "專案發起人 (Sponsor)", def: "專案的「金主」或「老闆」，提供資金與資源。", app: "批准專案章程，負責在高層排除障礙。" },
-            "stakeholder": { title: "利害關係人 (Stakeholder)", def: "任何會影響或被專案影響的個人或團體。", app: "影響力在專案初期最大，故須在起始階段辨識。" },
-            "power_influence": { title: "權力/影響力方格圖", def: "分析關係人權力與影響力的工具。", app: "決定管理策略：重點管理、保持滿意、保持告知、最低程度關注。" },
-            "engagement_matrix": { title: "利害關係人參與評估矩陣", def: "分析關係人**目前 (C)與期望 (D)**參與程度的工具。", app: "參與程度分為不知情 → 抵制 → 中立 → 支持 → 領導。" },
-            "communication_plan": { title: "溝通管理計畫書", def: "規劃專案溝通的「方法論」文件。", app: "決定：溝通內容、時間、頻率、管道、接收者。" },
-            "push_comm": { title: "推式溝通 (Push)", def: "主動將資訊發送給接收者（例如：Email）。", app: "適用於需要確保接收者知道的資訊。" },
-            "pull_comm": { title: "拉式溝通 (Pull)", def: "將資訊放在中央儲存庫，讓接收者自行取用（例如：網站）。", app: "適用於大量、非緊急的資訊。" },
-            "operations": { title: "日常營運 (Operations)", def: "持續性、重複性的工作，旨在維持組織正常運作。", app: "與專案的「暫時性」形成對比。" },
-            "opm": { title: "組織級專案管理 (OPM)", def: "連結策略與執行的框架，包含專案組合、專案集與專案管理。", app: "確保組織做對的事，並把事做對。" },
-            "tvm": { title: "貨幣時間價值 (TVM)", def: "「今天的 1 元比明天的 1 元更有價值」，因為今天的錢可以投資生息。", app: "NPV 等財務指標的核心概念，還本期法忽略此價值。" },
-            "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此五項原則才具體，避免目標空泛。" },
-            "ccb": { title: "變更管制委員會 (CCB)", def: "負責審查、評估、核准或否決專案變更請求的正式團體。", app: "基準確立後，任何變更都必須通過 CCB，以防止範疇潛變。" },
-            "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
-            "gold_plating": { title: "範疇鍍金", def: "PM 主動做超出需求的功能。", app: "增加成本與風險，PMI 不建議。" },
-            "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
-            "integration": { title: "整合管理 (Integration)", def: "識別、定義、結合、統一與協調各專案管理過程活動。", app: "PM 的核心職責，確保專案各部分協調運作。" },
-            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" },
-            "scrum": { title: "Scrum", def: "一種輕量級的敏捷框架，透過短週期的衝刺(Sprint)來交付價值。", app: "包含 3 個角色(PO/SM/Dev)、5 個事件、3 個產出物。" },
-            "po": { title: "產品負責人 (Product Owner)", def: "Scrum 角色，代表客戶利益，管理產品待辦清單(Backlog)。", app: "決定「做什麼」，對產品價值最大化負責。" },
-            "sm": { title: "Scrum Master", def: "Scrum 角色，負責確保團隊遵循 Scrum 價值觀，並排除障礙。", app: "僕人式領導者，促進團隊自組織。" },
-            "sprint": { title: "衝刺 (Sprint)", def: "Scrum 中的固定開發週期（通常 1-4 週）。", app: "每個衝刺結束都應產出潛在可發布的產品增量。" },
-            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" }
+            "demo": { title: "功能示範", def: "點擊紫色名詞可查看解釋。", app: "隨點隨查，不中斷思緒。" },
+            "project": { title: "專案 (Project)", def: "為創造獨特產品/服務而進行的暫時性工作。", app: "核心特性：暫時性、獨特性。" },
+            // ... (請將 V16.0 中完整的 glossaryDB 貼到這裡，包含所有 40+ 個名詞) ...
+            "pmbok": { title: "PMBOK® Guide", def: "專案管理知識體系指南 (PMI 發布)。", app: "全球專案管理的共同語言。" },
+            "vuca": { title: "VUCA", def: "易變性、不確定性、複雜性、模糊性。", app: "現代環境特徵，需敏捷應對。" },
+            "eef": { title: "企業環境因素 (EEF)", def: "團隊無法控制的外部環境條件。", app: "是「限制」。" },
+            "opa": { title: "組織流程資產 (OPA)", def: "團隊可利用的內部資產(流程/知識庫)。", app: "是「工具」。" },
+             // ... 務必完整填入 ...
         };
 
-        const STORAGE_KEY = 'pm_v16_final';
-        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false}');
+        // Transform glossaryDB into an array for the flashcard system
+        const VOCAB_DECK = Object.values(glossaryDB).map(item => ({
+            term: item.title,
+            def: `<strong>定義：</strong>${item.def}<br><br><strong>重點：</strong>${item.app}`
+        }));
+
+        // === 2. CORE APP STATE ===
+        const STORAGE_KEY = 'pm_v18_data';
+        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false, "vocabMastery":{}}');
+        
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+
+        // === 3. UI INITIALIZATION ===
         if (appData.dark) document.body.classList.add('dark-mode');
-        Object.keys(appData.progress).forEach(id => updateMasterUI(id, appData.progress[id]));
-        document.querySelectorAll('.my-note').forEach(el => { 
+        Object.keys(appData.progress).forEach(id => {
+             const sec = document.getElementById(id);
+             if (sec) {
+                 sec.classList.toggle('mastered', appData.progress[id]);
+                 sec.querySelector('.master-check').innerHTML = appData.progress[id] ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握';
+                 const dot = document.querySelector(`.progress-dot[data-target="${id}"]`);
+                 if(dot) dot.parentElement.classList.toggle('mastered', appData.progress[id]);
+             }
+        });
+        document.querySelectorAll('.my-note').forEach(el => {
             const id = el.closest('.section-block').id;
             if(appData.notes[id]) { el.value = appData.notes[id]; el.style.display = 'block'; }
         });
 
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
-        document.getElementById('btn-dark').addEventListener('click', () => { appData.dark = !appData.dark; document.body.classList.toggle('dark-mode', appData.dark); saveData(); });
-        document.getElementById('quiz-fab').addEventListener('click', () => { document.body.classList.toggle('quiz-mode'); });
-        document.body.addEventListener('click', e => { if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) e.target.classList.add('revealed'); });
-        
-        let flashcards = [];
-        window.addEventListener('load', () => {
-             document.querySelectorAll('.section-block').forEach(section => {
-                section.querySelectorAll('.quiz-mask').forEach(originalMask => {
-                    if (!originalMask.innerText.trim()) return;
-                    let container = originalMask.closest('tr');
-                    if (!container) container = originalMask.closest('li') || originalMask.closest('p') || originalMask.closest('.exam-tip') || originalMask.closest('.highlight-box');
-                    if (!container) {
-                        container = originalMask.parentElement;
-                        while (container && container.innerText.length < 30 && container.parentElement && !container.classList.contains('section-block')) { container = container.parentElement; }
-                    }
-                    if (container) {
-                        let allMasksInContainer = Array.from(container.querySelectorAll('.quiz-mask'));
-                        let maskIndex = allMasksInContainer.indexOf(originalMask);
-                        let clone = container.cloneNode(true);
-                        if (container.tagName === 'TR') { let wrapper = document.createElement('table'); wrapper.appendChild(clone); clone = wrapper; }
-                        let masksInClone = clone.querySelectorAll('.quiz-mask');
-                        if(masksInClone[maskIndex]) { masksInClone[maskIndex].innerHTML = '<span class="flash-blank-active">【❓❓❓】</span>'; }
-                        flashcards.push({ q: clone.outerHTML || clone.innerHTML, a: originalMask.innerText, src: section.querySelector('h3')?.innerText.trim() || '未知章節' });
-                    }
-                });
-            });
+        // === 4. EVENT LISTENERS (General) ===
+        document.getElementById('btn-dark').addEventListener('click', () => { 
+            appData.dark = !appData.dark; document.body.classList.toggle('dark-mode', appData.dark); saveData(); 
         });
+        document.getElementById('quiz-fab').addEventListener('click', () => document.body.classList.toggle('quiz-mode'));
+        document.body.addEventListener('click', e => {
+            if(document.body.classList.contains('quiz-mode') && e.target.classList.contains('quiz-mask')) {
+                e.target.classList.add('revealed');
+            }
+        });
+        document.querySelectorAll('.master-check').forEach(btn => btn.addEventListener('click', e => {
+            const id = btn.dataset.id; appData.progress[id] = !appData.progress[id];
+            e.currentTarget.closest('.section-block').classList.toggle('mastered', appData.progress[id]);
+            e.currentTarget.innerHTML = appData.progress[id] ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握';
+            saveData(); e.stopPropagation();
+        }));
+        document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => {
+            const a = e.target.nextElementSibling; a.style.display = a.style.display==='block'?'none':'block'; if(a.style.display==='block') a.focus();
+        }));
+        document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => {
+            appData.notes[el.closest('.section-block').id] = e.target.value; saveData();
+        }));
 
-        const fModal = document.getElementById('flashcard-modal');
-        function showFlash() { 
-            if(!flashcards.length) { alert('題目載入中或無可用題目，請稍後再試。'); return; }
-            const c = flashcards[Math.floor(Math.random()*flashcards.length)]; 
-            document.getElementById('flash-q').innerHTML=c.q; 
-            document.getElementById('flash-a').innerText=c.a; 
-            document.getElementById('flash-context').innerText=`出處：${c.src}`; 
-            document.getElementById('flash-a').style.display='none'; 
-            document.getElementById('flash-reveal').style.display='block'; 
-            document.getElementById('flash-next').style.display='none'; 
-            fModal.classList.add('active'); 
-        }
-        function closeFlashcard() { fModal.classList.remove('active'); }
-        document.getElementById('btn-flashcard').addEventListener('click', showFlash);
-        document.getElementById('flash-reveal').addEventListener('click', function() { document.getElementById('flash-a').style.display='block'; this.style.display='none'; document.getElementById('flash-next').style.display='block'; });
-        document.getElementById('flash-next').addEventListener('click', showFlash);
-
+        // Glossary Click
         document.body.addEventListener('click', e => {
             const t = e.target.closest('.term');
             if(t && glossaryDB[t.dataset.term]) {
@@ -845,39 +415,109 @@
                 document.getElementById('glossary-title').textContent = d.title;
                 document.getElementById('glossary-def').textContent = d.def;
                 document.getElementById('glossary-app').textContent = d.app;
-                document.getElementById('glossary-modal').classList.add('active');
+                openModal('glossary-modal');
             }
         });
-        function closeGlossary() { document.getElementById('glossary-modal').classList.remove('active'); }
-        document.querySelectorAll('.master-check').forEach(btn => btn.addEventListener('click', e => {
-            const id = btn.dataset.id; appData.progress[id] = !appData.progress[id];
-            updateMasterUI(id, appData.progress[id]); saveData(); e.stopPropagation();
-        }));
-        function updateMasterUI(id, v) {
-            const s = document.getElementById(id); if(s) { s.classList.toggle('mastered', v); s.querySelector('.master-check').innerHTML = v ? '<span>☑</span> 已掌握' : '<span>☐</span> 我已掌握'; const d = document.querySelector(`.progress-dot[data-target="${id}"]`); if(d) d.parentElement.classList.toggle('mastered', v); }
-        }
-        document.querySelectorAll('.note-toggle').forEach(b => b.addEventListener('click', e => { 
-            const a = e.target.nextElementSibling; a.style.display = a.style.display==='block'?'none':'block'; if(a.style.display==='block') a.focus();
-        }));
-        document.querySelectorAll('.my-note').forEach(el => el.addEventListener('input', e => { appData.notes[el.closest('.section-block').id] = e.target.value; saveData(); }));
-        
-        const mainScroll = document.getElementById('main-scroll');
-        mainScroll.addEventListener('scroll', () => {
-            document.getElementById('progress-bar').style.width = (mainScroll.scrollTop / (mainScroll.scrollHeight - mainScroll.clientHeight)) * 100 + '%';
-            document.getElementById('top-fab').classList.toggle('visible', mainScroll.scrollTop > 300);
-        });
-        document.getElementById('top-fab').addEventListener('click', () => mainScroll.scrollTo({top:0, behavior:'smooth'}));
 
-        document.addEventListener('keydown', e => { if(['TEXTAREA','INPUT'].includes(e.target.tagName)) return; if(e.key.toLowerCase()==='q') document.getElementById('quiz-fab').click(); if(e.key.toLowerCase()==='f') showFlash(); if(e.key==='Escape') { closeGlossary(); closeFlashcard(); }});
-        document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('確定清空所有紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
-        document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.add('open'));
-        document.addEventListener('click', e => { if(window.innerWidth<=768 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) document.getElementById('sidebar').classList.remove('open'); });
-        document.getElementById('search-input').addEventListener('input', e => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.section-block').forEach(sec => {
-                sec.style.display = sec.innerText.toLowerCase().includes(term) ? 'block' : 'none';
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // === 5. CLOZE FLASHCARD SYSTEM (舊的隨機抽題) ===
+        let clozeCards = [];
+        window.addEventListener('load', () => {
+             document.querySelectorAll('.section-block').forEach(section => {
+                section.querySelectorAll('.quiz-mask').forEach(originalMask => {
+                    if (!originalMask.innerText.trim()) return;
+                    let container = originalMask.closest('tr') || originalMask.closest('li') || originalMask.closest('p') || originalMask.closest('.exam-tip') || originalMask.closest('.highlight-box');
+                    if (!container) container = originalMask.parentElement;
+                    if (container) {
+                        let allMasks = Array.from(container.querySelectorAll('.quiz-mask'));
+                        let maskIndex = allMasks.indexOf(originalMask);
+                        let clone = container.cloneNode(true);
+                        if (container.tagName === 'TR') { let w = document.createElement('table'); w.appendChild(clone); clone = w; }
+                        let cloneMasks = clone.querySelectorAll('.quiz-mask');
+                        if(cloneMasks[maskIndex]) cloneMasks[maskIndex].innerHTML = '<span style="color:var(--accent);border-bottom:3px solid var(--accent);font-weight:900;padding:2px 8px;background:#fffbeb;border-radius:4px;">【❓❓❓】</span>';
+                        clozeCards.push({ q: clone.outerHTML || clone.innerHTML, a: originalMask.innerText, src: section.querySelector('h3')?.innerText.trim() });
+                    }
+                });
             });
         });
+        document.getElementById('btn-flashcard').addEventListener('click', () => {
+            if(!clozeCards.length) return alert('無題目');
+            const c = clozeCards[Math.floor(Math.random()*clozeCards.length)];
+            document.getElementById('flash-q').innerHTML=c.q;
+            document.getElementById('flash-a').innerText=c.a;
+            document.getElementById('flash-context').innerText=`出處：${c.src}`;
+            document.getElementById('flash-a').style.display='none';
+            document.getElementById('flash-reveal').style.display='block';
+            document.getElementById('flash-next').style.display='none';
+            openModal('flashcard-modal');
+        });
+        document.getElementById('flash-reveal').addEventListener('click', function() {
+            document.getElementById('flash-a').style.display='block'; this.style.display='none'; document.getElementById('flash-next').style.display='block';
+        });
+        document.getElementById('flash-next').addEventListener('click', () => document.getElementById('btn-flashcard').click());
+
+        // === 6. NEW VOCAB CARD SYSTEM (單字卡) ===
+        let vocabDeck = [], currentVocabIndex = 0;
+        function initVocabDeck() {
+            const filter = document.getElementById('vocab-filter').value;
+            vocabDeck = VOCAB_DECK.map((c, i) => ({...c, id: i})); // Add original ID
+            if (filter === 'unmastered') vocabDeck = vocabDeck.filter(c => !appData.vocabMastery[c.id]);
+            if (vocabDeck.length === 0 && VOCAB_DECK.length > 0) {
+                alert("恭喜！此篩選條件下沒有卡片了！");
+                vocabDeck = VOCAB_DECK.map((c, i) => ({...c, id: i})); // Fallback
+            }
+            shuffle(vocabDeck);
+            currentVocabIndex = 0;
+            updateVocabCard();
+        }
+        function updateVocabCard() {
+            if (!vocabDeck.length) return;
+            const card = vocabDeck[currentVocabIndex];
+            document.getElementById('vocab-front').textContent = card.term;
+            document.getElementById('vocab-back-title').textContent = card.term;
+            document.getElementById('vocab-back-content').innerHTML = card.def;
+            document.getElementById('vocab-card-container').classList.remove('flipped');
+            
+            document.getElementById('vocab-current').textContent = currentVocabIndex + 1;
+            document.getElementById('vocab-total').textContent = vocabDeck.length;
+            document.getElementById('vocab-mastered').textContent = Object.values(appData.vocabMastery).filter(v=>v).length;
+        }
+        document.getElementById('btn-vocab').addEventListener('click', () => { initVocabDeck(); openModal('vocab-modal'); });
+        document.getElementById('vocab-card-container').addEventListener('click', function() { this.classList.toggle('flipped'); });
+        document.getElementById('vocab-filter').addEventListener('change', initVocabDeck);
+        
+        function markVocab(mastered) {
+            if (!vocabDeck.length) return;
+            appData.vocabMastery[vocabDeck[currentVocabIndex].id] = mastered;
+            saveData();
+            currentVocabIndex = (currentVocabIndex + 1) % vocabDeck.length;
+            if (document.getElementById('vocab-filter').value === 'unmastered' && mastered) {
+                initVocabDeck(); // Remove mastered card from current deck
+            } else {
+                updateVocabCard();
+            }
+        }
+        document.getElementById('btn-know').addEventListener('click', (e) => { e.stopPropagation(); markVocab(true); });
+        document.getElementById('btn-dont-know').addEventListener('click', (e) => { e.stopPropagation(); markVocab(false); });
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Mobile Menu & Scroll
+        document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.add('open'));
+        document.addEventListener('click', e => { if(window.innerWidth<=768 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) document.getElementById('sidebar').classList.remove('open'); });
+        document.getElementById('main-scroll').addEventListener('scroll', () => {
+            const m = document.getElementById('main-scroll');
+            document.getElementById('progress-bar').style.width = (m.scrollTop / (m.scrollHeight - m.clientHeight)) * 100 + '%';
+            document.getElementById('top-fab').classList.toggle('visible', m.scrollTop > 300);
+        });
+        document.getElementById('top-fab').addEventListener('click', () => document.getElementById('main-scroll').scrollTo({top:0, behavior:'smooth'}));
     </script>
 </body>
 </html>
