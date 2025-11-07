@@ -44,15 +44,13 @@
             font-size: 1.1em;
         }
 
-        /* --- 改進的核心：使用 Grid 網格系統 --- */
         .container {
             max-width: 1100px;
             margin: 0 auto;
             padding: 20px;
             display: grid;
-            /* 自動適應欄位：每個至少 300px 寬，能放幾個就放幾個 */
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px; /* 卡片之間的間距 */
+            gap: 30px;
         }
 
         .card {
@@ -62,7 +60,7 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.06);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
-            flex-direction: column; /* 讓內容垂直排列 */
+            flex-direction: column;
         }
 
         .card:hover {
@@ -70,9 +68,8 @@
             box-shadow: 0 12px 25px rgba(93, 138, 168, 0.15);
         }
 
-        /* --- 讓照片整齊的關鍵 --- */
         .card-image-wrapper {
-            height: 250px; /* 固定照片高度 */
+            height: 250px;
             width: 100%;
             overflow: hidden;
             border-radius: 12px;
@@ -81,22 +78,22 @@
         .card img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 保持比例填滿，多餘的會被裁掉 */
-            object-position: center; /* 照片置中 */
+            object-fit: cover;
+            object-position: center;
             transition: transform 0.5s ease;
         }
 
         .card:hover img {
-             transform: scale(1.05); /* 滑鼠移過去照片微放大效果 */
+             transform: scale(1.05);
         }
 
         .card-content {
             padding: 15px 10px 10px 10px;
             text-align: center;
-            flex-grow: 1; /* 讓內容區塊填滿剩餘空間 */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 內容垂直置中 */
+            justify-content: center;
         }
 
         .tag {
@@ -106,7 +103,7 @@
             font-size: 0.85em;
             padding: 4px 12px;
             border-radius: 20px;
-            margin: 0 auto 10px auto; /* 置中 */
+            margin: 0 auto 10px auto;
             opacity: 0.9;
         }
 
@@ -134,7 +131,7 @@
     <main class="container">
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/3m5yszR9/IMG-8376.jpg" alt="史迪奇看白板">
+                <img src="stitch/IMG_8376.JPG" alt="史迪奇看白板">
             </div>
             <div class="card-content">
                 <span class="tag">認真生活</span>
@@ -144,7 +141,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/4xmG68f/IMG-8385.jpg" alt="史迪奇看冰箱">
+                <img src="stitch/IMG_8385.JPG" alt="史迪奇看冰箱">
             </div>
             <div class="card-content">
                 <span class="tag">貪吃鬼</span>
@@ -154,7 +151,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/kst5Cjbt/IMG-8436.jpg" alt="史迪奇喝咖啡">
+                <img src="stitch/IMG_8436.JPG" alt="史迪奇喝咖啡">
             </div>
             <div class="card-content">
                 <span class="tag">下午茶</span>
@@ -164,7 +161,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/CkSRSpH/IMG-8373.jpg" alt="史迪奇在床上看書">
+                <img src="stitch/IMG_8373.JPG" alt="史迪奇在床上看書">
             </div>
             <div class="card-content">
                 <span class="tag">睡前時光</span>
@@ -174,7 +171,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/r229dzYv/IMG-8377.jpg" alt="史迪奇照鏡子">
+                <img src="stitch/IMG_8377.JPG" alt="史迪奇照鏡子">
             </div>
             <div class="card-content">
                 <span class="tag">愛漂亮</span>
@@ -184,7 +181,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/NgzrRDQ4/IMG-8433.jpg" alt="史迪奇拿黑膠唱片">
+                <img src="stitch/IMG_8433.JPG" alt="史迪奇拿黑膠唱片">
             </div>
             <div class="card-content">
                 <span class="tag">音樂魂</span>
@@ -194,7 +191,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/HD9rxnNH/IMG-8372.jpg" alt="史迪奇在書桌看書">
+                <img src="stitch/IMG_8372.JPG" alt="史迪奇在書桌看書">
             </div>
             <div class="card-content">
                 <span class="tag">用功讀書</span>
@@ -204,7 +201,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/27MQ5ZPC/IMG-8420.jpg" alt="史迪奇坐沙發">
+                <img src="stitch/IMG_8420.JPG" alt="史迪奇坐沙發">
             </div>
             <div class="card-content">
                 <span class="tag">放鬆時刻</span>
@@ -214,7 +211,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/KpJfzCtV/IMG-8421.jpg" alt="史迪奇用筆電">
+                <img src="stitch/IMG_8421.JPG" alt="史迪奇用筆電">
             </div>
             <div class="card-content">
                 <span class="tag">工作中</span>
@@ -224,7 +221,7 @@
 
         <div class="card">
             <div class="card-image-wrapper">
-                <img src="https://i.ibb.co/d010QWpc/IMG-8407.jpg" alt="史迪奇趴在筆電上">
+                <img src="stitch/IMG_8407.JPG" alt="史迪奇趴在筆電上">
             </div>
             <div class="card-content">
                 <span class="tag">累了</span>
