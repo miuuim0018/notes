@@ -7,11 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-cream: #fff9f0;      /* 奶油白背景 */
-            --soft-blue: #a8d8ea;     /* 史迪奇粉藍 */
-            --soft-pink: #ffcad4;     /* 柔和粉紅 */
-            --warm-brown: #8d6e63;    /* 溫暖棕色文字 */
-            --card-bg: #ffffff;
+            --bg-cream: #fff9f0;
+            --soft-blue: #a8d8ea;
+            --soft-pink: #ffcad4;
+            --warm-brown: #8d6e63;
         }
 
         html {
@@ -24,10 +23,10 @@
             color: var(--warm-brown);
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* 防止滑動動畫造成暫時的橫向卷軸 */
+            overflow-x: hidden;
             background-image: radial-gradient(var(--soft-blue) 2%, transparent 0), radial-gradient(var(--soft-pink) 2%, transparent 0);
             background-size: 60px 60px;
-            background-position: 0 0, 30px 30px; /* 可愛的點點背景 */
+            background-position: 0 0, 30px 30px;
         }
 
         header {
@@ -64,28 +63,29 @@
         .story-block {
             display: flex;
             align-items: center;
-            margin-bottom: 100px; /* 區塊間距大一點，讓滑動更有感 */
-            opacity: 0; /* 初始狀態隱藏，給動畫用 */
-            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); /* 柔和的動畫曲線 */
+            min-height: 300px; /* 確保有足夠高度讓觀察器偵測 */
+            margin-bottom: 120px;
+            opacity: 0;
+            /* 動畫時間稍微加快一點點 (0.8s)，讓重複觸發時更靈敏 */
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        /* 偶數區塊反轉排列 (左文右圖) */
         .story-block:nth-child(even) {
             flex-direction: row-reverse;
         }
 
-        /* 初始位置偏移，製造滑入效果 */
+        /* 初始偏移量增加，讓滑入感更明顯 */
         .story-block:nth-child(odd) {
-            transform: translateX(-100px); /* 從左邊滑入 */
+            transform: translateX(-150px) scale(0.9);
         }
         .story-block:nth-child(even) {
-            transform: translateX(100px); /* 從右邊滑入 */
+            transform: translateX(150px) scale(0.9);
         }
 
-        /* 當區塊進入畫面時的狀態 (由 JS 觸發) */
+        /* 進入畫面時的狀態 */
         .story-block.show {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateX(0) scale(1);
         }
 
         .photo-frame {
@@ -95,18 +95,19 @@
             background: #fff;
             border-radius: 30px;
             box-shadow: 
-                0 10px 25px rgba(141, 110, 99, 0.1),
-                inset 0 0 0 5px var(--soft-blue); /* 內框線 */
-            transform: rotate(-2deg); /* 照片稍微歪歪的比較可愛 */
+                0 10px 25px rgba(141, 110, 99, 0.15),
+                inset 0 0 0 5px var(--soft-blue);
+            transform: rotate(-3deg);
             transition: transform 0.3s ease;
         }
 
         .story-block:nth-child(even) .photo-frame {
-            transform: rotate(2deg); /* 偶數張往另一邊歪 */
+            transform: rotate(3deg);
         }
 
         .photo-frame:hover {
-            transform: rotate(0deg) scale(1.02) !important; /* 滑鼠移上去變正 */
+            transform: rotate(0deg) scale(1.05) !important;
+            z-index: 2;
         }
 
         .photo-frame img {
@@ -118,7 +119,7 @@
         .text-content {
             flex: 1;
             padding: 40px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         .text-content h2 {
@@ -129,7 +130,6 @@
             display: inline-block;
         }
 
-        /* 標題下的可愛裝飾線 */
         .text-content h2::after {
             content: '';
             position: absolute;
@@ -150,23 +150,22 @@
             border-radius: 20px;
             font-size: 0.9rem;
             margin-bottom: 10px;
+            box-shadow: 3px 3px 0px rgba(141, 110, 99, 0.1);
         }
 
-        /* 手機版調整 */
         @media (max-width: 768px) {
             .story-block, 
             .story-block:nth-child(even) {
-                flex-direction: column; /* 手機版全部變直式 */
+                flex-direction: column;
                 text-align: center;
-                margin-bottom: 60px;
+                margin-bottom: 80px;
             }
             .text-content {
                 padding: 30px 10px 0 10px;
             }
-            /* 手機版動畫簡化為向上浮現 */
             .story-block:nth-child(odd),
             .story-block:nth-child(even) {
-                transform: translateY(50px);
+                transform: translateY(80px); /* 手機版改為向上浮現，比較自然 */
             }
             .story-block.show {
                 transform: translateY(0);
@@ -175,11 +174,12 @@
 
         footer {
             text-align: center;
-            padding: 50px;
-            color: var(--soft-blue);
-            background: #fff;
-            border-top-left-radius: 50% 20px;
-            border-top-right-radius: 50% 20px;
+            padding: 60px 20px;
+            color: #fff;
+            background: var(--soft-blue);
+            border-top-left-radius: 50% 30px;
+            border-top-right-radius: 50% 30px;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -194,7 +194,7 @@
         
         <div class="story-block">
             <div class="photo-frame">
-                <img src="stitch/IMG_8376.JPG" alt="史迪奇">
+                <img src="stitch/IMG_8376.JPG" alt="史迪奇看白板">
             </div>
             <div class="text-content">
                 <span class="tag">美好的一天</span>
@@ -205,7 +205,7 @@
 
         <div class="story-block">
             <div class="photo-frame">
-                <img src="stitch/IMG_8385.JPG" alt="史迪奇">
+                <img src="stitch/IMG_8385.JPG" alt="史迪奇看冰箱">
             </div>
             <div class="text-content">
                 <span class="tag">貪吃鬼</span>
@@ -216,7 +216,29 @@
 
         <div class="story-block">
             <div class="photo-frame">
-                <img src="stitch/IMG_8373.JPG" alt="史迪奇">
+                <img src="stitch/IMG_8436.JPG" alt="史迪奇喝咖啡">
+            </div>
+            <div class="text-content">
+                <span class="tag">悠閒午後</span>
+                <h2>大人的飲料</h2>
+                <p>學地球人一樣喝著黑黑苦苦的「咖啡」。嗯... 好像需要多加一點糖！</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8377.JPG" alt="史迪奇照鏡子">
+            </div>
+            <div class="text-content">
+                <span class="tag">自信爆棚</span>
+                <h2>魔鏡啊魔鏡</h2>
+                <p>看看鏡子裡這隻藍色小可愛是誰？喔！原來是我自己呀！今天也是魅力滿分的一天。</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8373.JPG" alt="史迪奇在床上看書">
             </div>
             <div class="text-content">
                 <span class="tag">晚安</span>
@@ -227,54 +249,80 @@
 
         <div class="story-block">
             <div class="photo-frame">
-                <img src="stitch/IMG_8436.JPG" alt="史迪奇">
+                <img src="stitch/IMG_8433.JPG" alt="史迪奇拿黑膠唱片">
             </div>
             <div class="text-content">
-                <span class="tag">悠閒午後</span>
-                <h2>大人的飲料</h2>
-                <p>學地球人一樣喝著黑黑苦苦的「咖啡」。嗯...好像還是果汁比較好喝！</p>
-            </div>
-        </div>
-
-        <div class="story-block">
-            <div class="photo-frame">
-                <img src="stitch/IMG_8433.JPG" alt="史迪奇">
-            </div>
-            <div class="text-content">
-                <span class="tag">音樂</span>
-                <h2>復古搖滾魂</h2>
+                <span class="tag">音樂魂</span>
+                <h2>復古搖滾</h2>
                 <p>抱著這張黑色的大圓盤，聽說它能發出美妙的聲音。這就是地球的音樂魔法嗎？</p>
             </div>
         </div>
 
         <div class="story-block">
             <div class="photo-frame">
-                <img src="stitch/IMG_8420.JPG" alt="史迪奇">
+                <img src="stitch/IMG_8372.JPG" alt="史迪奇在書桌看書">
             </div>
             <div class="text-content">
-                <span class="tag">放鬆</span>
+                <span class="tag">認真學習</span>
+                <h2>知識就是力量</h2>
+                <p>乖乖坐在書桌前看書。地球的知識好多喔，要多看書才能變聰明！</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8420.JPG" alt="史迪奇坐沙發">
+            </div>
+            <div class="text-content">
+                <span class="tag">放鬆模式</span>
                 <h2>沙發馬鈴薯</h2>
                 <p>什麼都不想做的時候，就讓自己陷進軟綿綿的沙發裡吧。這也是很重要的任務喔！</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8421.JPG" alt="史迪奇用筆電">
+            </div>
+            <div class="text-content">
+                <span class="tag">忙碌中</span>
+                <h2>星際辦公室</h2>
+                <p>噠噠噠... 認真敲打鍵盤，回覆來自銀河聯邦的重要郵件。請勿打擾！</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8407.JPG" alt="史迪奇趴在筆電上">
+            </div>
+            <div class="text-content">
+                <span class="tag">沒電了</span>
+                <h2>強制休眠</h2>
+                <p>工作太累了，眼睛睜不開... 先在暖暖的筆電上趴一下好了... Zzz...</p>
             </div>
         </div>
 
     </main>
 
     <footer>
-        Made with 💙 & 🍪 by Stitch
+        Made with 💙 by Stitch. 願你的每一天都溫暖可愛。
     </footer>
 
     <script>
-        // 建立一個觀察器，用來偵測元素是否進入畫面
+        // 建立觀察器
+        // threshold: 0.15 表示當元素有 15% 進入畫面時就觸發
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                // 如果元素進入畫面
                 if (entry.isIntersecting) {
-                    // 就加上 'show' 這個 class，觸發 CSS 動畫
+                    // 進入畫面：加上 .show 開始動畫
                     entry.target.classList.add('show');
+                } else {
+                    // 離開畫面：移除 .show 重置狀態
+                    // 這樣下次再滑回來時，動畫就會重新播放
+                    entry.target.classList.remove('show');
                 }
             });
-        }, { threshold: 0.2 }); // 元素出現 20% 時觸發
+        }, { threshold: 0.15 });
 
         // 開始觀察所有的故事區塊
         document.querySelectorAll('.story-block').forEach((el) => {
