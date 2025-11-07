@@ -109,6 +109,12 @@
             padding: 5px 10px;
             border-radius: 20px;
         }
+        /* 特別為史迪奇卡片設計的標籤顏色 */
+        .card-badge.relax {
+            background: #dcfce7;
+            color: #166534;
+        }
+
         .btn-enter {
             margin-top: 25px;
             padding: 10px 20px;
@@ -157,7 +163,15 @@
                 <div class="btn-enter">進入複習 →</div>
             </a>
 
-            </main>
+            <a href="Stitch.html" class="card">
+                <span class="card-badge relax">Relax Mode</span>
+                <div class="card-icon">💙</div>
+                <h2>史迪奇日常</h2>
+                <p>讀書讀太累了嗎？休息一下，來看看藍色外星人的可愛地球生活日記吧！</p>
+                <div class="btn-enter">去被療癒 →</div>
+            </a>
+
+        </main>
     </div>
 
     <footer style="margin-top: auto; padding: 20px; color: var(--text-muted); font-size: 0.9em;">
