@@ -3,235 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>史迪奇的日常小冒險</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>史迪奇的超酷日常 😎</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f4f9fd;
-            --primary-color: #5d8aa8;
-            --secondary-color: #ff9eb5;
-            --text-color: #444;
-            --card-bg: #fff;
+            --bg-gradient-start: #e0f2f7; /* 淡藍色 */
+            --bg-gradient-end: #f0f4f8;   /* 淺灰色 */
+            --primary-blue: #2196f3;      /* 鮮豔藍色 */
+            --text-dark: #263238;         /* 深灰文字 */
+            --text-light: #fdfdfd;        /* 淺色文字 */
+            --card-shadow: rgba(0, 0, 0, 0.15);
         }
 
         body {
-            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Montserrat', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
             line-height: 1.6;
-        }
-
-        header {
-            background: linear-gradient(180deg, #fff 0%, var(--bg-color) 100%);
-            text-align: center;
-            padding: 40px 20px;
-            margin-bottom: 30px;
-            border-bottom: 3px dashed #dbeefc;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 2.5em;
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            color: #8899a6;
-            margin-top: 10px;
-            font-size: 1.1em;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(93, 138, 168, 0.15);
+        header {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
         }
 
-        .card-image-wrapper {
-            height: 250px;
-            width: 100%;
-            overflow: hidden;
-            border-radius: 12px;
+        h1 {
+            color: var(--primary-blue);
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* 讓卡片尺寸彈性調整 */
+            gap: 35px;
+        }
+
+        /* --- 卡片設計：圖片疊加文字與懸停特效 --- */
+        .card {
+            position: relative;
+            height: 350px; /* 固定卡片高度 */
+            border-radius: 20px;
+            overflow: hidden; /* 確保內容不會跑出去 */
+            box-shadow: 0 10px 30px var(--card-shadow);
+            transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end; /* 文字預設靠下 */
+        }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.03); /* 懸停時卡片上浮並微放大 */
+            box-shadow: 0 25px 50px var(--card-shadow);
         }
 
         .card img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* 裁切圖片以填滿空間 */
             object-position: center;
-            transition: transform 0.5s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 平滑放大動畫 */
+            position: absolute; /* 讓圖片在最底層 */
+            top: 0;
+            left: 0;
         }
 
         .card:hover img {
-             transform: scale(1.05);
+            transform: scale(1.15); /* 懸停時圖片放大 */
         }
 
-        .card-content {
-            padding: 15px 10px 10px 10px;
-            text-align: center;
-            flex-grow: 1;
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;
+            padding: 25px;
+            color: var(--text-light);
+            opacity: 1; /* 預設顯示 */
+            transition: opacity 0.4s ease, background 0.4s ease;
         }
 
-        .tag {
-            display: inline-block;
-            background: var(--secondary-color);
-            color: white;
-            font-size: 0.85em;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin: 0 auto 10px auto;
-            opacity: 0.9;
+        .card:hover .card-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%);
         }
 
-        .caption {
-            font-weight: bold;
-            color: var(--text-color);
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            transform: translateY(0); /* 預設位置 */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card:hover .card-title {
+            transform: translateY(-10px); /* 懸停時標題上移 */
+        }
+
+        .card-description {
+            font-size: 1.1rem;
+            font-weight: 500;
+            opacity: 0; /* 預設隱藏 */
+            transform: translateY(10px); /* 預設位置 */
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card:hover .card-description {
+            opacity: 1; /* 懸停時顯示 */
+            transform: translateY(0); /* 懸停時上移到正常位置 */
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+            .container { grid-template-columns: 1fr; } /* 手機版變單欄 */
+            .card { height: 300px; }
+            .card-title { font-size: 1.6rem; }
+            .card-description { font-size: 1rem; }
         }
 
         footer {
             text-align: center;
-            padding: 40px;
-            color: #99aabb;
+            padding: 30px;
+            color: #78909c;
             font-size: 0.9em;
-            margin-top: 30px;
+            margin-top: auto; /* 推到底部 */
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>💙 史迪奇的地球日記 💙</h1>
-        <div class="subtitle">紀錄一隻藍色外星人的可愛日常</div>
+        <h1>🌟 史迪奇的超酷地球日誌 🌟</h1>
+        <p class="subtitle">歡迎來到藍色外星人的奇幻日常！準備好被萌翻了嗎？</p>
     </header>
 
     <main class="container">
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8376.JPG" alt="史迪奇看白板">
-            </div>
-            <div class="card-content">
-                <span class="tag">認真生活</span>
-                <div class="caption">📅 來看看今天的行程表...</div>
+            <img src="stitch/IMG_8376.JPG" alt="史迪奇看白板">
+            <div class="card-overlay">
+                <div class="card-title">今日任務！</div>
+                <div class="card-description">仔細規劃每一天的地球任務！</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8385.JPG" alt="史迪奇看冰箱">
-            </div>
-            <div class="card-content">
-                <span class="tag">貪吃鬼</span>
-                <div class="caption">🍓 冰箱裡好像有藏好吃的！</div>
+            <img src="stitch/IMG_8385.JPG" alt="史迪奇看冰箱">
+            <div class="card-overlay">
+                <div class="card-title">探索冰箱神秘學</div>
+                <div class="card-description">冰箱深處，是否有驚喜等著我？</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8436.JPG" alt="史迪奇喝咖啡">
-            </div>
-            <div class="card-content">
-                <span class="tag">下午茶</span>
-                <div class="caption">☕ 先喝杯咖啡提提神</div>
+            <img src="stitch/IMG_8436.JPG" alt="史迪奇喝咖啡">
+            <div class="card-overlay">
+                <div class="card-title">咖啡師史迪奇</div>
+                <div class="card-description">每日一杯，外星人也需要咖啡因。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8373.JPG" alt="史迪奇在床上看書">
-            </div>
-            <div class="card-content">
-                <span class="tag">睡前時光</span>
-                <div class="caption">📖 睡前讀個童話故事</div>
+            <img src="stitch/IMG_8373.JPG" alt="史迪奇在床上看書">
+            <div class="card-overlay">
+                <div class="card-title">睡前故事時間</div>
+                <div class="card-description">童話故事是入眠的好夥伴。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8377.JPG" alt="史迪奇照鏡子">
-            </div>
-            <div class="card-content">
-                <span class="tag">愛漂亮</span>
-                <div class="caption">🪞 魔鏡啊魔鏡，誰最可愛？</div>
+            <img src="stitch/IMG_8377.JPG" alt="史迪奇照鏡子">
+            <div class="card-overlay">
+                <div class="card-title">魅力值檢測</div>
+                <div class="card-description">鏡子啊鏡子，誰最閃耀？</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8433.JPG" alt="史迪奇拿黑膠唱片">
-            </div>
-            <div class="card-content">
-                <span class="tag">音樂魂</span>
-                <div class="caption">🎵 今天想聽點復古搖滾</div>
+            <img src="stitch/IMG_8433.JPG" alt="史迪奇拿黑膠唱片">
+            <div class="card-overlay">
+                <div class="card-title">復古音樂魂</div>
+                <div class="card-description">黑膠唱片，來自地球的古老聲音。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8372.JPG" alt="史迪奇在書桌看書">
-            </div>
-            <div class="card-content">
-                <span class="tag">用功讀書</span>
-                <div class="caption">📚 要好好學習當個地球人</div>
+            <img src="stitch/IMG_8372.JPG" alt="史迪奇在書桌看書">
+            <div class="card-overlay">
+                <div class="card-title">地球文化研究</div>
+                <div class="card-description">努力學習，融入地球生活。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8420.JPG" alt="史迪奇坐沙發">
-            </div>
-            <div class="card-content">
-                <span class="tag">放鬆時刻</span>
-                <div class="caption">🛋️ 週末就是要賴在沙發上</div>
+            <img src="stitch/IMG_8420.JPG" alt="史迪奇坐沙發">
+            <div class="card-overlay">
+                <div class="card-title">沙發馬鈴薯日</div>
+                <div class="card-description">最棒的週末，就是賴著不動。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8421.JPG" alt="史迪奇用筆電">
-            </div>
-            <div class="card-content">
-                <span class="tag">工作中</span>
-                <div class="caption">💻 認真回覆重要信件中...</div>
+            <img src="stitch/IMG_8421.JPG" alt="史迪奇用筆電">
+            <div class="card-overlay">
+                <div class="card-title">工作模式 ON</div>
+                <div class="card-description">外星高科技，處理地球事務。</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-image-wrapper">
-                <img src="stitch/IMG_8407.JPG" alt="史迪奇趴在筆電上">
-            </div>
-            <div class="card-content">
-                <span class="tag">累了</span>
-                <div class="caption">💤 電力不足，先充電一下</div>
+            <img src="stitch/IMG_8407.JPG" alt="史迪奇趴在筆電上">
+            <div class="card-overlay">
+                <div class="card-title">充電中...</div>
+                <div class="card-description">外星人也需要午休補眠。</div>
             </div>
         </div>
     </main>
 
     <footer>
-        © 2025 Stitch's Daily Life. Made with ❤️
+        © 2025 Stitch's Cool Life. All Rights Reserved. ✨
     </footer>
 
 </body>
