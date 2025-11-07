@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>運動醫學 學習應用程式 (V4.2 - 亂碼修正版)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Sans TC";
+            line-height: 1.7;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #005a9c;
+            text-align: center;
+            border-bottom: 3px solid #005a9c;
+            padding-bottom: 10px;
+        }
+        
+        /* 區塊大標題 (h2) */
+        h2 {
+            color: #004a80; /* 改為深藍色 */
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        
+        /* (新) 期中考重點 (h3) */
+        h3 {
+            color: #d9534f; /* 紅色 */
+            margin-top: 20px;
+        }
+
+        h2 small {
+            font-size: 0.7em;
+            font-weight: normal;
+            color: #555;
+        }
+
+        /* ========= V2.1 快速導覽目錄 (美化版) ========= */
+        .toc {
+            background-color: #eaf4fc;
+            border: 1px solid #bce0fd;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+        }
+        .toc h3 {
+            margin: 0 0 15px 0;
+            color: #004a80;
+            text-align: center;
+            font-weight: 600;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap; 
+        }
+        .toc li {
+            margin: 0;
+            flex-grow: 1;
+            min-width: 200px; 
+            max-width: 300px;
+        }
+        .toc li a, .toc li button {
+            display: block;
+            text-decoration: none;
+            background-color: #005a9c;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%; 
+            box-sizing: border-box; 
+            border: none;
+            font-size: 1em; 
+            cursor: pointer;
+        }
+        .toc li a:hover, .toc li a:focus,
+        .toc li button:hover, .toc li button:focus {
+            background-color: #004a80;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toc-btn-action {
+            background-color: #28a745 !important; /* 綠色 */
+        }
+        .toc-btn-action:hover {
+            background-color: #218838 !important; /* 深綠色 */
+        }
+        /* ================================================== */
+
+
+        /* ========= 筆記本體 (Details/Summary) ========= */
+        details {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        details[open] {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        summary {
+            font-size: 1.1em;
+            font-weight: 600;
+            padding: 16px 20px;
+            cursor: pointer;
+            color: #004a80;
+            outline: none; 
+            display: flex;
+            align-items: center;
+        }
+        summary:hover {
+            background-color: #f9f9f9;
+        }
+        .review-check {
+            margin-right: 12px;
+            transform: scale(1.4);
+            cursor: pointer;
+            flex-shrink: 0; 
+        }
+        .tag {
+            font-size: 0.75em;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-left: 10px;
+            color: white;
+            white-space: nowrap; 
+        }
+        .tag-high { background-color: #d9534f; } /* 紅色 - 必考 */
+        .tag-mid  { background-color: #f0ad4e; } /* 橘色 - 困難 */
+        .answer {
+            padding: 0px 20px 20px 20px;
+            border-top: 1px solid #eee;
+            background-color: #fafcfe;
+        }
+        .answer p, .answer ul, .answer ol {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .answer li { margin-bottom: 8px; }
+        strong { color: #007bff; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { background-color: #e9ecef; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        /* ================================================== */
+
+
+        /* ========= 新功能: 單字卡遊戲 Modal (彈出視窗) ========= */
+        .modal-overlay {
+            display: none; /* 預設隱藏 */
+            position: fixed; /* 固定在畫面上 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* 半透明黑底 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* 確保在最上層 */
+        }
+        .modal-content {
+            background-color: #f0f4f8; /* 遊戲的背景色 */
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        /* ================================================== */
+
+
+        /* ========= (新) 單字卡遊戲的 CSS ========= */
+        /* 這些 CSS 只會在 Modal 彈出時套用到遊戲容器 */
+        .game-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-container h2 {
+            color: #004a80;
+            margin-top: 0;
+            border-bottom: none;
+            text-align: center;
+        }
+        .card-container {
+            width: 100%;
+            height: 350px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 25px;
+            box-sizing: border-box;
+            border-radius: 15px;
+            font-size: 1.5em;
+            line-height: 1.6;
+        }
+        .card-front {
+            background-color: #ffffff;
+            color: #004a80;
+            font-weight: 600;
+        }
+        .card-back {
+            background-color: #005a9c;
+            color: white;
+            transform: rotateY(180deg);
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+        .card-back strong {
+            color: #ffdd57;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .controls button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .controls button:hover {
+            background-color: #c9302c;
+            transform: translateY(-2px);
+        }
+        .controls button#flip-btn {
+            background-color: #f0ad4e;
+        }
+        .controls button#flip-btn:hover {
+            background-color: #ec971f;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .navigation button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .navigation button:hover {
+            background-color: #0056b3;
+        }
+        .navigation #progress-text {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #555;
+        }
+        /* ================================================== */
+
+
+        /* ========= 友善列印格式 (僅列印筆記) ========= */
+        @media print {
+            body { 
+                background: #fff; color: #000; font-size: 10pt; max-width: 100%;
+            }
+            /* 列印時隱藏所有非筆記內容 */
+            .toc, .modal-overlay, summary .review-check, .tag { 
+                display: none; 
+            }
+            h1, h2 { 
+                color: #000; border-color: #aaa; margin-top: 20px;
+            }
+            details {
+                display: block !important; border: 1px solid #ccc; border-radius: 0;
+                box-shadow: none; margin-bottom: 15px; page-break-inside: avoid; 
+            }
+            details > summary {
+                font-size: 1.1em; font-weight: 600; color: #004a80; padding: 10px;
+                cursor: default; border-bottom: 1px solid #eee; display: block;
+            }
+            .answer {
+                display: block !important; border-top: none; background-color: #fff;
+                padding: 10px 20px 20px 20px;
+            }
+            table { page-break-inside: avoid; }
+        }
+        /* ================================================== */
+    </style>
+</head>
+<body>
+
+    <h1>📘 運動醫學與健康防護 (V4.2 最終修正版)</h1>
+    <p>這份筆記已整合所有資料，並分類為「期中考重點」、「名詞解釋」與「核心簡答題」，您也可以啟動單字卡遊戲來測驗自己。</p>
+    
+    <nav class="toc">
+      <h3>🚀 快速導覽</h3>
+      <ul>
+        <li><a href="#exam-highlights">1. 期中考重點提示</a></li>
+        <li><a href="#definitions">2. 關鍵名詞解釋</a></li>
+        <li><a href="#short-answer">3. 核心簡答題</a></li>
+        <li><button id="start-game-btn" class="toc-btn-action">🎮 啟動單字卡遊戲</button></li>
+      </ul>
+    </nav>
+
+    <h2 id="exam-highlights">壹、期中考重點提示 <small>(必看)</small></h2>
+    <details open> <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            🎯 期中考重點提示 (Exam Highlights)
+            <span class="tag tag-high">必考</span>
+        </summary>
+        <div class="answer">
+            <p>根據老師的提示，請務必複習以下重點：</p>
+            <ul>
+                <li><strong>運動壓力測試：</strong>運動壓力測試的流程、目的與常見指標（會考）。</li>
+                <li><strong>名詞檢視：</strong>
+                    <ul>
+                        <li>殘氣量 (Residual Volume)</li>
+                        <li>過度換氣 (Hyperventilation)</li>
+                        <li>三酸甘油酯 (Triglycerides)</li>
+                        <li>LDL (Low-Density Lipoprotein) 和 HDL</li>
+                        <li>收縮壓與舒張壓的意義</li>
+                    </ul>
+                </li>
+                <li><strong>骨骼與肌肉系統：</strong>
+                    <ul>
+                        <li>骨骼結構、功能與營養（熟讀）。</li>
+                        <li>肌肉分類與肌纖維差異（紅肌/白肌）。</li>
+                        <li>急性痠痛 vs. 延遲性痠痛 (DOMS)。</li>
+                        <li>中樞疲勞 vs. 周邊疲勞。</li>
+                    </ul>
+                </li>
+                <li><strong>運動傷害處理：</strong>
+                    <ul>
+                        <li>緊急急救大原則（PRICE、急性期西醫、立即送醫標準）。</li>
+                    </ul>
+                </li>
+                <li><strong>心血管系統：</strong>
+                    <ul>
+                        <li>心電圖原理 (去極化/再極化)。</li>
+                        <li>心肌梗塞與冠狀動脈阻塞。</li>
+                        <li>心臟肥大：區分主動性（生理性）與被動性（病理性）。</li>
+                        <li>心臟病七大危險因子。</li>
+                    </ul>
+                </li>
+                <li><strong>大腦與認知：</strong>
+                    <ul>
+                        <li>大腦與認知的關係。</li>
+                        <li>失智症與健忘的區別。</li>
+                    </ul>
+                </li>
+                <li><strong>運動與新陳代謝</strong>（代謝症候群）。</li>
+            </ul>
+        </div>
+    </details>
+
+    <h2 id="definitions">貳、關鍵名詞解釋 <small>(點擊看定義)</small></h2>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            1. 症狀 (Symptom) vs. 症候 (Sign)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>症狀 (Symptom)：</strong>患者主觀感受（例如：膝蓋無法彎曲、刺痛、噁心）。</li>
+                <li><strong>症候 (Sign)：</strong>客觀可見的表徵（例如：紅、腫、熱、痛、發燒）。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            2. 軟組織修復三時期
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>階段</th>
+                        <th>時間</th>
+                        <th>特徵</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>急性期</strong></td>
+                        <td>0–72 小時</td>
+                        <td>發炎反應，紅腫熱痛</td>
+                    </tr>
+                    <tr>
+                        <td><strong>亞急性期</strong></td>
+                        <td>72 小時–數週</td>
+                        <td>修補期，促進組織癒合</td>
+                    </tr>
+                    <tr>
+                        <td><strong>慢性期</strong></td>
+                        <td>數週後</td>
+                        <td>成熟期，恢復功能、肌力與柔軟度</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            3. 【比較】中樞疲勞 vs. 周邊疲勞
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>中樞疲勞 (Central Fatigue)：</strong>由神經系統或全身性疾病引起（例如：憂鬱、緊張、糖尿病、癌症、貧血）。</li>
+                <li><strong>周邊疲勞 (Peripheral Fatigue)：</strong>由肌肉本身功能下降（例如：乳酸堆積、ATP 減少、能量不足、酸鹼值改變）。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            4. 能量代謝 (Metabolism)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>生物體內能量的獲取、轉換與利用過程，目的是將外界能量（光能、食物）轉換為細胞可用的能量 ATP。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            5. 代謝當量 (MET)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>衡量運動強度的指標。以安靜坐著消耗的能量定為 <strong>1 MET</strong>。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            6. 肌絲滑動學說 (Sliding Filament Theory)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>肌肉收縮的基本理論。肌動蛋白（細肌絲）在肌球蛋白（粗肌絲）上滑動，造成肌纖維縮短，肌肉收縮，需要 ATP 提供能量。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            7. 急性肌肉疼痛 (AMS)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>運動當下至數小時內發生的痠痛。</p>
+            <p><strong>原因：</strong>乳酸堆積（無氧代謝產物）或氫離子累積。</p>
+            <p><strong>特徵：</strong>運動結束後幾分鐘內消失。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            8. 延遲性肌肉痠痛 (DOMS)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>運動後 24–72 小時才發生的痠痛。</p>
+            <p><strong>原因：</strong>肌纖維微小損傷與炎症反應（非乳酸造成）。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            9. 沃爾夫氏定律 (Wolff's Law)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>骨骼會因應外在的壓力（例如運動）而重組其結構，變得更強壯、更緻密。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            10. 骨質疏鬆 (Osteoporosis)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>骨質密度降低，骨小梁稀疏，導致骨折不易癒合。</p>
+            <p><strong>健康骨頭：</strong>活著的骨頭因有骨膜（含微血管）覆蓋，呈桃紅色，而非電影中的白骨（已鈣化）。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            11. 骨關節炎 (OA) vs. 類風濕性 (RA) vs. 痛風 (Gout)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>骨關節炎 (OA)：</strong>長期磨損（Wear and Tear）導致軟骨退化。X光片顯示關節間隙消失（骨對骨）。</li>
+                <li><strong>類風濕性關節炎 (RA)：</strong>自體免疫疾病，白血球攻擊自身關節滑膜。是全身性疾病。</li>
+                <li><strong>痛風 (Gout)：</strong>體內尿酸過高，在關節形成「尿酸鈉結晶」，引起劇烈發炎。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            12. 心電圖 (ECG) 原理
+        </summary>
+        <div class="answer">
+            <p><strong>基本原理：</strong>心臟竇房結放電 → 電流傳導至心肌 → 肌肉收縮。</p>
+            <ul>
+                <li><strong>去極化 (Depolarization)：</strong>放電 → 心肌收縮 (跳動)。</li>
+                <li><strong>再極化 (Repolarization)：</strong>充電 → 心肌放鬆 (休息)。</li>
+            </ul>
+            <p><strong>PQRST 波群：</strong></p>
+            <ul>
+                <li><strong>P 波：</strong>心房收縮 (去極化)。</li>
+                <li><strong>QRS 波群：</strong>心室收縮 (去極化)。</li>
+                <li><strong>T 波：</strong>心室放鬆 (再極化)。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            13. 動脈粥樣硬化 (Atherosclerosis)
+        </summary>
+        <div class="answer">
+            <p><strong>機制：</strong>LDL (壞膽固醇) 附著在冠狀動脈血管壁上，形成散布團/斑塊。</p>
+            <p><strong>後果：</strong>血管狹窄 → 血流受阻 → 心肌缺血 → 心肌梗塞。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            14. 心肌梗塞 (MI)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>冠狀動脈完全阻塞，導致心肌缺氧壞死。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            15. 心室顫動 (V-fib)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>心因性猝死 (SCD) 的主因。心臟電信號完全混亂，不規則顫動，無法有效送血。</p>
+            <p><strong>急救：</strong>AED (自動體外去顫器) 是唯一能有效停止 V-fib 的儀器。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            16. 認知功能 (Cognitive Function)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>人類大腦皮質與環境互動、適應生存的能力。</p>
+            <p><strong>包含：</strong>記憶、語言、辨別事物、操作、計畫與執行。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            17. 失智症 (Dementia)
+        </summary>
+        <div class="answer">
+            <p><strong>定義：</strong>認知功能有兩種以上受損，且影響日常生活（例如：忘記關火、不會開罐頭）。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            18. 扭傷 (Sprain) vs. 拉傷 (Strain)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>扭傷 (Sprain)：</strong>傷到「韌帶」或「關節囊」（連接骨與骨）。通常是關節猛力扭轉（如翻船）。</li>
+                <li><strong>拉傷 (Strain)：</strong>傷到「肌肉」或「肌腱」（連接肌肉與骨骼）。通常是肌肉過度伸展或強力收縮導致。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            19. (新) 期中考重點名詞
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>殘氣量 (Residual Volume)：</strong>用力吐氣後，仍殘留在肺部的空氣量。</li>
+                <li><strong>過度換氣 (Hyperventilation)：</strong>呼吸頻率和深度超過身體代謝需求，導致二氧化碳排出過多。</li>
+                <li><strong>三酸甘油酯 (Triglycerides)：</strong>血液中的一種脂肪，過高會增加心血管疾病風險。</li>
+                <li><strong>LDL vs. HDL：</strong>
+                    <ul>
+                        <li><strong>LDL (壞膽固醇)：</strong>低密度脂蛋白，易沉積在血管壁。</li>
+                        <li><strong>HDL (好膽固醇)：</strong>高密度脂蛋白，可將膽固醇帶回肝臟代謝。</li>
+                    </ul>
+                </li>
+                <li><strong>收縮壓 vs. 舒張壓：</strong>
+                    <ul>
+                        <li><strong>收縮壓 (SBP)：</strong>心臟「收縮」時，血液衝擊動脈管壁的壓力（血壓值的分子/較高者）。</li>
+                        <li><strong>舒張壓 (DBP)：</strong>心臟「舒張」時，動脈管壁仍承受的壓力（血壓值的分母/較低者）。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            20. (新) 急/慢性運動傷害 (表格定義)
+        </summary>
+        <div class="answer">
+            <h3>急性運動傷害 (Acute)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>傷害名稱</th>
+                        <th>傷害機轉</th>
+                        <th>關鍵特徵</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>扭傷 (Sprain)</strong></td>
+                        <td>韌帶或關節囊受外力過度拉扯</td>
+                        <td>最常見腳踝內翻扭傷，傷及外側韌帶</td>
+                    </tr>
+                    <tr>
+                        <td><strong>拉傷 (Strain)</strong></td>
+                        <td>肌肉或肌腱纖維撕裂</td>
+                        <td>恢復期可達數週至數月</td>
+                    </tr>
+                    <tr>
+                        <td><strong>脫臼 (Dislocation)</strong></td>
+                        <td>骨頭末端脫離關節位置</td>
+                        <td>有時比骨折更嚴重（因韌帶/關節囊受損）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>挫傷 (Contusion)</strong></td>
+                        <td>鈍器撞擊造成的組織傷害（如鐵腿）</td>
+                        <td>肌肉或骨頭挫傷</td>
+                    </tr>
+                    <tr>
+                        <td><strong>骨折 (Fracture)</strong></td>
+                        <td>骨骼受力斷裂</td>
+                        <td>閉鎖性（皮膚完整）與開放性（骨頭穿出皮膚）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>阿基里斯腱斷裂</strong></td>
+                        <td>急停急動、暖身不足</td>
+                        <td>不規則斷裂，開刀修補後需伸展復健</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 style="margin-top: 15px;">慢性運動傷害 (Chronic / Overuse)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>傷害名稱</th>
+                        <th>部位</th>
+                        <th>成因與特徵</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>網球肘</strong></td>
+                        <td>肘關節外側</td>
+                        <td>肱骨外上髁炎，手腕伸展肌群過度使用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>跑者膝 (PFPS)</strong></td>
+                        <td>膝蓋骨下方</td>
+                        <td>髕骨與股骨溝槽摩擦，久坐後站起疼痛（戲院徵象）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>跳躍膝</strong></td>
+                        <td>髕骨肌腱</td>
+                        <td>髕骨下緣肌腱過度使用發炎</td>
+                    </tr>
+                    <tr>
+                        <td><strong>五十肩</strong></td>
+                        <td>肩關節</td>
+                        <td>肩關節囊發炎與沾黏，治療重點是伸展</td>
+                    </tr>
+                    <tr>
+                        <td><strong>腕隧道症候群</strong></td>
+                        <td>手腕</td>
+                        <td>正中神經受壓迫</td>
+                    </tr>
+                    <tr>
+                        <td><strong>髂脛束摩擦症候群 (ITBS)</strong></td>
+                        <td>膝蓋外側</td>
+                        <td>髂脛束在股骨外髁上摩擦</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
+
+    <h2 id="short-answer">參、核心簡答題 <small>(點擊看詳解)</small></h2>
+
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            1. 運動傷害的七大考量因素
+        </summary>
+        <div class="answer">
+            <ol>
+                <li><strong>發生部位與定義：</strong>傷害發生的確切位置及嚴重程度。</li>
+                <li><strong>伴隨部位：</strong>受到影響或活動受限的其他區域。</li>
+                <li><strong>症狀與症候：</strong>(見名詞解釋)</li>
+                <li><strong>成因：</strong>造成傷害的原因。</li>
+                <li><strong>潛在危機：</strong>例如劇烈撞擊可能造成內出血、內臟受傷或骨裂。</li>
+                <li><strong>預防：</strong>平時如何避免傷害。</li>
+                <li><strong>治療：</strong>傷害發生後的處理程序。</li>
+            </ol>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            2. 急性傷害處理 (PRICE 原則)
+            <span class="tag tag-high">必考</span>
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>P (Protect)：</strong>保護受傷部位，避免二次傷害。</li>
+                <li><strong>R (Rest)：</strong>受傷後應立即停止活動，馬上休息。</li>
+                <li><strong>I (Ice)：</strong>冰敷，急性期 (72小時內) 冰敷，有助於血管收縮、止痛、減少腫脹。每次 15–20 分鐘，間隔 1–2 小時。</li>
+                <li><strong>C (Compression)：</strong>壓迫，使用彈性繃帶由遠心端向近心端包紮，防止內出血或水腫。</li>
+                <li><strong>E (Elevation)：</strong>抬高患部，將受傷部位抬高至心臟以上，以幫助血液回流並減輕腫脹。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            3. 運動傷害發生後的完整處理程序 (七步驟)
+        </summary>
+        <div class="answer">
+            <ol>
+                <li><strong>治療選擇：</strong>急性期應優先尋求西醫（可進行 X 光、超音波等科學檢查），慢性期則可考慮中醫或復健。</li>
+                <li><strong>持續觀察：</strong>注意避免延遲性反應，如休克。</li>
+                <li><strong>用藥：</strong>消炎藥、肌肉鬆弛劑需由醫師開立，建議痛到無法忍受時才吃。</li>
+                <li><strong>活動檢查：</strong>輕微活動患部，確認血液循環與神經有無受阻。</li>
+                <li><strong>正常飲食：</strong>避免食用促進發炎的食物，例如含糖飲料、甜食（糖類）和花生（含花生四烯酸）。</li>
+                <li><strong>復健：</strong>受傷後必須進行復健，以恢復關節活動度、柔軟度與運動技術。</li>
+                <li><strong>PRICE 原則：</strong>確實執行保護、休息、冰敷、壓迫、抬高。</li>
+            </ol>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            4. 須立即送醫的緊急狀況
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>狀況類別</th>
+                        <th>具體表現</th>
+                        <th>致命風險</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>生命跡象</strong></td>
+                        <td>心跳微弱、呼吸停止、休克（失去意識）。</td>
+                        <td>高</td>
+                    </tr>
+                    <tr>
+                        <td><strong>骨骼損傷</strong></td>
+                        <td>脊髓損傷（不可移動患者）。骨折併發症（遠端肢體脈搏消失）。股骨骨折（可能大出血）。穿破性骨折（骨頭刺穿皮膚）。</td>
+                        <td>高</td>
+                    </tr>
+                    <tr>
+                        <td><strong>熱疾病</strong></td>
+                        <td>中暑 (Heat Stroke)：失去意識、皮膚乾燥/紅/燙、體溫 &ge; 40&deg;C。</td>
+                        <td>致命</td>
+                    </tr>
+                    <tr>
+                        <td><strong>內臟</strong></td>
+                        <td>腹部疼痛且僵硬（懷疑內出血或內臟受損）。持續不斷嘔吐。</td>
+                        <td>高</td>
+                    </tr>
+                    <tr>
+                        <td><strong>其他</strong></td>
+                        <td>失去意識、頸椎骨折。突發嚴重暈眩（可能中風或腦震盪）。</td>
+                        <td>高</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 10px;">💡 <strong>失血量警示：</strong>血液約佔體重的 1/13。流失總血量的 1/3 會致命（例如 65 公斤的人，失血約 1,600 cc 就有致命危險）。</p>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            5. 【比較】熱衰竭 vs. 熱中暑 (Heat Exhaustion vs. Heat Stroke)
+            <span class="tag tag-high">必考</span>
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>熱衰竭 (Heat Exhaustion)</th>
+                        <th>熱中暑 (Heat Stroke)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>意識狀態</strong></td>
+                        <td>仍有意識。</td>
+                        <td><strong>可能昏迷，失去意識 (最關鍵差異)。</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>皮膚狀態</strong></td>
+                        <td>大量流汗，皮膚濕冷。</td>
+                        <td><strong>皮膚乾燥、紅、燙，無汗。</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>體溫</strong></td>
+                        <td>正常或稍高 (38-39&deg;C)。</td>
+                        <td><strong>體溫 &ge; 40&deg;C (核心溫度)。</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>處理</strong></td>
+                        <td>移至陰涼處、休息、補水。</td>
+                        <td><strong>立即降溫、送醫急救 (休息不足以挽救)。</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>危險性</strong></td>
+                        <td>不會致命。</td>
+                        <td><strong>致命危險性極高。</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            6. 地球兩大能量循環 (光合 vs. 呼吸)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>光合作用：</strong>將太陽能轉化為化學能儲存在葡萄糖中。<br>(二氧化碳 + 水 + 光能 → 葡萄糖 + 氧氣)</li>
+                <li><strong>呼吸作用：</strong>釋放葡萄糖中的化學能供生物使用。<br>(葡萄糖 + 氧氣 → 能量(ATP) + 二氧化碳 + 水)</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            7. 【比較】骨骼肌纖維分類 (紅肌 vs. 白肌)
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>紅肌 (Slow-Twitch, I 型)</th>
+                        <th>白肌 (Fast-Twitch, II 型)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>別稱</strong></td>
+                        <td>慢肌、耐力肌</td>
+                        <td>快肌、力量肌</td>
+                    </tr>
+                    <tr>
+                        <td><strong>能量來源</strong></td>
+                        <td>有氧代謝，粒線體多</td>
+                        <td>無氧代謝（乳酸發酵），粒線體少</td>
+                    </tr>
+                    <tr>
+                        <td><strong>肌紅蛋白</strong></td>
+                        <td>濃度高（紅色）</td>
+                        <td>濃度低（白色）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>特性</strong></td>
+                        <td>持久性佳、抗疲勞，爆發力差</td>
+                        <td>力量大、爆發力強，容易疲勞</td>
+                    </tr>
+                    <tr>
+                        <td><strong>訓練效果</strong></td>
+                        <td>粒線體與肌紅蛋白增加，提升有氧耐力</td>
+                        <td>肌纖維肥大，增加肌肉力量</td>
+                    </tr>
+                    <tr>
+                        <td><strong>適用運動</strong></td>
+                        <td>長跑、馬拉松、游泳</td>
+                        <td>短跑、舉重、爆發型項目</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            8. 肌肉痙攣（抽筋）的成因與分類
+        </summary>
+        <div class="answer">
+            <p><strong>主要原因：</strong>電解質不平衡、缺水、疲勞、暖身不足。</p>
+            <p><strong>電解質建議：</strong></p>
+            <ul>
+                <li><strong>晚上抽筋：</strong>多因缺乏<strong>鎂 (Mg<sup>2+</sup>)</strong>、<strong>鉀 (K<sup>+</sup>)</strong> → 補充香蕉、綠色蔬菜。</li>
+                <li><strong>運動後抽筋：</strong>多因缺乏<strong>鈣 (Ca<sup>2+</sup>)</strong>、<strong>鈉 (Na<sup>+</sup>)</strong> → 補充牛奶、電解質飲料。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            9. 骨折恢復期的飲食建議與禁忌
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>建議：</strong>多補充膠質、蛋白質、維生素 C、D。</li>
+                <li><strong>禁忌：</strong>
+                    <ul>
+                        <li><strong>香蕉：</strong>含磷高（降低體內鈣），含鎂高（取代鈣，造成肌麻痺）。</li>
+                        <li><strong>茶葉：</strong>丹寧抑制鈣吸收。</li>
+                        <li><strong>咖啡因：</strong>加劇鈣質缺乏。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            10. 【比較】關節炎主要類型與治療
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>類型</th>
+                        <th>成因</th>
+                        <th>診斷特徵</th>
+                        <th>治療方法</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>骨關節炎 (OA)</strong></td>
+                        <td>長期磨損、軟骨退化</td>
+                        <td>X 光片顯示關節間隙消失（骨對骨摩擦）</td>
+                        <td>藥物 (COX-2 抑制劑)、玻尿酸注射、人工關節置換 (TKR)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>類風濕性關節炎 (RA)</strong></td>
+                        <td>自體免疫系統攻擊關節滑膜</td>
+                        <td>系統性疾病，常影響心臟等器官</td>
+                        <td>藥物（長期服藥控制）、基因改造藥物</td>
+                    </tr>
+                    <tr>
+                        <td><strong>痛風 (Gout)</strong></td>
+                        <td>尿酸過高，形成針狀結晶沉積於關節</td>
+                        <td>關節抽液檢查（觀察尿酸鈉結晶）</td>
+                        <td>藥物（Allopurinol 降尿酸、抗發炎藥）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            11. 關節炎的輔助與另類療法
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>水中運動：</strong>水提供浮力，減少關節衝擊（體重減輕約 2/3），可增強肌力、改善活動度。</li>
+                <li><strong>太極 (Tai Chi)：</strong>低衝擊、冥想式運動，可增加關節靈活度，減少疼痛。</li>
+                <li><strong>蜂蜇療法 (BVT)：</strong>另類療法，蜂毒含有抗發炎成分，可減輕關節炎症狀。</li>
+                <li><strong>職能治療：</strong>透過輔助器具（如專用開罐器）和改變動作模式，減少關節負荷。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            12. 心臟病的七大危險因子
+            <span class="tag tag-high">必考</span>
+        </summary>
+        <div class="answer">
+            <ol>
+                <li>高膽固醇 (特別是 LDL, 壞膽固醇)。</li>
+                <li>高血壓 (無聲殺手, &ge; 140/90 mmHg)。</li>
+                <li>抽菸。</li>
+                <li>缺乏運動。</li>
+                <li>體重過重（肥胖）。</li>
+                <li>糖尿病。</li>
+                <li>家族遺傳 (風險增加約 15%)。</li>
+            </ol>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            13. 動脈粥樣硬化的治療選項
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>機械刮除術 (Atherectomy)：</strong>高速旋轉刀片刮除斑塊。</li>
+                <li><strong>氣球擴張術 (Angioplasty) 或支架置放。</strong></li>
+                <li><strong>冠狀動脈繞道手術 (Bypass Surgery)：</strong>用於嚴重多處阻塞。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            14. 【比較】心臟肥大分類 (生理性 vs. 病理性)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>生理性肥大 (Athlete's Heart)：</strong>因長期運動訓練造成，心室均勻變大，舒張功能良好，心搏徐緩，是**安全適應**。</li>
+                <li><strong>病理性肥大：</strong>因高血壓或心肌病變造成，心室壁顯著增厚（向心性肥大），舒張功能異常，有**心臟衰竭風險**。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            15. 心臟病預防與生活管理 (運動與飲食)
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>運動建議：</strong>
+                    <ul>
+                        <li>每週 3-5 次，每次 20-60 分鐘的中高強度有氧運動。</li>
+                        <li>對已發作過心臟病者，運動可降低 90% 再發風險。</li>
+                    </ul>
+                </li>
+                <li><strong>飲食原則：</strong>
+                    <ul>
+                        <li>總熱量中脂肪比例不超過 30%。</li>
+                        <li>減少人工果糖、甜食與高 GI 食物，多吃原型食物。</li>
+                        <li>選擇低脂食材（如脫脂牛奶、蛋白、豆製品）。</li>
+                    </ul>
+                </li>
+                <li><strong>運動前篩檢：</strong>中高危險群在激烈運動前，應進行醫師體檢與運動測試。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            16. 人口老化對社會的衝擊
+        </summary>
+        <div class="answer">
+            <ul>
+                <li><strong>超高齡社會：</strong>高齡人口比例快速上升，勞動人口（15–64 歲）比例急遽下降。</li>
+                <li><strong>社會負擔：</strong>未來可能變成「一個人養一個人」的社會結構，年輕世代的經濟壓力將大幅增加。</li>
+                <li><strong>國力削弱：</strong>壽命延長，但多活的 30 年若伴隨疾病與失能（如失智症），將嚴重削弱國力。</li>
+            </ul>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            17. 【比較】健忘 vs. 失智症
+            <span class="tag tag-high">必考</span>
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>健忘 (正常老化)</th>
+                        <th>失智症 (疾病)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>機制</strong></td>
+                        <td><strong>檢索</strong>能力障礙（找書的人找不到）。</td>
+                        <td><strong>輸入與儲存</strong>能力障礙（書未存入）。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>記憶恢復</strong></td>
+                        <td>提醒後或之後可能想起。</td>
+                        <td>忘記就忘記了，無法想起。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>病識感</strong></td>
+                        <td>有，知道自己健忘。</td>
+                        <td><strong>缺乏病識感</strong>（像老頑童或小孩）。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            18. 如何預防與改善認知功能障礙
+        </summary>
+        <div class="answer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>策略類別</th>
+                        <th>具體方法</th>
+                        <th>作用機制</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>運動</strong></td>
+                        <td>每週 2–3 次中度有氧運動，或複雜協調性運動（如跳舞、打網球）。</td>
+                        <td>刺激大腦分泌多巴胺，帶動血液循環，維持大腦體積。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>營養</strong></td>
+                        <td>補充 Omega-3（魚油）、維他命 E（小麥胚芽）、B 群、卵磷脂。</td>
+                        <td>維他命 E 抗氧化，鈣離子安定神經細胞，卵磷脂預防血管硬化。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>腦力訓練</strong></td>
+                        <td>打麻將、橋牌、猜謎、電子遊戲。</td>
+                        <td>活化腦部，促進神經連結，需要專心與集中注意力。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>生活</strong></td>
+                        <td>遠離三高與肥胖。參加社交活動，訓練觀察力。</td>
+                        <td>維持社交，降低心血管風險。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details>
+        <summary>
+            <input type="checkbox" class="review-check" onclick="event.stopPropagation()">
+            19. 🎯 概念總結：運動與健康的工程學比喻
+        </summary>
+        <div class="answer">
+            <p>運動醫學就像人體的「工程學」。</p>
+            <ul>
+                <li><strong>心血管系統 (水管)：</strong>需規律運動保持彈性、避免生鏽（動脈粥樣硬化）。</li>
+                <li><strong>骨骼/肌肉 (鋼筋)：</strong>需壓力訓練（沃爾夫氏定律）保持強度。</li>
+                <li><strong>大腦 (電腦硬碟)：</strong>需持續刺激、營養和運動來防止檔案流失（失智症）。</li>
+            </ul>
+            <p><strong>適度運動</strong>是維持系統高效運作的「潤滑油」，<strong>過度</strong>則可能造成系統崩潰（急性傷害或病理性肥大）。</p>
+        </div>
+    </details>
+
+
+    <div id="game-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span id="modal-close-btn" class="modal-close">&times;</span>
+            
+            <div class="game-container">
+                <h2>運動醫學 單字卡遊戲</h2>
+                <div class="card-container">
+                    <div class="flashcard" id="flashcard">
+                        <div class="card-face card-front" id="card-front">載入中...</div>
+                        <div class="card-face card-back" id="card-back"></div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="shuffle-btn">🔀 隨機洗牌</button>
+                    <button id="flip-btn">🔄 翻牌</button>
+                </div>
+                <div class="navigation">
+                    <button id="prev-btn">⬅️ 上一張</button>
+                    <span id="progress-text">1 / 35</span> <button id="next-btn">➡️ 下一張</button>
+                </div>
+            </div>
+            </div>
+    </div>
+
+
+    <script>
+        // 確保 DOM 載入後才執行
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ===================================
+            // Modal (彈出視窗) 相關邏輯
+            // ===================================
+            const gameModal = document.getElementById('game-modal');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+
+            if (startGameBtn) {
+                startGameBtn.addEventListener('click', () => {
+                    if (gameModal) {
+                        gameModal.style.display = 'flex'; 
+                        loadCard(currentCardIndex);
+                    } else {
+                        alert("錯誤：找不到遊戲視窗！請檢查 HTML 程式碼。");
+                    }
+                });
+            }
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    gameModal.style.display = 'none';
+                });
+            }
+            if (gameModal) {
+                gameModal.addEventListener('click', (event) => {
+                    if (event.target === gameModal) {
+                        gameModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // ===================================
+            // (V4.2 修正) 單字卡資料庫 (已修正亂碼)
+            // ===================================
+            const cardData = [
+                { term: "症狀 (Symptom) vs. 症候 (Sign)", definition: "<strong>症狀</strong>: 患者<strong>主觀</strong>感受 (如刺痛)。<br><strong>症候</strong>: <strong>客觀</strong>可見表徵 (如紅腫)。" },
+                { term: "PRICE 原則", definition: "急性傷害處理：<br><strong>P(保護)</strong>, <strong>R(休息)</strong>, <strong>I(冰敷)</strong>, <strong>C(壓迫)</strong>, <strong>E(抬高)</strong>" },
+                { term: "【比較】熱衰竭 vs. 熱中暑", definition: "<strong>熱衰竭</strong>: 仍有意識, 皮膚濕冷。<br><strong>熱中暑</strong>: <strong>失去意識, 皮膚乾燙, 體溫 &ge; 40&deg;C (致命)</strong>。" },
+                { term: "【比較】中樞疲勞 vs. 周邊疲勞", definition: "<strong>中樞疲勞</strong>: 神經系統或疾病引起 (如憂鬱)。<br><strong>周邊疲勞</strong>: 肌肉本身引起 (如乳酸堆積)。" },
+                { term: "代謝當量 (MET)", definition: "衡量運動強度的指標。以安靜坐著消耗的能量為 <strong>1 MET</strong>。" },
+                { term: "肌絲滑動學說", definition: "肌肉收縮理論：肌動蛋白 (細) 在肌球蛋白 (粗) 上滑動，造成肌肉縮短。" },
+                { term: "【比較】紅肌 (I 型) vs. 白肌 (II 型)", definition: "<strong>第 I 型 (紅肌/慢肌)</strong>: 有氧、不易疲勞 (馬拉松)。<br><strong>第 II 型 (白肌/快肌)</strong>: 無氧、易疲勞 (短跑)。" },
+                { term: "急性肌肉痠痛 (AMS)", definition: "運動<strong>當下</strong>發生的痠痛，主因是<strong>乳酸堆積</strong>，休息後即消失。" },
+                { term: "延遲性肌肉痠痛 (DOMS)", definition: "運動後 <strong>24-72 小時</strong>才發生的痠痛，主因是<strong>肌纖維微小損傷</strong>，而非乳酸。" },
+                { term: "肌肉痙攣 (抽筋) 的電解質", definition: "<strong>晚上抽筋</strong>: 缺 <strong>鎂(Mg<sup>2+</sup>) / 鉀(K<sup>+</sup>)</strong> (吃香蕉/蔬菜)。<br><strong>運動後抽筋</strong>: 缺 <strong>鈣(Ca<sup>2+</sup>) / 鈉(Na<sup>+</sup>)</strong> (喝牛奶/運動飲料)。" },
+                { term: "沃夫定律 (Wolff's Law)", definition: "骨骼會因應外在的<strong>壓力</strong>（例如運動）而重組其結構，變得更強壯、更緻密。" },
+                { term: "骨折恢復期的飲食禁忌", definition: "<strong>香蕉</strong> (高磷鎂, 抑制鈣吸收)。<br><strong>茶葉</strong> (丹寧, 抑制鈣吸收)。<br><strong>咖啡因</strong> (加速鈣流失)。" },
+                { term: "【比較】骨關節炎 (OA) vs. 類風濕性 (RA)", definition: "<strong>OA</strong>: <strong>長期磨損</strong>，軟骨退化 (骨對骨)。<br><strong>RA</strong>: <strong>自體免疫</strong>疾病，攻擊關節滑膜。" },
+                { term: "痛風 (Gout)", definition: "體內<strong>尿酸過高</strong>，在關節（常見大拇趾）形成<strong>針狀結晶</strong>，導致劇烈發炎。" },
+                { term: "心電圖 (ECG) 原理", definition: "<strong>去極化 (Depolarization)</strong>: 放電 → 心肌收縮。<br><strong>再極化 (Repolarization)</strong>: 充電 → 心肌休息。" },
+                { term: "ECG 波群 (P-QRS-T)", definition: "<strong>P 波</strong>: 心房收縮 (去極化)。<br><strong>QRS 波群</strong>: 心室收縮 (去極化)。<br><strong>T 波</strong>: 心室放鬆 (再極化)。" },
+                { term: "動脈粥樣硬化 (Atherosclerosis)", definition: "<strong>LDL (壞膽固醇)</strong> 附著在血管壁，形成斑塊，導致血管狹窄。" },
+                { term: "心肌梗塞 (MI)", definition: "冠狀動脈<strong>完全阻塞</strong>，導致心肌缺氧壞死，休息無法緩解。" },
+                { term: "心因性猝死 (SCD) 的年齡風險", definition: "<strong>＜ 35 歲</strong>: 主因為<strong>先天性心臟病</strong> (如 HCM)。<br><strong>＞ 35 歲</strong>: 主因為<strong>冠狀動m脈疾病</strong> (CAD)。" },
+                { term: "心室顫動 (V-fib)", definition: "心因性猝死的主因。心臟不規則顫動，無法送血。<br><strong>唯一急救方式：AED 電擊</strong>。" },
+                { term: "心臟病的七大危險因子", definition: "高膽固醇 (LDL)、高血壓、抽菸、缺乏運動、肥胖、糖尿病、家族遺傳。" },
+                { term: "【比較】生理性 vs. 病理性心臟肥大", definition: "<strong>生理性 (運動員)</strong>: 均勻肥大，舒張功能<strong>良好</strong> (好的)。<br><strong>病理性 (高血壓)</strong>: 心室壁增厚，舒張功能<strong>異常</strong> (壞的)。" },
+                { term: "人口老化對社會的衝擊", definition: "勞動人口下降，社會負擔加重（可能變「一個人養一個人」），若失能將削弱國力。" },
+                { term: "認知功能 (定義)", definition: "大腦皮質與環境互動、適應生存的能力 (含記憶、語言、辨識、操作、計畫)。" },
+                { term: "【比較】健忘 vs. 失智症", definition: "<strong>健忘</strong>: <strong>檢索</strong>能力障礙 (找不到)，提醒後想起。<br><strong>失智症</strong>: <strong>儲存</strong>能力障礙 (未存入)，想不起且<strong>無病識感</strong>。" },
+                { term: "預防失智症的運動", definition: "每週 2-3 次<strong>中度有氧運動</strong> (快走)，或<strong>複雜協調運動</strong> (如跳舞、打網球)。" },
+                { term: "預防失智症的營養", definition: "<strong>Omega-3</strong> (魚油)。<br><strong>維生素 E</strong> (抗氧化, 來自小麥胚芽)。<br>B 群、卵磷脂。" },
+                { term: "【比較】扭傷 (Sprain) vs. 拉傷 (Strain)", definition: "<strong>扭傷 (Sprain)</strong>: 傷到「韌帶」 (骨連骨)。<br><strong>拉傷 (Strain)</strong>: 傷到「肌肉/肌腱」 (肌連骨)。" },
+                { term: "網球肘 (Tennis Elbow)", definition: "肘關節「外側」疼痛。因<strong>手腕伸展肌群</strong>過度使用。" },
+                { term: "跑者膝 (PFPS)", definition: "膝蓋骨「下方」或「周圍」疼痛。有「戲院徵象」（久坐後站起劇痛）。" },
+                { term: "五十肩 (Frozen Shoulder)", definition: "肩關節囊發炎與「沾黏」，導致往各方向的活動都受限 (尤其外展外轉)。" },
+                { term: "須立即送醫的狀況：中暑", definition: "<strong>失去意識</strong>、皮膚乾燥/紅/燙、體溫 &ge; 40&deg;C。必須立即降溫並送醫。" },
+                { term: "須立即送醫的狀況：脊髓損傷", definition: "懷疑脊椎受傷時，<strong>絕對不可自行移動</strong>，應立即叫救護車。" },
+                { term: "軟組織修復三時期", definition: "<strong>急性期</strong> (0-72h): 發炎 (PRICE)。<br><strong>亞急性期</strong> (72h-數週): 修補期 (恢復 ROM)。<br><strong>慢性期</strong> (數週後): 成熟期 (恢復肌力)。" },
+                { term: "🎯 概念比喻：運動與健康", definition: "<strong>心血管 (水管)</strong>: 運動防生鏽 (動脈硬化)。<br><strong>骨骼 (鋼筋)</strong>: 壓力訓練 (沃夫定律)。<br><strong>大腦 (硬碟)</strong>: 運動防檔案流失 (失智)。" }
+            ];
+
+            // ===================================
+            // 單字卡遊戲核心邏輯 (與 V3.1 相同)
+            // ===================================
+            let deck = [...cardData];
+            let currentCardIndex = 0;
+            let isFlipped = false;
+
+            const card = document.getElementById('flashcard');
+            const cardFront = document.getElementById('card-front');
+            const cardBack = document.getElementById('card-back');
+            const flipBtn = document.getElementById('flip-btn');
+            const shuffleBtn = document.getElementById('shuffle-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const progressText = document.getElementById('progress-text');
+
+            function loadCard(index) {
+                // 在 Modal 的 JS 邏輯中，要檢查元素是否存在
+                if (deck.length === 0 || !cardFront || !cardBack || !progressText) return; 
+                const currentCard = deck[index];
+                cardFront.innerHTML = currentCard.term;
+                cardBack.innerHTML = currentCard.definition;
+                progressText.textContent = `${index + 1} / ${deck.length}`;
+                if (isFlipped) {
+                    if (card) card.classList.remove('is-flipped');
+                    isFlipped = false;
+                }
+            }
+
+            function flipCard() {
+                if (!card) return;
+                card.classList.toggle('is-flipped');
+                isFlipped = !isFlipped;
+            }
+
+            function nextCard() {
+                currentCardIndex = (currentCardIndex + 1) % deck.length;
+                loadCard(currentCardIndex);
+            }
+
+            function prevCard() {
+                currentCardIndex = (currentCardIndex - 1 + deck.length) % deck.length;
+                loadCard(currentCardIndex);
+            }
+
+            function shuffleDeck() {
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+                currentCardIndex = 0;
+                loadCard(currentCardIndex);
+                alert('已隨機洗牌！');
+            }
+
+            // 綁定事件監聽器
+            if(card) card.addEventListener('click', flipCard);
+            if(flipBtn) flipBtn.addEventListener('click', flipCard);
+            if(nextBtn) nextBtn.addEventListener('click', nextCard);
+            if(prevBtn) prevBtn.addEventListener('click', prevCard);
+            if(shuffleBtn) shuffleBtn.addEventListener('click', shuffleDeck);
+            
+            // 鍵盤左右鍵控制 (僅在 Modal 開啟時)
+            document.addEventListener('keydown', (e) => {
+                if (gameModal && gameModal.style.display === 'flex') {
+                    if (e.key === 'ArrowRight') {
+                        nextCard();
+                    } else if (e.key === 'ArrowLeft') {
+                        prevCard();
+                    }
+                }
+            });
+            
+            // 遊戲初始化
+            // 第一次載入，確保 Modal 打開時有內容
+            loadCard(currentCardIndex);
+
+        }); // DOMContentLoaded 結束
+    </script>
+
+</body>
+</html>
