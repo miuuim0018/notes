@@ -3,305 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STITCH // CYBER DIARY</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>史迪奇的溫暖手札 📔</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0a0a0a;
-            --neon-blue: #00f3ff;
-            --neon-purple: #9d00ff;
-            --text-primary: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.05);
+            --bg-cream: #fff9f0;      /* 奶油白背景 */
+            --soft-blue: #a8d8ea;     /* 史迪奇粉藍 */
+            --soft-pink: #ffcad4;     /* 柔和粉紅 */
+            --warm-brown: #8d6e63;    /* 溫暖棕色文字 */
+            --card-bg: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            background-color: var(--bg-dark);
-            /* 酷炫的動態網格背景 */
-            background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            padding-bottom: 100px;
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--warm-brown);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 防止滑動動畫造成暫時的橫向卷軸 */
+            background-image: radial-gradient(var(--soft-blue) 2%, transparent 0), radial-gradient(var(--soft-pink) 2%, transparent 0);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px; /* 可愛的點點背景 */
         }
 
-        /* 標題區特效 */
         header {
             text-align: center;
-            padding: 100px 20px 60px;
-            position: relative;
+            padding: 100px 20px 80px;
+            background: linear-gradient(180deg, #fff 0%, var(--bg-cream) 100%);
+            border-bottom-left-radius: 50% 20px;
+            border-bottom-right-radius: 50% 20px;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(141, 110, 99, 0.05);
         }
 
         h1 {
-            font-size: 4rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: transparent;
-            -webkit-text-stroke: 2px var(--neon-blue);
-            position: relative;
-            display: inline-block;
-            /* 霓虹燈閃爍特效 */
-            animation: flicker 1.5s infinite alternate;
-        }
-        
-        /* 讓標題有雙重疊影效果 */
-        h1::before {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            color: var(--neon-blue);
-            opacity: 0.5;
-            filter: blur(10px);
-            z-index: -1;
-        }
-
-        @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-                text-shadow:
-                    0 0 5px var(--neon-blue),
-                    0 0 10px var(--neon-blue),
-                    0 0 20px var(--neon-blue),
-                    0 0 40px var(--neon-blue);
-                opacity: 1;
-            }
-            20%, 24%, 55% {
-                text-shadow: none;
-                opacity: 0.5;
-            }
+            color: var(--soft-blue);
+            font-size: 3rem;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px var(--soft-pink);
         }
 
         .subtitle {
-            margin-top: 20px;
             font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--warm-brown);
+            opacity: 0.8;
         }
 
-        /* 3D 卡片容器網格 */
         .container {
-            max-width: 1400px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 50px;
-            perspective: 1000px; /* 3D 空間深度 */
         }
 
-        /* 3D 卡片本體 */
-        .card {
+        /* --- 故事區塊設計 --- */
+        .story-block {
+            display: flex;
+            align-items: center;
+            margin-bottom: 100px; /* 區塊間距大一點，讓滑動更有感 */
+            opacity: 0; /* 初始狀態隱藏，給動畫用 */
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); /* 柔和的動畫曲線 */
+        }
+
+        /* 偶數區塊反轉排列 (左文右圖) */
+        .story-block:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        /* 初始位置偏移，製造滑入效果 */
+        .story-block:nth-child(odd) {
+            transform: translateX(-100px); /* 從左邊滑入 */
+        }
+        .story-block:nth-child(even) {
+            transform: translateX(100px); /* 從右邊滑入 */
+        }
+
+        /* 當區塊進入畫面時的狀態 (由 JS 觸發) */
+        .story-block.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .photo-frame {
+            flex: 1;
             position: relative;
-            min-height: 450px;
-            border-radius: 20px;
-            /* 玻璃擬態背景 */
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform-style: preserve-3d; /* 關鍵：保留 3D 空間給子元素 */
-            transform: perspective(1000px);
-            cursor: pointer;
-            opacity: 0; /* 初始隱藏，給進場動畫用 */
-            animation: slideIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            padding: 15px;
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 
+                0 10px 25px rgba(141, 110, 99, 0.1),
+                inset 0 0 0 5px var(--soft-blue); /* 內框線 */
+            transform: rotate(-2deg); /* 照片稍微歪歪的比較可愛 */
+            transition: transform 0.3s ease;
         }
 
-        /* 卡片進場動畫 */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(100px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        .story-block:nth-child(even) .photo-frame {
+            transform: rotate(2deg); /* 偶數張往另一邊歪 */
         }
 
-        .card-img-box {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 140px; /* 留空間給下方文字 */
-            border-radius: 15px;
-            overflow: hidden;
-            transform: translateZ(30px); /* 讓圖片在 3D 空間中浮起來 */
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        .photo-frame:hover {
+            transform: rotate(0deg) scale(1.02) !important; /* 滑鼠移上去變正 */
         }
 
-        .card-img-box img {
+        .photo-frame img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        /* 懸停時圖片微放大 */
-        .card:hover .card-img-box img {
-            transform: scale(1.1);
+            border-radius: 20px;
+            display: block;
         }
 
-        .card-content {
+        .text-content {
+            flex: 1;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        .text-content h2 {
+            font-size: 1.8rem;
+            color: var(--soft-blue);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* 標題下的可愛裝飾線 */
+        .text-content h2::after {
+            content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -5px;
             left: 0;
             width: 100%;
-            padding: 30px;
-            transform: translateZ(60px); /* 文字浮得比圖片更高，超立體 */
+            height: 8px;
+            background-color: var(--soft-pink);
+            opacity: 0.4;
+            border-radius: 4px;
         }
 
-        .card-tag {
+        .tag {
             display: inline-block;
+            background: var(--soft-pink);
+            color: #fff;
             padding: 5px 15px;
-            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-        }
-
-        .card h2 {
-            font-size: 1.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
             margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
-        .card p {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'Noto Sans TC', sans-serif;
-        }
-
-        /* 手機版適配 */
+        /* 手機版調整 */
         @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .container { gap: 30px; padding: 10px; }
-            .card { min-height: 400px; }
+            .story-block, 
+            .story-block:nth-child(even) {
+                flex-direction: column; /* 手機版全部變直式 */
+                text-align: center;
+                margin-bottom: 60px;
+            }
+            .text-content {
+                padding: 30px 10px 0 10px;
+            }
+            /* 手機版動畫簡化為向上浮現 */
+            .story-block:nth-child(odd),
+            .story-block:nth-child(even) {
+                transform: translateY(50px);
+            }
+            .story-block.show {
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px;
+            color: var(--soft-blue);
+            background: #fff;
+            border-top-left-radius: 50% 20px;
+            border-top-right-radius: 50% 20px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 data-text="STITCH // DIARY">STITCH // DIARY</h1>
-        <p class="subtitle">Subject #626 Observation Log</p>
+        <h1>📔 史迪奇的溫暖手札</h1>
+        <p class="subtitle">紀錄每一個微小而幸福的瞬間</p>
     </header>
 
-    <div class="container">
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.1s">
-            <div class="card-img-box">
+    <main class="container">
+        
+        <div class="story-block">
+            <div class="photo-frame">
                 <img src="stitch/IMG_8376.JPG" alt="史迪奇">
             </div>
-            <div class="card-content">
-                <span class="card-tag">Mission 01</span>
-                <h2>行程規劃確認</h2>
-                <p>分析今日地球任務目標。</p>
+            <div class="text-content">
+                <span class="tag">美好的一天</span>
+                <h2>今天的計畫是...</h2>
+                <p>認真地看著白板上的行程，雖然看不懂地球人的文字，但感覺今天會是充滿冒險的一天呢！</p>
             </div>
         </div>
 
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.2s">
-            <div class="card-img-box">
+        <div class="story-block">
+            <div class="photo-frame">
                 <img src="stitch/IMG_8385.JPG" alt="史迪奇">
             </div>
-            <div class="card-content">
-                <span class="card-tag">Target Locked</span>
-                <h2>搜尋補給品</h2>
-                <p>偵測到冰箱內有高能量反應。</p>
+            <div class="text-content">
+                <span class="tag">貪吃鬼</span>
+                <h2>冰箱裡的寶藏</h2>
+                <p>打開神秘的白色大箱子，裡面總是藏著冰冰涼涼、甜甜的好東西。今天要吃哪一個好呢？</p>
             </div>
         </div>
 
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.3s">
-            <div class="card-img-box">
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8373.JPG" alt="史迪奇">
+            </div>
+            <div class="text-content">
+                <span class="tag">晚安</span>
+                <h2>睡前故事時光</h2>
+                <p>窩在軟軟的被子裡，讀一本關於遙遠星球的童話書。希望能做個甜甜的美夢。</p>
+            </div>
+        </div>
+
+        <div class="story-block">
+            <div class="photo-frame">
                 <img src="stitch/IMG_8436.JPG" alt="史迪奇">
             </div>
-            <div class="card-content">
-                <span class="card-tag">Recharge</span>
-                <h2>咖啡因攝取</h2>
-                <p>系統效能提升中...</p>
+            <div class="text-content">
+                <span class="tag">悠閒午後</span>
+                <h2>大人的飲料</h2>
+                <p>學地球人一樣喝著黑黑苦苦的「咖啡」。嗯...好像還是果汁比較好喝！</p>
             </div>
         </div>
 
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.4s">
-            <div class="card-img-box">
+        <div class="story-block">
+            <div class="photo-frame">
                 <img src="stitch/IMG_8433.JPG" alt="史迪奇">
             </div>
-            <div class="card-content">
-                <span class="card-tag">Audio Data</span>
-                <h2>類比訊號分析</h2>
-                <p>播放地球古老黑膠唱片。</p>
+            <div class="text-content">
+                <span class="tag">音樂</span>
+                <h2>復古搖滾魂</h2>
+                <p>抱著這張黑色的大圓盤，聽說它能發出美妙的聲音。這就是地球的音樂魔法嗎？</p>
             </div>
         </div>
 
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.5s">
-            <div class="card-img-box">
-                <img src="stitch/IMG_8421.JPG" alt="史迪奇">
+        <div class="story-block">
+            <div class="photo-frame">
+                <img src="stitch/IMG_8420.JPG" alt="史迪奇">
             </div>
-            <div class="card-content">
-                <span class="card-tag">Hacking...</span>
-                <h2>終端機連線</h2>
-                <p>正在覆寫地球網絡安全協定。</p>
-            </div>
-        </div>
-
-        <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.6s">
-            <div class="card-img-box">
-                <img src="stitch/IMG_8377.JPG" alt="史迪奇">
-            </div>
-            <div class="card-content">
-                <span class="card-tag">Self-Check</span>
-                <h2>外觀參數校正</h2>
-                <p>確認可愛指數：100%。</p>
+            <div class="text-content">
+                <span class="tag">放鬆</span>
+                <h2>沙發馬鈴薯</h2>
+                <p>什麼都不想做的時候，就讓自己陷進軟綿綿的沙發裡吧。這也是很重要的任務喔！</p>
             </div>
         </div>
 
-         <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.7s">
-            <div class="card-img-box">
-                <img src="stitch/IMG_8407.JPG" alt="史迪奇">
-            </div>
-            <div class="card-content">
-                <span class="card-tag">Low Battery</span>
-                <h2>系統休眠</h2>
-                <p>強制進入待機模式。</p>
-            </div>
-        </div>
+    </main>
 
-         <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" style="animation-delay: 0.8s">
-            <div class="card-img-box">
-                <img src="stitch/IMG_8372.JPG" alt="史迪奇">
-            </div>
-            <div class="card-content">
-                <span class="card-tag">Database</span>
-                <h2>資料庫更新</h2>
-                <p>學習人類行為模式中。</p>
-            </div>
-        </div>
+    <footer>
+        Made with 💙 & 🍪 by Stitch
+    </footer>
 
-    </div>
-
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
-        // 這裡可以調整 3D 特效的參數
-        VanillaTilt.init(document.querySelectorAll(".card"), {
-            max: 15,     // 最大傾斜角度
-            speed: 400,  // 轉動速度
-            glare: true, // 開啟反光
-            "max-glare": 0.3, // 反光強度
-            scale: 1.05  // 懸停時稍微放大一點點
+        // 建立一個觀察器，用來偵測元素是否進入畫面
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // 如果元素進入畫面
+                if (entry.isIntersecting) {
+                    // 就加上 'show' 這個 class，觸發 CSS 動畫
+                    entry.target.classList.add('show');
+                }
+            });
+        }, { threshold: 0.2 }); // 元素出現 20% 時觸發
+
+        // 開始觀察所有的故事區塊
+        document.querySelectorAll('.story-block').forEach((el) => {
+            observer.observe(el);
         });
     </script>
+
 </body>
 </html>
