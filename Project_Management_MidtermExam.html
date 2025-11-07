@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案管理期中備考系統 V22.0 (翻頁+收縮版)</title>
+    <title>專案管理期中備考系統 V23.0 (進度可視化版)</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -97,7 +97,7 @@
         h1 { color: var(--primary); text-align: center; margin-bottom: 10px; }
         .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 50px; }
         
-        /* NEW: Collapsible Sections */
+        /* Collapsible Sections */
         section h2 {
             background: linear-gradient(135deg, var(--secondary), var(--primary)); color: white;
             padding: 15px 25px; border-radius: 12px; margin: 60px 0 30px 0;
@@ -147,6 +147,11 @@
         #sec0 th { background: var(--section-header-bg); text-align: center; }
         #sec0 td:nth-child(2) { font-weight: 600; text-align: center; width: 15%; }
 
+        /* OPM Table Specific Styling */
+        #sec1-2 table:nth-of-type(1) { font-size: 0.95em; }
+        #sec1-2 table:nth-of-type(1) th { background: #e0f2fe; color: #075985; }
+        #sec1-2 table:nth-of-type(1) td:nth-child(1) { font-weight: bold; width: 20%; }
+
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 90; }
         .fab { width: 56px; height: 56px; border-radius: 50%; border: none; color: white; font-size: 1.5em; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
         #quiz-fab { background: var(--primary); }
@@ -184,16 +189,20 @@
         .card-front { font-size: 2.2em; font-weight: bold; color: var(--primary); }
         .card-back { background: var(--card-back); transform: rotateY(180deg); align-items: flex-start; text-align: left; overflow-y: auto; }
         .card-back h3 { color: var(--secondary); margin-top: 0; border-bottom: 2px solid var(--accent); padding-bottom: 15px; width: 100%; }
+        .card-back-content { font-size: 1.15em; line-height: 1.6; color: var(--text-main); }
         .vocab-actions { display: flex; gap: 15px; margin-top: 15px; }
         .vocab-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 1.2em; font-weight: bold; cursor: pointer; color: white; }
         #btn-know { background: var(--success); }
         #btn-dont-know { background: var(--fail); }
-        .vocab-progress { text-align: center; color: white; margin-top: 20px; font-size: 1.1em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .vocab-filter { margin-bottom: 20px; padding: 12px; border-radius: 12px; border: none; width: 100%; font-size: 1.1em; font-weight: bold; }
-        /* NEW: Vocab Navigation */
-        .vocab-nav { display: flex; justify-content: space-between; width: 100%; margin-bottom: 10px; }
-        .vocab-nav-btn { background: var(--bg-sidebar); border: 1px solid var(--border); color: var(--text-main); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .vocab-nav-btn:hover { background: var(--primary-light); color: var(--primary); }
+        .vocab-progress { text-align: center; color: white; margin-top: 15px; font-size: 1.1em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .vocab-filter { margin-bottom: 15px; padding: 12px; border-radius: 12px; border: none; width: 100%; font-size: 1.1em; font-weight: bold; }
+        .vocab-nav { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; }
+        .vocab-nav-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; backdrop-filter: blur(5px); }
+        .vocab-nav-btn:hover { background: rgba(255,255,255,0.4); }
+        /* NEW: Vocab Progress Bar */
+        .vocab-progress-bar-container { width: 100%; height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 15px; overflow: hidden; }
+        .vocab-progress-fill { height: 100%; background-color: var(--primary-light); width: 0%; transition: width 0.3s ease; }
+
 
         #flash-q { font-size: 1.3em; margin: 30px 0; min-height: 80px; line-height: 1.8; background: var(--bg-main); padding: 20px; border-radius: 12px; text-align: left; border: 1px solid var(--border); }
         .flash-blank-active { color: var(--accent) !important; border-bottom: 3px solid var(--accent) !important; font-weight: 900; padding: 2px 8px; background-color: #fffbeb; border-radius: 4px; }
@@ -218,8 +227,8 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>🚀 備考系統 V22.0</h3>
-            <div class="shortcuts-hint">翻頁+收縮版 (Ultimate)</div>
+            <h3>🚀 備考系統 V23.0</h3>
+            <div class="shortcuts-hint">進度可視化版</div>
             <div class="search-box"><input type="text" id="search-input" placeholder="搜尋筆記..."></div>
         </div>
         <div class="sidebar-nav">
@@ -300,6 +309,7 @@
                         <tr><td><span class="term" data-term="irr">內部報酬率 (IRR)</span></td><td>選擇</td><td>使專案淨現值等於零的折現率。</td><td>IRR <span class="quiz-mask">越高越好</span>，須大於公司門檻。</td></tr>
                         <tr><td><span class="term" data-term="payback_period">還本期法</span></td><td>選擇</td><td>回收初始投資所需的時間。</td><td>時間越短越好，但<span class="quiz-mask">不考慮</span>金錢時間價值。</td></tr>
                         <tr><td><span class="term" data-term="sacred_cow">聖牛</span></td><td>選擇</td><td>僅因高層個人意志而執行的專案。</td><td><span class="quiz-mask">缺乏正式商業論證</span>。</td></tr>
+                        <tr><td><span class="term" data-term="weighted_scoring">加權評分模型</span></td><td>選擇</td><td>綜合性的非財務選擇模型。</td><td>根據<span class="quiz-mask">權重與評分加總</span>選擇專案。</td></tr>
                     </tbody>
                 </table>
                 <div class="section-header"><h3>伍、專案規劃：範疇與責任</h3><div class="master-check" data-id="sec0-5"><span>☐</span> 我已掌握</div></div>
@@ -307,9 +317,13 @@
                     <thead><tr><th>專有名詞</th><th>分類</th><th>解釋</th><th>關鍵細節</th></tr></thead>
                     <tbody>
                         <tr><td><span class="term" data-term="pmp_plan">專案管理計畫書</span></td><td>規劃</td><td>專案的總計畫，整合所有子計畫。</td><td>包含三大基準：<span class="quiz-mask">範疇、時程、成本</span>。</td></tr>
+                        <tr><td><span class="term" data-term="baseline">三大基準</span></td><td>規劃</td><td>經正式批准的計畫版本，用於衡量績效。</td><td>修改需通過<span class="quiz-mask">變更控制 (CCB)</span>。</td></tr>
+                        <tr><td><span class="term" data-term="sow">工作說明書</span></td><td>範疇</td><td>專案的「高層級需求」文件。</td><td>來源通常是外部（客戶合約）或發起人。</td></tr>
                         <tr><td><span class="term" data-term="wbs">WBS</span></td><td>範疇</td><td>將專案總範疇分解成階層結構。</td><td>遵循<span class="quiz-mask">100%原則</span>；可交付成果導向。</td></tr>
                         <tr><td><span class="term" data-term="work_package">工作包 (WP)</span></td><td>範疇</td><td>WBS 最底層的項目。</td><td>估算時程與成本的<span class="quiz-mask">最小單位</span>。</td></tr>
+                        <tr><td><span class="term" data-term="wbs_dictionary">WBS 辭典</span></td><td>範疇</td><td>WBS 每個項目的詳細文字描述文件。</td><td>包含負責人、允收標準等細節。</td></tr>
                         <tr><td><span class="term" data-term="control_account">管制帳戶</span></td><td>範疇</td><td>WBS 與 OBS 的交會點。</td><td>用於實獲值管理 (EVM)。</td></tr>
+                        <tr><td><span class="term" data-term="ram">RAM</span></td><td>責任</td><td>將「WBS 工作包」與「團隊成員」連結的表格。</td><td>RACI 是一種常見形式。</td></tr>
                         <tr><td><span class="term" data-term="raci">RACI</span></td><td>責任</td><td>定義責任類型的矩陣。</td><td>Accountable (負全責，<span class="quiz-mask">A 只能有一人</span>)。</td></tr>
                     </tbody>
                 </table>
@@ -317,19 +331,13 @@
                 <table>
                     <thead><tr><th>專有名詞</th><th>分類</th><th>解釋</th><th>關鍵細節</th></tr></thead>
                     <tbody>
+                        <tr><td><span class="term" data-term="sponsor">專案發起人</span></td><td>角色</td><td>提供資金與資源的「金主」。</td><td>批准章程，<span class="quiz-mask">排除高層障礙</span>。</td></tr>
                         <tr><td><span class="term" data-term="stakeholder">利害關係人</span></td><td>關係人</td><td>任何會影響或被專案影響的個人或團體。</td><td>影響力在專案初期<span class="quiz-mask">最大</span>。</td></tr>
                         <tr><td><span class="term" data-term="power_influence">權力/影響力方格圖</span></td><td>工具</td><td>分析關係人權力與影響力。</td><td>決定管理策略 (重點管理/保持滿意等)。</td></tr>
+                        <tr><td><span class="term" data-term="engagement_matrix">參與評估矩陣</span></td><td>工具</td><td>分析關係人<span class="quiz-mask">目前(C)與期望(D)</span>參與程度。</td><td>規劃行動以彌平差距。</td></tr>
+                        <tr><td><span class="term" data-term="communication_plan">溝通管理計畫書</span></td><td>溝通</td><td>規劃專案溝通的「方法論」文件。</td><td>決定溝通內容、時間、頻率、管道。</td></tr>
                         <tr><td><span class="term" data-term="push_comm">推式溝通</span></td><td>溝通</td><td>主動將資訊發送給接收者（如 Email）。</td><td>確保接收者<span class="quiz-mask">知道</span>資訊。</td></tr>
                         <tr><td><span class="term" data-term="pull_comm">拉式溝通</span></td><td>溝通</td><td>資訊放中央讓接收者自取（如網站）。</td><td>適用於<span class="quiz-mask">大量、非緊急</span>資訊。</td></tr>
-                    </tbody>
-                </table>
-                 <div class="section-header"><h3>柒、敏捷核心</h3><div class="master-check" data-id="sec0-7"><span>☐</span> 我已掌握</div></div>
-                <table>
-                    <thead><tr><th>專有名詞</th><th>分類</th><th>解釋</th><th>關鍵細節</th></tr></thead>
-                    <tbody>
-                        <tr><td><span class="term" data-term="scrum">Scrum</span></td><td>框架</td><td>最常見的敏捷框架，透過衝刺交付價值。</td><td>3角色(PO/SM/Dev)、5事件、3產出物。</td></tr>
-                        <tr><td><span class="term" data-term="sprint">衝刺 (Sprint)</span></td><td>實作</td><td>固定長度（1-4 週）的開發週期。</td><td>產出<span class="quiz-mask">潛在可發布</span>的產品增量。</td></tr>
-                        <tr><td><span class="term" data-term="kanban">看板 (Kanban)</span></td><td>實作</td><td>視覺化工作流程工具。</td><td>強調限制<span class="quiz-mask">在製品數量 (WIP)</span>。</td></tr>
                     </tbody>
                 </table>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note"></textarea></div>
@@ -363,17 +371,39 @@
                 <div class="content-body">
                     <p>現代專案面臨 <strong><span class="term" data-term="vuca">VUCA</span></strong> (易變、不確定、複雜、模糊) 環境。</p>
                     <h4>(一) <span class="term" data-term="opm">組織級專案管理 (OPM)</span> 層級</h4>
+                    <p>OPM 是一個策略框架，用於將組織的策略與「專案組合」、「專案集」和「專案」連結起來，以實現戰略目標。</p>
                     <table>
-                        <tr><th>層級</th><th>目的</th><th>焦點</th></tr>
-                        <tr><td><span class="term" data-term="portfolio">專案組合</span></td><td>做「對的」事情</td><td>策略目標</td></tr>
-                        <tr><td><span class="term" data-term="program">專案集</span></td><td>獲取 1+1>2 的利益</td><td>相依性管理</td></tr>
-                        <tr><td>專案</td><td>把事情「做對」</td><td>交付獨特成果</td></tr>
+                        <thead>
+                            <tr>
+                                <th>層級</th>
+                                <th>目的</th>
+                                <th>焦點</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="term" data-term="portfolio">專案組合 (Portfolio)</span></td>
+                                <td>確保做「對的」事情 (<span class="quiz-mask">Do the right things</span>)。</td>
+                                <td>連結組織策略，管理多個（不一定相關）專案/專案集。</td>
+                            </tr>
+                            <tr>
+                                <td><span class="term" data-term="program">專案集 (Program)</span></td>
+                                <td>以協調的方式管理相關專案，獲取 <span class="quiz-mask">1+1>2 的利益</span>。</td>
+                                <td>管理「<span class="quiz-mask">相依性</span>」的一組相關專案。</td>
+                            </tr>
+                            <tr>
+                                <td>專案 (Project)</td>
+                                <td>把事情「做對」 (<span class="quiz-mask">Do things right</span>)。</td>
+                                <td>交付獨特的成果。</td>
+                            </tr>
+                        </tbody>
                     </table>
-                    <h4>(二) <span class="term" data-term="pmo">PMO</span> 類型與控制度</h4>
+
+                    <h4>(二) <span class="term" data-term="pmo">專案管理辦公室 (PMO)</span> 三種類型</h4>
                     <ul>
-                        <li><strong>支援型：</strong>顧問角色，提供範本。<span class="quiz-mask">(低)</span></li>
-                        <li><strong>管制型：</strong>要求遵循框架。<span class="quiz-mask">(中)</span></li>
-                        <li><strong>指令型：</strong>直接管理專案。<span class="quiz-mask">(高)</span></li>
+                        <li><strong>支援型 (Supportive)：</strong>顧問角色，提供範本。控制度：<span class="quiz-mask">低</span>。</li>
+                        <li><strong>管制型 (Controlling)：</strong>要求遵循特定框架。控制度：<span class="quiz-mask">中</span>。</li>
+                        <li><strong>指令型 (Directive)：</strong>直接指派並管理 PM。控制度：<span class="quiz-mask">高</span>。</li>
                     </ul>
                     <h4>(三) 組織結構對 PM 權限的影響 (必考)</h4>
                      <table>
@@ -384,8 +414,10 @@
                         <tr><td>強矩陣</td><td>中~高</td><td>PM</td><td>全職</td></tr>
                         <tr><td>專案型</td><td><span class="quiz-mask">高~全權</span></td><td>PM</td><td>全職(大老闆)</td></tr>
                     </table>
+                    <h4>(四) PMI 人才金三角</h4>
+                    <p>工作方式 (技術)、商業敏銳度 (策略)、影響力技能 (領導)。</p>
                 </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
 
              <div id="sec1-3" class="section-block">
@@ -427,17 +459,17 @@
                     <table>
                         <tr><th>角色</th><th>核心職責</th><th>關鍵行為</th></tr>
                         <tr><td><strong>PM</strong></td><td>整合者</td><td>協調活動、流程、關係人。</td></tr>
-                        <tr><td><strong>Sponsor</strong></td><td>提供資源</td><td>批准章程、<span class="quiz-mask">排除高層障礙</span>。</td></tr>
+                        <tr><td><strong><span class="term" data-term="sponsor">Sponsor</span></strong></td><td>提供資源</td><td>批准章程、<span class="quiz-mask">排除高層障礙</span>。</td></tr>
                         <tr><td><strong><span class="term" data-term="po">PO</span></strong></td><td>決定「<span class="quiz-mask">做什麼</span>」</td><td>管理待辦清單，最大化價值。</td></tr>
                         <tr><td><strong><span class="term" data-term="sm">SM</span></strong></td><td>排除障礙</td><td>確保流程順暢，僕人式領導。</td></tr>
                     </table>
                     <div class="highlight-box">
-                        <strong>PM 的環境保護：</strong> PM 是團隊的「盾牌」，負責排除外部干擾，確保成員專心於交付物。同時需進行<span class="quiz-mask">變更管理</span>，避免任意變動。
+                        <strong>PM 的環境保護：</strong> PM 是團隊的「盾牌」，負責排除外部干擾，確保成員專心於交付物。同時需進行<span class="quiz-mask">變更管理</span>，避免任意變動導致重練。
                     </div>
                     <h4>PMI 人才金三角 (最新版)</h4>
                     <p>工作方式 (技術)、商業敏銳度 (策略)、影響力技能 (領導)。</p>
                 </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
         </section>
 
@@ -495,7 +527,7 @@
                         <li>低權力 / 低影響力 → <strong><span class="quiz-mask">監督</span></strong>。</li>
                     </ul>
                 </div>
-                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note"></textarea></div>
+                <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
         </section>
 
@@ -545,7 +577,8 @@
                     </ul>
                     <p><strong><span class="term" data-term="obs">組織分解結構 (OBS)</span>：</strong>顯示工作包由哪個部門負責。</p>
                     <h4>(二) <span class="term" data-term="communication_plan">溝通管理</span></h4>
-                    <p>規劃合適的溝通類型：推式(Email)、拉式(網站)、互動式(會議)。</p>
+                    <p>規劃「誰」需要「什麼資訊」，在「何時」，透過「什麼方式」提供。</p>
+                    <p>類型：<span class="term" data-term="push_comm">推式(Email)</span>、<span class="term" data-term="pull_comm">拉式(網站)</span>、互動式(會議)。</p>
                 </div>
                 <div class="note-area"><button class="note-toggle">添加筆記</button><textarea class="my-note" placeholder="在此輸入您的心得或口訣..."></textarea></div>
             </div>
@@ -643,6 +676,9 @@
                 <button id="btn-dont-know" class="vocab-btn">❓ 不熟</button>
                 <button id="btn-know" class="vocab-btn">✅ 記住了</button>
             </div>
+            <div class="vocab-progress-bar-container">
+                <div id="vocab-progress-fill" class="vocab-progress-fill"></div>
+            </div>
             <div class="vocab-progress">
                 進度: <span id="vocab-current">0</span> / <span id="vocab-total">0</span> (已掌握: <span id="vocab-mastered">0</span>)
             </div>
@@ -668,69 +704,65 @@
     </div>
 
     <script>
-        // === 1. DATA (COMPLETE) ===
         const glossaryDB = {
             "demo": { title: "功能示範", def: "點擊紫色虛線名詞可查看詳細解釋。", app: "閱讀時隨點隨查，不用中斷思緒。" },
-            "project": { title: "專案 (Project)", def: "為創造獨特產品/服務而進行的暫時性工作。", app: "核心特性：暫時性、獨特性。" },
-            "project_management": { title: "專案管理", def: "應用知識、技能、工具和技術，以滿足專案需求。", app: "核心在於運用工具和整合資源。" },
-            "vuca": { title: "VUCA", def: "易變性、不確定性、複雜性、模糊性。", app: "現代環境特徵，需敏捷應對。" },
-            "pmi": { title: "PMI", def: "國際專案管理學會，制定全球專案管理標準。", app: "PMP 考試核心依據，成立於 1969 年。" },
-            "pmbok": { title: "PMBOK® Guide", def: "專案管理知識體系指南，全球專案管理的共同語言。", app: "PMI 發布的標準指南，含 5 大流程與 10 大知識領域。" },
-            "eef": { title: "企業環境因素 (EEF)", def: "團隊無法控制的外部環境條件。", app: "EEF 是對專案的「限制」，如組織文化、市場條件、政府法規等。" },
-            "opa": { title: "組織流程資產 (OPA)", def: "團隊可利用的內部資產。", app: "OPA 是專案的「工具」，包含組織標準流程、範本、政策及經驗學習知識庫。" },
-            "functional_org": { title: "功能型組織", def: "傳統的部門化組織結構。", app: "PM 權力極低，資源由功能經理 (FM) 控制，PM 通常只做聯絡人。" },
-            "projectized_org": { title: "專案型組織", def: "組織完全圍繞專案運作的結構。", app: "PM 權力極高，團隊成員直接向 PM 報告，資源獨占。" },
-            "matrix_org": { title: "矩陣型組織", def: "功能型和專案型的混合體。", app: "團隊成員有兩個老闆（PM & FM），權力分弱/平衡/強三種。" },
+            "progressive_elaboration": { title: "逐步完善 (Progressive Elaboration)", def: "隨著資訊明朗，計畫由粗到細的過程。", app: "適用於滾動式規劃，近期詳細，遠期粗略。" },
+            "vuca": { title: "VUCA 時代", def: "易變性(V)、不確定性(U)、複雜性(C)、模糊性(A)的環境。", app: "需引入敏捷思維來應對。" },
+            "portfolio": { title: "專案組合 (Portfolio)", def: "為達成策略目標而組合在一起管理的專案、專案集。", app: "重點在「做對的事」(策略選擇)。" },
+            "program": { title: "專案集 (Program)", def: "一組相互關聯且被協調管理的專案。", app: "重點在獲取個別管理無法得到的利益 (1+1>2)。" },
             "pmo": { title: "專案管理辦公室 (PMO)", def: "組織內負責標準化專案治理流程的單位。", app: "分為支援型(顧問)、管制型(警察)、指令型(老闆)。" },
-            "agile_manifesto": { title: "敏捷宣言", def: "強調個人互動、可用軟體、客戶合作、回應變化。", app: "核心是「回應變化勝於遵循計畫」。" },
-            "waterfall": { title: "瀑布式 (Waterfall)", def: "預先定義所有需求，按順序執行。", app: "適用於需求明確的專案。" },
-            "agile": { title: "敏捷 (Agile)", def: "短週期交付可用產品，擁抱變化。", app: "適用於需求不明確的 VUCA 環境。" },
-            "hybrid": { title: "混合式 (Hybrid)", def: "結合傳統和敏捷的優點來管理專案。", app: "例如：硬體用傳統，軟體用敏捷。" },
-            "ooda": { title: "OODA 循環", def: "觀察→導向→決策→行動。", app: "強調快速反應的決策流程。" },
-            "phase_gate": { title: "階段關卡 (Kill Point)", def: "每個階段結束時的審查點。", app: "決定專案是否繼續 (Go/No-Go)。" },
-            "progressive_elaboration": { title: "漸進明細", def: "隨著專案推進，計畫越來越詳細。", app: "專案資訊是逐步演進的。" },
-            "rolling_wave": { title: "滾動式規劃", def: "漸進明細的實作：近期詳細，遠期粗略。", app: "避免過早進行不確定的細部規劃。" },
-            "charter": { title: "專案章程", def: "專案的「出生證明」，正式授權文件。", app: "由發起人發布；任命 PM；賦予 PM 使用組織資源的權力。" },
-            "npv": { title: "淨現值 (NPV)", def: "將所有未來現金流折現回「現值」後，減去初始投資。", app: "NPV > 0 則接受。最重要的財務指標，數值越高越好。" },
-            "irr": { title: "內部報酬率 (IRR)", def: "使專案淨現值等於零的折現率。", app: "IRR 越高越好，必須大於最低要求報酬率 (Hurdle Rate)。" },
-            "payback_period": { title: "還本期法", def: "回收初始投資所需的時間。", app: "時間越短越好，但缺點是**不考慮**金錢的時間價值 (TVM)。" },
-            "weighted_scoring": { title: "加權評分模型", def: "綜合性的非財務選擇模型。", app: "根據標準權重與評分加總，總分最高者獲選。" },
-            "sacred_cow": { title: "聖牛 (Sacred Cow)", def: "僅因高層主管的個人意志而執行的專案。", app: "通常缺乏正式的商業論證。" },
-            "pmp_plan": { title: "專案管理計畫書 (PM Plan)", def: "專案的總計畫，整合所有子計畫。", app: "包含三大基準：範疇、時程、成本。" },
-            "baseline": { title: "基準 (Baseline)", def: "經正式批准的計畫版本，用於衡量績效的標準。", app: "任何修改都需通過正式的變更控制 (CCB)。" },
-            "sow": { title: "工作說明書 (SOW)", def: "專案的「高層級需求」文件。", app: "來源通常是外部（客戶合約）或發起人。" },
-            "wbs": { title: "WBS (工作分解結構)", def: "將專案總範疇，分解成更小的可交付成果的階層結構。", app: "必須遵循「百分之百原則」；是可交付成果導向 (名詞)。" },
-            "work_package": { title: "工作包 (WP)", def: "WBS 最底層的項目。", app: "是可以被可靠地估算時程與成本的最小單位。" },
-            "wbs_dictionary": { title: "WBS 辭典", def: "WBS 每個項目的詳細文字描述文件。", app: "包含工作包描述、負責人、時程、成本、允收標準等。" },
-            "control_account": { title: "管制帳戶 (CA)", def: "WBS 結構中的管理節點。", app: "WBS (範疇) 與 OBS (組織) 的交會點，用於實獲值管理 (EVM)。" },
-            "ram": { title: "責任分派矩陣 (RAM)", def: "將「WBS 工作包」與「團隊成員」連結的表格。", app: "RACI 是一種常見形式。" },
-            "raci": { title: "RACI", def: "RAM 的一種，定義每個任務的責任類型。", app: "Responsible, Accountable (只能有一人), Consult, Inform。" },
-            "sponsor": { title: "發起人 (Sponsor)", def: "專案的「金主」或「老闆」，提供資金與資源。", app: "批准專案章程，負責在高層排除障礙。" },
-            "stakeholder": { title: "利害關係人", def: "任何會影響或被專案影響的個人或團體。", app: "影響力在專案初期最大，故須在起始階段辨識。" },
-            "power_influence": { title: "權力/影響力方格圖", def: "分析關係人權力與影響力的工具。", app: "決定管理策略：重點管理、保持滿意、保持告知、最低程度關注。" },
-            "engagement_matrix": { title: "參與評估矩陣", def: "分析關係人目前(C)與期望(D)參與程度的工具。", app: "參與程度分為不知情 → 抵制 → 中立 → 支持 → 領導。" },
-            "communication_plan": { title: "溝通管理計畫書", def: "規劃專案溝通的「方法論」文件。", app: "決定：溝通內容、時間、頻率、管道、接收者。" },
-            "push_comm": { title: "推式溝通", def: "主動將資訊發送給接收者（例如：Email）。", app: "適用於需要確保接收者知道的資訊。" },
-            "pull_comm": { title: "拉式溝通", def: "將資訊放在中央儲存庫，讓接收者自行取用（例如：網站）。", app: "適用於大量、非緊急的資訊。" },
-            "operations": { title: "日常營運 (Operations)", def: "持續性、重複性的工作，旨在維持組織正常運作。", app: "與專案的「暫時性」形成對比。" },
-            "opm": { title: "組織級專案管理 (OPM)", def: "連結策略與執行的框架，包含專案組合、專案集與專案管理。", app: "確保組織做對的事，並把事做對。" },
-            "tvm": { title: "貨幣時間價值 (TVM)", def: "「今天的 1 元比明天的 1 元更有價值」，因為今天的錢可以投資生息。", app: "NPV 等財務指標的核心概念，還本期法忽略此價值。" },
-            "smart": { title: "SMART 原則", def: "明確、可衡量、可達成、相關、有時限。", app: "設定具體目標的標準。" },
-            "ccb": { title: "變更管制委員會 (CCB)", def: "負責審查、評估、核准或否決專案變更請求的正式團體。", app: "基準確立後，任何變更都必須通過 CCB，以防止範疇潛變。" },
+            "pmbok": { title: "專案管理知識體系 (PMBOK)", def: "PMI 發布的標準指南，含 5 大流程與 10 大知識領域。", app: "PMP 考試核心依據。" },
+            "npv": { title: "淨現值 (NPV)", def: "未來現金流折現後的總和。", app: "最重要的財務指標。NPV > 0 才做，越高越好。" },
+            "irr": { title: "內部報酬率 (IRR)", def: "使 NPV = 0 的折現率。", app: "代表專案真實投資報酬率，越高越好。" },
+            "charter": { title: "專案章程 (Project Charter)", def: "正式授權專案成立的文件。", app: "PM 的尚方寶劍，一旦簽署即獲得動用資源權力。" },
+            "sponsor": { title: "發起人 (Sponsor)", def: "提供資金與資源的高層，章程簽署者。", app: "PM 在組織內的靠山，負責解決高層級衝突。" },
+            "smart": { title: "SMART 原則", def: "明確(S)、可衡量(M)、可達成(A)、相關(R)、有時限(T)。", app: "設定目標必須符合此五項原則才具體，避免目標空泛。" },
+            "stakeholder": { title: "利害關係人", def: "影響專案或被專案影響的人。", app: "初期影響力最大，需儘早辨識與管理。" },
+            "baseline": { title: "基準 (Baseline)", def: "經核准的計畫版本(範疇/時程/成本)。", app: "衡量績效的尺，修改需走變更管制(CCB)。" },
+            "delphi": { title: "德爾菲技術 (Delphi Technique)", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
             "scope_creep": { title: "範疇潛變", def: "未經核准的範疇擴張。", app: "專案殺手，需透過變更管制預防。" },
             "gold_plating": { title: "範疇鍍金", def: "PM 主動做超出需求的功能。", app: "增加成本與風險，PMI 不建議。" },
-            "delphi": { title: "德爾菲技術", def: "邀請專家匿名填寫問卷，反覆數輪以達成共識。", app: "用於蒐集需求或風險辨識，可避免從眾效應。" },
-            "obs": { title: "組織分解結構 (OBS)", def: "按組織部門層級排列，顯示工作包由哪個部門負責。", app: "與 WBS 結合可形成管制帳戶(CA)，便於績效考核。" },
-            "integration": { title: "整合管理 (Integration)", def: "識別、定義、結合、統一與協調各專案管理過程活動。", app: "PM 的核心職責，確保專案各部分協調運作。" },
-            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" },
+            "wbs": { title: "工作分解結構 (WBS)", def: "將交付成果分解為層級結構。", app: "規劃核心工具，需符合 100% 原則。" },
+            "control_account": { title: "管制帳戶 (Control Account)", def: "WBS 與組織結構(OBS)的交會點。", app: "在此點上整合範疇、預算、時程以衡量績效(EVM)。" },
+            "raci": { title: "RACI 矩陣", def: "當責(A)、負責(R)、諮詢(C)、告知(I)的角色分配表。", app: "每個任務只能有一位當責者(A)。" },
+            "agile": { title: "敏捷 (Agile)", def: "一種以人為本、迭代、漸進式的開發方法。", app: "適用於需求高度不確定的專案。" },
             "scrum": { title: "Scrum", def: "一種輕量級的敏捷框架，透過短週期的衝刺(Sprint)來交付價值。", app: "包含 3 個角色(PO/SM/Dev)、5 個事件、3 個產出物。" },
+            "sprint": { title: "衝刺 (Sprint)", def: "Scrum 中的固定開發週期（通常 1-4 週）。", app: "每個衝刺結束都應產出潛在可發布的產品增量。" },
+            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" },
+            "operations": { title: "日常營運 (Operations)", def: "持續性、重複性的工作，旨在維持組織正常運作。", app: "與專案的「暫時性」形成對比。" },
+            "opm": { title: "組織級專案管理 (OPM)", def: "連結策略與執行的框架，包含專案組合、專案集與專案管理。", app: "確保組織做對的事，並把事做對。" },
+            "sacred_cow": { title: "聖牛 (Sacred Cow)", def: "源自印度文化，指高層基於個人偏好強制執行的專案。", app: "通常缺乏理性商業論證，但必須執行。" },
+            "payback_period": { title: "還本期 (Payback Period)", def: "回收初始投資成本所需的時間。", app: "時間越短越好，但缺點是忽略了貨幣時間價值(TVM)。" },
             "po": { title: "產品負責人 (Product Owner)", def: "Scrum 角色，代表客戶利益，管理產品待辦清單(Backlog)。", app: "決定「做什麼」，對產品價值最大化負責。" },
             "sm": { title: "Scrum Master", def: "Scrum 角色，負責確保團隊遵循 Scrum 價值觀，並排除障礙。", app: "僕人式領導者，促進團隊自組織。" },
-            "sprint": { title: "衝刺 (Sprint)", def: "Scrum 中的固定開發週期（通常 1-4 週）。", app: "每個衝刺結束都應產出潛在可發布的產品增量。" },
-            "kanban": { title: "看板 (Kanban)", def: "源自豐田生產系統，強調視覺化工作流程與限制在製品(WIP)。", app: "常用於需要持續交付或維運型的專案。" },
-            "portfolio": { title: "專案組合", def: "為達成策略目標而組合在一起管理的專案、專案集。", app: "重點在「做對的事」(策略選擇)。" },
-            "program": { title: "專案集", def: "一組相互關聯且被協調管理的專案。", app: "重點在獲取個別管理無法得到的利益 (1+1>2)。" },
-            "pm": { title: "專案經理 (PM)", def: "專案的整合者，負責協調所有活動以達成目標。", app: "需具備技術、商業、領導力(人才金三角)，80%時間在溝通。" }
+            "integration": { title: "整合管理 (Integration)", def: "識別、定義、結合、統一與協調各專案管理過程活動。", app: "PM 的核心職責，確保專案各部分協調運作。" },
+            "risk": { title: "風險 (Risk)", def: "一旦發生，會對專案目標產生正面或負面影響的不確定事件。", app: "需及早辨識並規劃應對策略(規避/移轉/減輕/接受)。" },
+            "tvm": { title: "貨幣時間價值 (TVM)", def: "「今天的 1 元比明天的 1 元更有價值」，因為今天的錢可以投資生息。", app: "NPV 等財務指標的核心概念，忽略 TVM 會導致決策失準。" },
+            "pmp_plan": { title: "專案管理計畫書 (PM Plan)", def: "定義專案如何執行、監控、結案的綜合性文件。", app: "是整合所有子計畫的「母計畫」，也是專案執行的最高指導原則。" },
+            "ccb": { title: "變更管制委員會 (CCB)", def: "負責審查、評估、核准或否決專案變更請求的正式團體。", app: "基準確立後，任何變更都必須通過 CCB，以防止範疇潛變。" },
+            "project": { title: "專案 (Project)", def: "為創造獨特產品/服務而進行的暫時性工作。", app: "核心特性為「暫時性」與「獨特性」。" },
+            "project_management": { title: "專案管理", def: "應用知識、技能、工具和技術，以滿足專案需求。", app: "核心在於運用工具和整合資源。" },
+            "eef": { title: "企業環境因素 (EEF)", def: "團隊無法控制的外部環境條件。", app: "是「限制」。(如法規、市場)" },
+            "opa": { title: "組織流程資產 (OPA)", def: "團隊可利用的內部資產。", app: "是「工具」。(如範本、經驗學習庫)" },
+            "functional_org": { title: "功能型組織", def: "傳統部門化結構，PM 無實權。", app: "資源由功能經理控制。" },
+            "projectized_org": { title: "專案型組織", def: "圍繞專案運作，PM 全權。", app: "資源獨占，團隊直接向 PM 報告。" },
+            "matrix_org": { title: "矩陣型組織", def: "功能型與專案型的混合體。", app: "成員有兩個老闆，權力分弱/平衡/強。" },
+            "agile_manifesto": { title: "敏捷宣言", def: "強調個人互動、可用軟體、客戶合作、回應變化。", app: "核心是「回應變化勝於遵循計畫」。" },
+            "waterfall": { title: "瀑布式 (Waterfall)", def: "預先定義所有需求，按順序執行。", app: "範疇固定，時程/成本可變。適用於需求明確的專案。" },
+            "hybrid": { title: "混合式 (Hybrid)", def: "結合傳統和敏捷的優點來管理專案。", app: "例如：硬體用瀑布，軟體用敏捷。" },
+            "ooda": { title: "OODA 循環", def: "觀察→導向→決策→行動。", app: "強調快速反應的決策流程。" },
+            "phase_gate": { title: "階段關卡 (Kill Point)", def: "階段結束時的審查點。", app: "決定專案是否繼續 (Go/No-Go)。" },
+            "rolling_wave": { title: "滾動式規劃", def: "漸進明細的實作：近期詳細，遠期粗略。", app: "避免過早進行不確定的細部規劃。" },
+            "weighted_scoring": { title: "加權評分模型", def: "綜合性的非財務選擇模型。", app: "根據權重與評分加總選擇專案。" },
+            "work_package": { title: "工作包 (WP)", def: "WBS 最底層的項目。", app: "是可以被可靠地估算時程與成本的最小單位。" },
+            "wbs_dictionary": { title: "WBS 辭典", def: "WBS 每個項目的詳細文字描述文件。", app: "包含工作包描述、負責人、時程、成本、允收標準等。" },
+            "ram": { title: "責任分派矩陣 (RAM)", def: "連結工作包與團隊成員的表格。", app: "RACI 是一種常見形式。" },
+            "power_influence": { title: "權力/影響力方格圖", def: "分析關係人權力與影響力的工具。", app: "決定管理策略：重點管理、保持滿意、保持告知、最低程度關注。" },
+            "engagement_matrix": { title: "參與評估矩陣", def: "分析關係人目前(C)與期望(D)參與程度的工具。", app: "參與程度分為不知情 → 抵制 → 中立 → 支持 → 領導。" },
+            "push_comm": { title: "推式溝通", def: "主動將資訊發送給接收者（例如：Email）。", app: "適用於需要確保接收者知道的資訊。" },
+            "pull_comm": { title: "拉式溝通", def: "將資訊放在中央儲存庫，讓接收者自行取用（例如：網站）。", app: "適用於大量、非緊急的資訊。" },
+            "pm": { title: "專案經理 (PM)", def: "專案的整合者，負責協調所有活動以達成目標。", app: "需具備技術、商業、領導力(人才金三角)，80%時間在溝通。" },
+            "obs": { title: "組織分解結構 (OBS)", def: "按組織部門層級排列，顯示工作包由哪個部門負責。", app: "與 WBS 結合可形成管制帳戶(CA)，便於績效考核。" }
         };
 
         const VOCAB_DECK = Object.values(glossaryDB).map(item => ({
@@ -738,12 +770,10 @@
             def: `<strong>定義：</strong>${item.def}<br><br><strong>重點：</strong>${item.app}`
         }));
 
-        // === 2. CORE APP STATE ===
-        const STORAGE_KEY = 'pm_v22_final';
+        const STORAGE_KEY = 'pm_v23_final';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"progress":{}, "notes":{}, "dark":false, "vocabMastery":{}}');
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
 
-        // === 3. UI INITIALIZATION ===
         if (appData.dark) document.body.classList.add('dark-mode');
         Object.keys(appData.progress).forEach(id => {
              const sec = document.getElementById(id);
@@ -759,7 +789,6 @@
             if(appData.notes[id]) { el.value = appData.notes[id]; el.style.display = 'block'; }
         });
 
-        // === 4. EVENT LISTENERS ===
         document.getElementById('btn-dark').addEventListener('click', () => { 
             appData.dark = !appData.dark; document.body.classList.toggle('dark-mode', appData.dark); saveData(); 
         });
@@ -794,12 +823,12 @@
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // NEW: Section Collapse Logic
+        // Section Collapse
         document.querySelectorAll('section h2').forEach(h2 => {
             h2.addEventListener('click', () => h2.parentElement.classList.toggle('collapsed'));
         });
 
-        // === 5. FLASHCARD & VOCAB LOGIC ===
+        // FLASHCARD
         let clozeCards = [];
         window.addEventListener('load', () => {
              document.querySelectorAll('.section-block').forEach(section => {
@@ -838,6 +867,7 @@
         });
         document.getElementById('flash-next').addEventListener('click', () => document.getElementById('btn-flashcard').click());
 
+        // VOCAB CARD
         let vocabDeck = [], currentVocabIndex = 0;
         function initVocabDeck() {
             const filter = document.getElementById('vocab-filter').value;
@@ -859,20 +889,12 @@
             document.getElementById('vocab-current').textContent = currentVocabIndex + 1;
             document.getElementById('vocab-total').textContent = vocabDeck.length;
             document.getElementById('vocab-mastered').textContent = Object.values(appData.vocabMastery).filter(v=>v).length;
+             // Update progress bar
+            const progressPercent = ((currentVocabIndex + 1) / vocabDeck.length) * 100;
+            document.getElementById('vocab-progress-fill').style.width = `${progressPercent}%`;
         }
-        // NEW: Vocab Navigation Functions
-        window.prevVocabCard = () => {
-            if (vocabDeck.length > 0) {
-                currentVocabIndex = (currentVocabIndex - 1 + vocabDeck.length) % vocabDeck.length;
-                updateVocabCard();
-            }
-        };
-        window.nextVocabCard = () => {
-            if (vocabDeck.length > 0) {
-                currentVocabIndex = (currentVocabIndex + 1) % vocabDeck.length;
-                updateVocabCard();
-            }
-        };
+        window.prevVocabCard = () => { if (vocabDeck.length > 0) { currentVocabIndex = (currentVocabIndex - 1 + vocabDeck.length) % vocabDeck.length; updateVocabCard(); } };
+        window.nextVocabCard = () => { if (vocabDeck.length > 0) { currentVocabIndex = (currentVocabIndex + 1) % vocabDeck.length; updateVocabCard(); } };
 
         document.getElementById('btn-vocab').addEventListener('click', () => { initVocabDeck(); openModal('vocab-modal'); });
         document.getElementById('vocab-card-container').addEventListener('click', function() { this.classList.toggle('flipped'); });
@@ -881,13 +903,11 @@
         document.getElementById('btn-dont-know').addEventListener('click', (e) => { e.stopPropagation(); markVocab(false); });
         function markVocab(mastered) {
             if (!vocabDeck.length) return;
-            appData.vocabMastery[vocabDeck[currentVocabIndex].id] = mastered;
-            saveData();
-            nextVocabCard(); // Use the new next function
-            // Optionally re-filter if needed, but smoother just to move next.
+            appData.vocabMastery[vocabDeck[currentVocabIndex].id] = mastered; saveData();
+            nextVocabCard();
         }
 
-        // 7. REPORT
+        // REPORT
         document.getElementById('btn-report').addEventListener('click', () => {
             const mastered = Object.values(appData.vocabMastery).filter(v => v).length;
             const total = VOCAB_DECK.length;
@@ -918,11 +938,10 @@
             if(e.key.toLowerCase()==='q') document.getElementById('quiz-fab').click();
             if(e.key.toLowerCase()==='f') document.getElementById('btn-flashcard').click();
             if(e.key==='Escape') { closeModal('glossary-modal'); closeModal('flashcard-modal'); closeModal('vocab-modal'); closeModal('report-modal'); }
-            // Add arrow key support for vocab navigation if modal is open
             if(document.getElementById('vocab-modal').classList.contains('active')) {
                  if(e.key === 'ArrowLeft') prevVocabCard();
                  if(e.key === 'ArrowRight') nextVocabCard();
-                 if(e.key === ' ' || e.key === 'Enter') document.getElementById('vocab-card-container').click(); // Flip on space/enter
+                 if(e.key === ' ' || e.key === 'Enter') document.getElementById('vocab-card-container').click();
             }
         });
         document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('確定清空所有紀錄？')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
