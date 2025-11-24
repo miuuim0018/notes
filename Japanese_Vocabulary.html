@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- viewport-fit=cover ensures layout extends to full screen including notch area -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>五十音記憶神器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -24,11 +25,12 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Safe area for iPhone X+ */
+        /* Safe area padding for iPhone X+ Home Indicator */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
 
-        /* Disable selection */
-        body { -webkit-user-select: none; user-select: none; }
+        /* Disable selection to feel like an App */
+        body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         /* Desktop Hover Effects */
         @media (min-width: 768px) {
@@ -37,18 +39,19 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 h-screen w-screen overflow-hidden">
+<!-- Use h-[100dvh] for dynamic viewport height on mobile browsers -->
+<body class="bg-slate-100 font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
 
-    <div id="app" class="flex h-full w-full">
+    <div id="app" class="flex flex-col md:flex-row h-full w-full">
         
         <!-- 1. DESKTOP SIDEBAR (Hidden on Mobile) -->
-        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20">
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">あ</div>
                 <h1 class="font-bold text-xl text-slate-800">五十音記憶</h1>
             </div>
             
-            <nav class="flex-1 p-4 space-y-2">
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <button @click="setActiveTab('list')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'list' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-book size="20"></icon-book> 單字列表
                 </button>
@@ -60,7 +63,7 @@
                 </button>
             </nav>
 
-            <div class="p-6 border-t border-slate-100">
+            <div class="p-6 border-t border-slate-100 shrink-0">
                 <div class="bg-slate-50 p-4 rounded-xl">
                     <div class="text-xs font-bold text-slate-400 mb-2 uppercase">學習狀態</div>
                     <div class="flex justify-between mb-1">
@@ -75,52 +78,52 @@
             </div>
         </aside>
 
-        <!-- 2. MAIN CONTENT AREA -->
+        <!-- 2. MAIN CONTENT AREA (Flex Column for layout stability) -->
         <div class="flex-1 flex flex-col h-full relative overflow-hidden">
             
-            <!-- MOBILE HEADER (Hidden on Desktop) -->
-            <header class="md:hidden h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-center shrink-0 z-20">
+            <!-- MOBILE HEADER (Hidden on Desktop) - Fixed height, shrink-0 -->
+            <header class="md:hidden h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe">
                 <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
-            <!-- CONTENT SCROLL AREA -->
-            <main class="flex-1 overflow-y-auto relative bg-slate-50/50 no-scrollbar">
+            <!-- CONTENT SCROLL AREA (Flex-1 takes remaining space) -->
+            <main class="flex-1 overflow-hidden relative bg-slate-50/50 w-full">
                 
                 <!-- === TAB: LIST VIEW === -->
-                <div v-if="activeTab === 'list'" class="p-4 md:p-8 pb-24 md:pb-8 max-w-5xl mx-auto">
-                    <!-- Mobile Dashboard (Hidden on Desktop) -->
-                    <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-8">
-                        <div class="flex justify-between text-center divide-x divide-indigo-400 mb-4">
-                            <div class="flex-1"><div class="text-2xl font-bold">{{ vocabularyData.length }}</div><div class="text-xs opacity-70">總數</div></div>
-                            <div class="flex-1"><div class="text-2xl font-bold text-yellow-300">{{ bookmarks.length }}</div><div class="text-xs opacity-70">收藏</div></div>
-                            <div class="flex-1"><div class="text-2xl font-bold text-red-300">{{ missedIds.length }}</div><div class="text-xs opacity-70">待加強</div></div>
-                        </div>
-                    </div>
-
-                    <!-- Desktop: Row-based Grid -->
-                    <div class="space-y-6">
-                        <div v-for="(items, row) in groupedData" :key="row">
-                            <div class="flex items-center gap-4 mb-3">
-                                <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
-                                <div class="h-px flex-1 bg-slate-200"></div>
+                <div v-if="activeTab === 'list'" class="h-full overflow-y-auto no-scrollbar p-4 md:p-8 pb-20 md:pb-8">
+                    <div class="max-w-5xl mx-auto">
+                        <!-- Mobile Dashboard -->
+                        <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-8">
+                            <div class="flex justify-between text-center divide-x divide-indigo-400 mb-4">
+                                <div class="flex-1"><div class="text-2xl font-bold">{{ vocabularyData.length }}</div><div class="text-xs opacity-70">總數</div></div>
+                                <div class="flex-1"><div class="text-2xl font-bold text-yellow-300">{{ bookmarks.length }}</div><div class="text-xs opacity-70">收藏</div></div>
+                                <div class="flex-1"><div class="text-2xl font-bold text-red-300">{{ missedIds.length }}</div><div class="text-xs opacity-70">待加強</div></div>
                             </div>
-                            
-                            <!-- Grid Layout for Cards -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                <div v-for="item in items" :key="item.id" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group">
-                                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-xl shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                        {{ item.kana }}
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-baseline justify-between">
-                                            <span class="font-bold text-slate-800 text-lg truncate">{{ item.word }}</span>
-                                            <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
+                        </div>
+
+                        <!-- Desktop Grid / Mobile List -->
+                        <div class="space-y-6">
+                            <div v-for="(items, row) in groupedData" :key="row">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
+                                    <div class="h-px flex-1 bg-slate-200"></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                                    <div v-for="item in items" :key="item.id" class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group">
+                                        <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg md:text-xl shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                            {{ item.kana }}
                                         </div>
-                                        <div class="text-sm text-slate-500 truncate">{{ item.meaning }}</div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-baseline justify-between">
+                                                <span class="font-bold text-slate-800 text-base md:text-lg truncate">{{ item.word }}</span>
+                                                <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
+                                            </div>
+                                            <div class="text-sm text-slate-500 truncate">{{ item.meaning }}</div>
+                                        </div>
+                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200 hover:text-yellow-400'">
+                                            <icon-star :filled="hasBookmark(item.id)" size="20"></icon-star>
+                                        </button>
                                     </div>
-                                    <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200 hover:text-yellow-400'">
-                                        <icon-star :filled="hasBookmark(item.id)" size="20"></icon-star>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -128,18 +131,18 @@
                 </div>
 
                 <!-- === TAB: FLASHCARDS === -->
-                <div v-if="activeTab === 'flashcards'" class="absolute inset-0 flex flex-col">
-                    <!-- Empty State / Mode Selection -->
-                    <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex flex-col items-center justify-center h-full p-6 animate-fade-in">
+                <div v-if="activeTab === 'flashcards'" class="h-full flex flex-col relative">
+                    
+                    <!-- Empty State -->
+                    <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
                         <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full">
-                            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
+                            <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
                                 <icon-layers size="40"></icon-layers>
                             </div>
                             <h2 class="text-2xl font-bold text-slate-800 mb-2">單字卡練習</h2>
                             <p class="text-slate-500 mb-8">請選擇要練習的範圍</p>
-                            
                             <div class="space-y-3">
-                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md hover:shadow-lg">
+                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md">
                                     <icon-layers></icon-layers> 全部單字 ({{ vocabularyData.length }})
                                 </button>
                                 <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -153,9 +156,9 @@
                     </div>
 
                     <!-- Result Screen -->
-                    <div v-else-if="roundComplete" class="flex flex-col items-center justify-center h-full p-6 animate-fade-in">
+                    <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
                         <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full">
-                            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto">
+                            <div class="w-16 h-16 md:w-20 md:h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto">
                                 <icon-trophy size="40"></icon-trophy>
                             </div>
                             <h2 class="text-2xl font-bold text-slate-800 mb-2">練習完成！</h2>
@@ -170,136 +173,117 @@
                         </div>
                     </div>
 
-                    <!-- Card View -->
-                    <div v-else class="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
-                        <!-- Top Bar -->
-                        <div class="w-full max-w-md flex justify-between items-center mb-6 md:mb-10">
-                            <button @click="toggleFlashcardMode" class="bg-white px-4 py-2 rounded-full text-sm font-bold text-slate-600 shadow-sm border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2">
-                                <icon-arrow-left-right size="16"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                    <!-- Active Flashcard View -->
+                    <div v-else class="flex-1 flex flex-col items-center p-4 md:p-8 h-full">
+                        <!-- Top Controls -->
+                        <div class="w-full max-w-md flex justify-between items-center mb-4 shrink-0">
+                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-2 rounded-lg text-xs md:text-sm font-bold text-slate-600 shadow-sm border border-slate-200 active:bg-slate-50 flex items-center gap-2">
+                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
                             </button>
-                            <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
-                            <button @click="shuffleDeck" class="p-2 text-slate-400 hover:text-indigo-600 bg-white rounded-full shadow-sm border border-slate-200 hover:border-indigo-200 transition-colors">
-                                <icon-shuffle size="20"></icon-shuffle>
+                            <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg text-xs md:text-sm">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
+                            <button @click="shuffleDeck" class="p-2 text-slate-400 active:text-indigo-600 bg-white rounded-lg shadow-sm border border-slate-200">
+                                <icon-shuffle size="18"></icon-shuffle>
                             </button>
                         </div>
 
-                        <!-- Card -->
-                        <div class="relative w-full max-w-md aspect-[3/4] md:aspect-[4/3] max-h-[60vh] perspective-1000 cursor-pointer group"
-                             @click="isFlipped = !isFlipped">
-                            <div class="relative w-full h-full transition-all duration-500 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
-                                
-                                <!-- FRONT -->
-                                <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-2xl border-2 border-white flex flex-col items-center justify-center p-8 md:p-12 hover:border-indigo-100 transition-colors">
-                                    <div class="absolute top-6 right-6">
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors">
-                                            <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                        <!-- Card Area (Flex grow/shrink to fit) -->
+                        <div class="flex-1 w-full max-w-md min-h-0 flex items-center justify-center mb-4 relative">
+                            <div class="relative w-full h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
+                                 @click="isFlipped = !isFlipped"
+                                 @touchstart="onTouchStart"
+                                 @touchend="onTouchEnd">
+                                <div class="relative w-full h-full transition-all duration-300 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
+                                    <!-- FRONT -->
+                                    <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-lg border-2 border-white flex flex-col items-center justify-center p-6 md:p-12 z-10">
+                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-slate-50">
+                                            <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                         </button>
+                                        <span class="text-[10px] md:text-xs font-bold text-indigo-400 tracking-widest mb-4 md:mb-6">QUESTION</span>
+                                        <h2 class="font-bold text-slate-800 text-center break-words leading-tight" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
+                                            {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                        </h2>
+                                        <p class="mt-6 md:mt-8 text-slate-300 text-xs md:text-sm font-bold animate-pulse">點擊翻面</p>
                                     </div>
-                                    <span class="text-xs font-bold text-indigo-400 tracking-[0.2em] mb-6">QUESTION</span>
-                                    <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
-                                        {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
-                                    </h2>
-                                    <p class="mt-8 text-slate-300 text-sm font-bold animate-pulse">點擊翻面</p>
-                                </div>
-
-                                <!-- BACK -->
-                                <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-2xl border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 md:p-12 text-white">
-                                    <div class="absolute top-6 right-6">
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-                                            <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
+                                    <!-- BACK -->
+                                    <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-lg border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-6 md:p-12 text-white">
+                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-white/10">
+                                            <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
                                         </button>
-                                    </div>
-                                    <span class="absolute top-8 left-8 text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
-                                    
-                                    <div class="z-10 text-center w-full">
-                                        <template v-if="flashcardMode === 'jp-zh'">
-                                            <div class="text-3xl md:text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
-                                            <div class="text-lg md:text-xl opacity-60 font-mono mb-8">{{ currentItem.romaji }}</div>
-                                            <div class="w-16 h-1 bg-white/30 rounded-full mx-auto mb-8"></div>
-                                            <div class="text-3xl md:text-5xl font-bold">{{ currentItem.meaning }}</div>
-                                        </template>
-                                        <template v-else>
-                                            <div class="text-sm opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
-                                            <div class="text-5xl md:text-6xl font-bold mb-4">{{ currentItem.word }}</div>
-                                            <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
-                                            <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
-                                        </template>
-                                    </div>
-                                    
-                                    <div v-if="currentItem.note" class="mt-8 bg-black/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-                                        {{ currentItem.note }}
+                                        <span class="absolute top-6 left-6 text-6xl md:text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
+                                        <div class="z-10 text-center w-full">
+                                            <template v-if="flashcardMode === 'jp-zh'">
+                                                <div class="text-2xl md:text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
+                                                <div class="text-base md:text-xl opacity-60 font-mono mb-6 md:mb-8">{{ currentItem.romaji }}</div>
+                                                <div class="w-12 md:w-16 h-1 bg-white/30 rounded-full mx-auto mb-6 md:mb-8"></div>
+                                                <div class="text-2xl md:text-4xl font-bold leading-snug">{{ currentItem.meaning }}</div>
+                                            </template>
+                                            <template v-else>
+                                                <div class="text-xs opacity-60 mb-2 md:mb-4 font-bold tracking-widest">ANSWER</div>
+                                                <div class="text-4xl md:text-6xl font-bold mb-2 md:mb-4">{{ currentItem.word }}</div>
+                                                <div class="text-xl md:text-2xl opacity-80">{{ currentItem.kanji }}</div>
+                                                <div class="text-sm md:text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
+                                            </template>
+                                        </div>
+                                        <div v-if="currentItem.note" class="mt-6 md:mt-8 bg-black/20 px-3 py-1 rounded-full text-xs md:text-sm font-medium backdrop-blur-sm">
+                                            {{ currentItem.note }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Desktop Controls Hint -->
-                        <div class="hidden md:block text-center mt-6 text-slate-400 text-xs font-medium">
-                            可使用鍵盤 <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">←</span> <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">→</span> 切換，<span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">Space</span> 翻面
-                        </div>
-
-                        <!-- Mobile Buttons -->
-                        <div class="md:hidden w-full max-w-md flex gap-4 mt-6 h-16">
-                            <button @click="handleCardResult('missed')" class="flex-1 bg-red-50 text-red-500 rounded-2xl font-bold border-2 border-red-100 flex flex-col items-center justify-center gap-1 active:scale-95"><icon-x size="20"></icon-x><span class="text-xs">沒記住</span></button>
-                            <button @click="handleCardResult('memorized')" class="flex-1 bg-green-50 text-green-600 rounded-2xl font-bold border-2 border-green-100 flex flex-col items-center justify-center gap-1 active:scale-95"><icon-check size="20"></icon-check><span class="text-xs">記住了</span></button>
-                        </div>
-                        
-                        <!-- Desktop Buttons (Larger) -->
-                        <div class="hidden md:flex w-full max-w-md gap-4 mt-8">
-                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 hover:bg-red-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
-                                <icon-x></icon-x> 沒記住 (需複習)
+                        <!-- Bottom Action Buttons (Shrink-0, Safe from bottom) -->
+                        <div class="w-full max-w-md flex gap-3 md:gap-4 h-16 md:h-20 shrink-0 mb-2">
+                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 active:bg-red-50 rounded-2xl font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 active:scale-95 transition-transform">
+                                <icon-x size="20"></icon-x><span class="text-xs md:text-sm">沒記住</span>
                             </button>
-                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 hover:bg-green-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
-                                <icon-check></icon-check> 記住了 (移除)
+                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 active:bg-green-50 rounded-2xl font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 active:scale-95 transition-transform">
+                                <icon-check size="20"></icon-check><span class="text-xs md:text-sm">記住了</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- === TAB: QUIZ === -->
-                <div v-if="activeTab === 'quiz'" class="absolute inset-0 flex flex-col">
-                    <!-- Quiz Setup -->
-                    <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center h-full p-6 animate-fade-in">
-                        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 w-full max-w-lg">
-                            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-8 text-indigo-600 mx-auto">
-                                <icon-settings size="40"></icon-settings>
+                <div v-if="activeTab === 'quiz'" class="h-full overflow-y-auto no-scrollbar">
+                    <!-- Setup -->
+                    <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 w-full max-w-lg my-auto">
+                            <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-8 text-indigo-600 mx-auto">
+                                <icon-settings size="32"></icon-settings>
                             </div>
                             <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">測驗設定</h2>
-                            
                             <div class="space-y-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題庫來源</label>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <button @click="quizConfig.source = 'all'" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">全部</button>
-                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">收藏</button>
-                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">錯題</button>
+                                        <button @click="quizConfig.source = 'all'" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">全部</button>
+                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">收藏</button>
+                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">錯題</button>
                                     </div>
                                 </div>
-
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題目數量</label>
                                     <div class="grid grid-cols-4 gap-2">
-                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">{{ opt === 'all' ? '全部' : opt }}</button>
+                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">{{ opt === 'all' ? '全部' : opt }}</button>
                                     </div>
                                 </div>
-
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">測驗模式</label>
+                                    <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">模式</label>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <button @click="quizConfig.mode = 'jp-zh'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'jp-zh' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">日 ⮕ 中</button>
-                                        <button @click="quizConfig.mode = 'zh-jp'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'zh-jp' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">中 ⮕ 日</button>
+                                        <button @click="quizConfig.mode = 'jp-zh'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'jp-zh' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">日 ⮕ 中</button>
+                                        <button @click="quizConfig.mode = 'zh-jp'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'zh-jp' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">中 ⮕ 日</button>
                                     </div>
                                 </div>
                             </div>
-
                             <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 active:scale-95 transition-transform mt-8 flex items-center justify-center gap-2">
                                 <icon-play-circle size="24"></icon-play-circle> 開始測驗
                             </button>
                         </div>
                     </div>
 
-                    <!-- Quiz Result -->
-                    <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center h-full p-6 text-center animate-fade-in">
+                    <!-- Result -->
+                    <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
                         <div class="text-8xl mb-6 filter drop-shadow-lg">{{ quizPercentage >= 80 ? '🎉' : '💪' }}</div>
                         <h2 class="text-3xl font-bold text-slate-800 mb-2">測驗結束</h2>
                         <div class="my-10 p-8 bg-white rounded-3xl shadow-lg border border-slate-100 w-full max-w-xs">
@@ -311,35 +295,32 @@
                         </button>
                     </div>
 
-                    <!-- Quiz Playing -->
-                    <div v-else class="flex flex-col h-full max-w-2xl mx-auto w-full p-4 md:p-8">
-                        <!-- Progress -->
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
-                            <span class="text-slate-400 font-bold">Score: {{ quizState.score }}</span>
+                    <!-- Playing -->
+                    <div v-else class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-20 md:pb-8">
+                        <div class="flex justify-between items-center mb-4 md:mb-6">
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full text-sm md:text-base">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
+                            <span class="text-slate-400 font-bold text-sm md:text-base">Score: {{ quizState.score }}</span>
                         </div>
 
-                        <!-- Question Card -->
-                        <div class="bg-white p-8 md:p-16 rounded-3xl shadow-lg border border-slate-100 text-center mb-6 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
-                            <div v-if="quizState.lastCorrect === true" class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-check class="text-green-500 drop-shadow-md" size="100"></icon-check></div>
-                            <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="100"></icon-x></div>
+                        <div class="bg-white p-8 md:p-16 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 md:mb-6 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
+                            <div v-if="quizState.lastCorrect === true" class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-check class="text-green-500 drop-shadow-md" size="80"></icon-check></div>
+                            <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="80"></icon-x></div>
                             
-                            <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-6">QUESTION</span>
+                            <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-4 md:mb-6">QUESTION</span>
                             <template v-if="quizConfig.mode === 'jp-zh'">
-                                <h2 class="text-5xl md:text-7xl font-bold text-slate-800 mb-4">{{ currentQuizItem.word }}</h2>
-                                <p class="text-indigo-400 text-xl md:text-2xl font-medium">{{ currentQuizItem.kana }}</p>
+                                <h2 class="text-4xl md:text-7xl font-bold text-slate-800 mb-2 md:mb-4">{{ currentQuizItem.word }}</h2>
+                                <p class="text-indigo-400 text-lg md:text-2xl font-medium">{{ currentQuizItem.kana }}</p>
                             </template>
                             <template v-else>
-                                <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-2">{{ currentQuizItem.meaning }}</h2>
+                                <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-2">{{ currentQuizItem.meaning }}</h2>
                             </template>
                         </div>
 
-                        <!-- Options -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0">
                             <button v-for="(opt, i) in quizState.options" :key="i" 
                                 :disabled="quizState.lastCorrect !== null"
                                 @click="handleQuizAnswer(opt)"
-                                class="p-5 rounded-xl text-left font-bold border-2 transition-all text-lg relative overflow-hidden"
+                                class="p-4 md:p-5 rounded-xl text-left font-bold border-2 transition-all text-base md:text-lg relative overflow-hidden"
                                 :class="getQuizOptionClass(opt)"
                             >
                                 {{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}
@@ -352,8 +333,8 @@
             </main>
         </div>
 
-        <!-- 3. MOBILE BOTTOM NAV (Hidden on Desktop) -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe z-50">
+        <!-- 3. MOBILE BOTTOM NAV (Hidden on Desktop, Fixed height, shrink-0, Safe area padding) -->
+        <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
             <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
                 <icon-book size="20"></icon-book>
                 <span class="text-[10px] font-bold mt-1">列表</span>
@@ -600,7 +581,6 @@
                 // --- Touch Logic ---
                 const touchStartX = ref(null);
                 const onTouchStart = (e) => { touchStartX.value = e.targetTouches[0].clientX; };
-                const onTouchMove = (e) => { };
                 const onTouchEnd = (e) => {
                     if (!touchStartX.value) return;
                     const endX = e.changedTouches[0].clientX;
@@ -709,7 +689,7 @@
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
-                    onTouchStart, onTouchMove, onTouchEnd,
+                    onTouchStart, onTouchEnd,
                     // List
                     groupedData,
                     // Quiz
