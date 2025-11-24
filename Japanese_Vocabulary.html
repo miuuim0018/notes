@@ -50,6 +50,10 @@
             transition: opacity 0.2s ease;
             pointer-events: none;
         }
+
+        /* Modal Backdrop */
+        .modal-enter-active, .modal-leave-active { transition: opacity 0.3s; }
+        .modal-enter-from, .modal-leave-to { opacity: 0; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
@@ -113,7 +117,7 @@
                             </div>
                         </div>
 
-                        <!-- Desktop Grid / Mobile List -->
+                        <!-- Word List -->
                         <div class="space-y-6">
                             <div v-for="(items, row) in groupedData" :key="row">
                                 <div class="flex items-center gap-4 mb-3">
@@ -187,15 +191,45 @@
 
                     <!-- Active Flashcard View -->
                     <div v-else class="flex-1 flex flex-col items-center p-4 md:p-8 h-full select-none">
+                        
+                        <!-- Deck Menu Modal -->
+                        <transition name="modal">
+                            <div v-if="showDeckMenu" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="showDeckMenu = false">
+                                <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 animate-fade-in">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <h3 class="text-lg font-bold text-slate-800">切換題庫</h3>
+                                        <button @click="showDeckMenu = false" class="p-2 text-slate-400 hover:text-slate-600"><icon-x size="20"></icon-x></button>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <button @click="startSession('all'); showDeckMenu = false" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all" :class="currentSessionType === 'all' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
+                                            <icon-layers size="20" class="text-indigo-600"></icon-layers> 全部單字
+                                        </button>
+                                        <button @click="startSession('bookmarks'); showDeckMenu = false" :disabled="bookmarks.length === 0" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all disabled:opacity-50" :class="currentSessionType === 'bookmarks' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
+                                            <icon-star size="20" class="text-yellow-400" filled="true"></icon-star> 收藏單字
+                                        </button>
+                                        <button @click="startSession('missed'); showDeckMenu = false" :disabled="missedIds.length === 0" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-red-200 hover:bg-red-50 transition-all disabled:opacity-50" :class="currentSessionType === 'missed' ? 'border-red-500 bg-red-50' : 'border-slate-100'">
+                                            <icon-refresh-cw size="20" class="text-red-500"></icon-refresh-cw> 錯題複習
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+
                         <!-- Top Controls -->
                         <div class="w-full max-w-md flex justify-between items-center mb-4 shrink-0">
-                            <button @click="toggleFlashcardMode" class="bg-white px-4 py-2 rounded-full text-sm font-bold text-slate-600 shadow-sm border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2">
-                                <icon-arrow-left-right size="16"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-2 rounded-lg text-xs md:text-sm font-bold text-slate-600 shadow-sm border border-slate-200 active:bg-slate-50 flex items-center gap-2">
+                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
                             </button>
                             <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
-                            <button @click="shuffleDeck" class="p-2 text-slate-400 hover:text-indigo-600 bg-white rounded-full shadow-sm border border-slate-200 hover:border-indigo-200 transition-colors">
-                                <icon-shuffle size="20"></icon-shuffle>
-                            </button>
+                            <div class="flex gap-2">
+                                <button @click="shuffleDeck" class="p-2 text-slate-400 active:text-indigo-600 bg-white rounded-lg shadow-sm border border-slate-200">
+                                    <icon-shuffle size="18"></icon-shuffle>
+                                </button>
+                                <!-- New Deck Settings Button -->
+                                <button @click="showDeckMenu = true" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg shadow-sm border border-indigo-100 active:scale-95 transition-transform">
+                                    <icon-sliders size="18"></icon-sliders>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Card Area (Flex) -->
@@ -205,10 +239,10 @@
                                 <icon-chevron-left size="40"></icon-chevron-left>
                             </button>
 
-                            <!-- Card Wrapper (Touch Area) -->
-                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000"
+                            <!-- Card Wrapper -->
+                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
+                                 @click="isFlipped = !isFlipped"
                                  @touchstart="onTouchStart"
-                                 @touchmove="onTouchMove"
                                  @touchend="onTouchEnd"
                                  @mousedown="onTouchStart"
                                  @mousemove="onTouchMove"
@@ -224,25 +258,19 @@
                                         
                                         <!-- FRONT -->
                                         <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-2xl border-2 border-white flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden">
-                                            
                                             <!-- Swipe Feedback Overlays -->
                                             <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }">
-                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm">
-                                                    <icon-check class="text-green-500" size="64"></icon-check>
-                                                </div>
+                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm"><icon-check class="text-green-500" size="64"></icon-check></div>
                                             </div>
                                             <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }">
-                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm">
-                                                    <icon-x class="text-red-500" size="64"></icon-x>
-                                                </div>
+                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm"><icon-x class="text-red-500" size="64"></icon-x></div>
                                             </div>
 
-                                            <!-- Bookmark -->
                                             <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-50 transition-colors z-30">
                                                 <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                             </button>
                                             
-                                            <span class="text-xs font-bold text-indigo-400 tracking-[0.2em] mb-6">QUESTION</span>
+                                            <span class="text-[10px] md:text-xs font-bold text-indigo-400 tracking-[0.2em] mb-6">QUESTION</span>
                                             <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
                                                 {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
                                             </h2>
@@ -251,13 +279,8 @@
 
                                         <!-- BACK -->
                                         <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-2xl border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 md:p-12 text-white overflow-hidden">
-                                            <!-- Back Overlays (Same logic) -->
-                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }">
-                                                <icon-check class="text-white drop-shadow-lg" size="80"></icon-check>
-                                            </div>
-                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }">
-                                                <icon-x class="text-white drop-shadow-lg" size="80"></icon-x>
-                                            </div>
+                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white drop-shadow-lg" size="80"></icon-check></div>
+                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white drop-shadow-lg" size="80"></icon-x></div>
 
                                             <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors z-30">
                                                 <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
@@ -278,10 +301,7 @@
                                                     <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
                                                 </template>
                                             </div>
-                                            
-                                            <div v-if="currentItem.note" class="mt-8 bg-black/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-                                                {{ currentItem.note }}
-                                            </div>
+                                            <div v-if="currentItem.note" class="mt-8 bg-black/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">{{ currentItem.note }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -302,7 +322,7 @@
                             <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">Space</span>翻面
                         </div>
 
-                        <!-- MOBILE Action Buttons (Nav Only - Updated text) -->
+                        <!-- MOBILE Action Buttons -->
                         <div class="md:hidden w-full max-w-md flex gap-3 h-16 shrink-0 mb-2">
                             <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
                                 <icon-chevron-left size="24"></icon-chevron-left><span class="text-xs">上一張</span>
@@ -312,7 +332,7 @@
                             </button>
                         </div>
                         
-                        <!-- DESKTOP Action Buttons (Grading) -->
+                        <!-- DESKTOP Action Buttons -->
                         <div class="hidden md:flex w-full max-w-md gap-4 mt-2">
                             <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 hover:bg-red-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
                                 <icon-x></icon-x> 沒記住 (←)
@@ -376,10 +396,18 @@
                     </div>
 
                     <!-- Playing -->
-                    <div v-else class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-20 md:pb-8">
-                        <div class="flex justify-between items-center mb-4 md:mb-6">
-                            <span class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full text-sm md:text-base">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
-                            <span class="text-slate-400 font-bold text-sm md:text-base">Score: {{ quizState.score }}</span>
+                    <div v-else class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-20 md:pb-8 relative">
+                        
+                        <!-- Abort Quiz Button -->
+                        <button @click="quizPhase = 'setup'" class="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 active:text-red-500 transition-colors z-20">
+                            <icon-x size="24"></icon-x>
+                        </button>
+
+                        <div class="flex justify-end items-center mb-4 md:mb-6 mt-2">
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full text-sm md:text-base">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
+                                <span class="text-slate-400 font-bold text-sm md:text-base">Score: {{ quizState.score }}</span>
+                            </div>
                         </div>
 
                         <div class="bg-white p-8 md:p-16 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 md:mb-6 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
@@ -414,7 +442,7 @@
         </div>
 
         <!-- 3. MOBILE BOTTOM NAV (Hidden on Desktop, Fixed height, shrink-0, Safe area padding) -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe z-50">
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
             <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
                 <icon-book size="20"></icon-book>
                 <span class="text-[10px] font-bold mt-1">列表</span>
@@ -502,6 +530,7 @@
                 <svg v-else-if="name === 'play-circle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
                 <svg v-else-if="name === 'chevron-left'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                 <svg v-else-if="name === 'chevron-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <svg v-else-if="name === 'sliders'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             `
         };
 
@@ -522,6 +551,7 @@
                 'icon-play-circle': { ...Icon, data() { return { name: 'play-circle' } } },
                 'icon-chevron-left': { ...Icon, data() { return { name: 'chevron-left' } } },
                 'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
+                'icon-sliders': { ...Icon, data() { return { name: 'sliders' } } },
             },
             setup() {
                 const activeTab = ref('list');
@@ -535,6 +565,8 @@
                 const missedIds = ref([]);
                 const bookmarks = ref([]);
                 const roundComplete = ref(false);
+                const showDeckMenu = ref(false);
+                const currentSessionType = ref('all'); // Track current session type
 
                 // Swipe Logic Refs
                 const dragX = ref(0);
@@ -607,7 +639,7 @@
 
                 // --- METHODS ---
                 const handleKeydown = (e) => {
-                    if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0) {
+                    if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0 && !showDeckMenu.value) {
                         if (e.code === 'Space') {
                             e.preventDefault();
                             isFlipped.value = !isFlipped.value;
@@ -639,8 +671,12 @@
                     else if (type === 'bookmarks') deck = vocabularyData.filter(item => bookmarks.value.includes(item.id));
                     else if (type === 'missed') deck = vocabularyData.filter(item => missedIds.value.includes(item.id));
 
-                    if (deck.length === 0) return;
+                    if (deck.length === 0) {
+                        // Optional: alert user if empty
+                        return;
+                    }
 
+                    currentSessionType.value = type;
                     currentDeck.value = deck;
                     currentIndex.value = 0;
                     isFlipped.value = false;
@@ -868,7 +904,9 @@
                     groupedData,
                     // Quiz
                     quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
-                    startQuiz, handleQuizAnswer, getQuizOptionClass
+                    startQuiz, handleQuizAnswer, getQuizOptionClass,
+                    // New Features
+                    showDeckMenu, currentSessionType
                 };
             }
         });
