@@ -6,7 +6,7 @@
     <title>期中考複習傳送門456</title>
     <style>
         :root {
-            --primary: #6366f1;      /* 主色調 (靛藍) */
+            --primary: #6366f1;       /* 主色調 (靛藍) */
             --primary-hover: #4f46e5;
             --bg-main: #f8fafc;       /* 背景灰 */
             --text-main: #1e293b;     /* 深色文字 */
@@ -114,6 +114,11 @@
             background: #dcfce7;
             color: #166534;
         }
+        /* 特別為日文卡片設計的標籤顏色 (粉色系) */
+        .card-badge.lang {
+            background: #fce7f3;
+            color: #9d174d;
+        }
 
         .btn-enter {
             margin-top: 25px;
@@ -146,7 +151,7 @@
         </header>
 
         <main class="grid">
-            
+           
             <a href="Project_Management_MidtermExam.html" class="card">
                 <span class="card-badge">Midterm</span>
                 <div class="card-icon">📘</div>
@@ -160,6 +165,14 @@
                 <div class="card-icon">🏥</div>
                 <h2>運動醫學</h2>
                 <p>(尚未建立檔案) 點擊此處將連結到您的運動醫學複習筆記頁面。</p>
+                <div class="btn-enter">進入複習 →</div>
+            </a>
+
+            <a href="Japanese_Vocabulary.html" class="card">
+                <span class="card-badge lang">Language</span>
+                <div class="card-icon">🇯🇵</div>
+                <h2>日文50音單字</h2>
+                <p>平假名與片假名對照表、基礎發音規則、初級必背單字總整理。</p>
                 <div class="btn-enter">進入複習 →</div>
             </a>
 
