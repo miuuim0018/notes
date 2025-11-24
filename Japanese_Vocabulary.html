@@ -8,10 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
-        /* Disable double-tap zoom globally */
+        /* Disable double-tap zoom and improve touch handling */
         html, body {
             touch-action: manipulation;
             -ms-touch-action: manipulation;
+            overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
         }
 
         /* Custom CSS for 3D Flip */
@@ -42,6 +43,12 @@
         @media (min-width: 768px) {
             .hover-scale { transition: transform 0.2s; }
             .hover-scale:hover { transform: scale(1.02); }
+        }
+        
+        /* Swipe Feedback Overlays */
+        .swipe-overlay {
+            transition: opacity 0.2s ease;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -179,84 +186,114 @@
                     </div>
 
                     <!-- Active Flashcard View -->
-                    <div v-else class="flex-1 flex flex-col items-center p-4 md:p-8 h-full">
+                    <div v-else class="flex-1 flex flex-col items-center p-4 md:p-8 h-full select-none">
                         <!-- Top Controls -->
                         <div class="w-full max-w-md flex justify-between items-center mb-4 shrink-0">
-                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-2 rounded-lg text-xs md:text-sm font-bold text-slate-600 shadow-sm border border-slate-200 active:bg-slate-50 flex items-center gap-2">
-                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                            <button @click="toggleFlashcardMode" class="bg-white px-4 py-2 rounded-full text-sm font-bold text-slate-600 shadow-sm border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2">
+                                <icon-arrow-left-right size="16"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
                             </button>
-                            <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg text-xs md:text-sm">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
-                            <button @click="shuffleDeck" class="p-2 text-slate-400 active:text-indigo-600 bg-white rounded-lg shadow-sm border border-slate-200">
-                                <icon-shuffle size="18"></icon-shuffle>
+                            <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
+                            <button @click="shuffleDeck" class="p-2 text-slate-400 hover:text-indigo-600 bg-white rounded-full shadow-sm border border-slate-200 hover:border-indigo-200 transition-colors">
+                                <icon-shuffle size="20"></icon-shuffle>
                             </button>
                         </div>
 
                         <!-- Card Area (Flex) -->
                         <div class="flex-1 w-full flex items-center justify-center mb-4 relative">
-                            <!-- Desktop Previous Button (Hidden on Mobile) -->
+                            <!-- Desktop Previous Button -->
                             <button @click="prevCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors mr-4 disabled:opacity-30" :disabled="currentIndex === 0">
                                 <icon-chevron-left size="40"></icon-chevron-left>
                             </button>
 
-                            <!-- Card Wrapper -->
-                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
-                                 @click="isFlipped = !isFlipped"
+                            <!-- Card Wrapper (Touch Area) -->
+                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000"
                                  @touchstart="onTouchStart"
-                                 @touchend="onTouchEnd">
-                                <div class="relative w-full h-full transition-all duration-300 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
-                                    <!-- FRONT -->
-                                    <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-lg border-2 border-white flex flex-col items-center justify-center p-6 md:p-12 z-10 relative overflow-hidden">
-                                        <!-- Hints for Swipe (Mobile Only) -->
-                                        <div class="md:hidden absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center bg-gradient-to-r from-red-50/50 to-transparent text-red-200 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': touchStartX && touchCurrentX && (touchCurrentX - touchStartX < -30) }">
-                                            <icon-x size="24"></icon-x>
-                                        </div>
-                                        <div class="md:hidden absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center bg-gradient-to-l from-green-50/50 to-transparent text-green-200 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': touchStartX && touchCurrentX && (touchCurrentX - touchStartX > 30) }">
-                                            <icon-check size="24"></icon-check>
+                                 @touchmove="onTouchMove"
+                                 @touchend="onTouchEnd"
+                                 @mousedown="onTouchStart"
+                                 @mousemove="onTouchMove"
+                                 @mouseup="onTouchEnd"
+                                 @mouseleave="onTouchEnd">
+                                
+                                <!-- The Animated Card Container -->
+                                <div class="relative w-full h-full transition-transform duration-100 ease-linear will-change-transform preserve-3d cursor-grab active:cursor-grabbing" 
+                                     :style="cardContainerStyle">
+                                    
+                                    <!-- Card Content (Flip Logic) -->
+                                    <div class="relative w-full h-full transition-all duration-300 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
+                                        
+                                        <!-- FRONT -->
+                                        <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-2xl border-2 border-white flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden">
+                                            
+                                            <!-- Swipe Feedback Overlays -->
+                                            <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }">
+                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm">
+                                                    <icon-check class="text-green-500" size="64"></icon-check>
+                                                </div>
+                                            </div>
+                                            <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }">
+                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm">
+                                                    <icon-x class="text-red-500" size="64"></icon-x>
+                                                </div>
+                                            </div>
+
+                                            <!-- Bookmark -->
+                                            <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-50 transition-colors z-30">
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                                            </button>
+                                            
+                                            <span class="text-xs font-bold text-indigo-400 tracking-[0.2em] mb-6">QUESTION</span>
+                                            <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
+                                                {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                            </h2>
+                                            <p class="mt-8 text-slate-300 text-sm font-bold animate-pulse">輕點翻面 / 滑動評分</p>
                                         </div>
 
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-slate-50 hover:bg-slate-50 transition-colors">
-                                            <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
-                                        </button>
-                                        <span class="text-[10px] md:text-xs font-bold text-indigo-400 tracking-widest mb-4 md:mb-6">QUESTION</span>
-                                        <h2 class="font-bold text-slate-800 text-center break-words leading-tight" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
-                                            {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
-                                        </h2>
-                                        <p class="mt-6 md:mt-8 text-slate-300 text-xs md:text-sm font-bold animate-pulse">點擊翻面</p>
-                                    </div>
-                                    <!-- BACK -->
-                                    <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-lg border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-6 md:p-12 text-white">
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-white/10 hover:bg-white/10 transition-colors">
-                                            <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
-                                        </button>
-                                        <span class="absolute top-6 left-6 text-6xl md:text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
-                                        <div class="z-10 text-center w-full">
-                                            <template v-if="flashcardMode === 'jp-zh'">
-                                                <div class="text-2xl md:text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
-                                                <div class="text-base md:text-xl opacity-60 font-mono mb-6 md:mb-8">{{ currentItem.romaji }}</div>
-                                                <div class="w-12 md:w-16 h-1 bg-white/30 rounded-full mx-auto mb-6 md:mb-8"></div>
-                                                <div class="text-2xl md:text-4xl font-bold leading-snug">{{ currentItem.meaning }}</div>
-                                            </template>
-                                            <template v-else>
-                                                <div class="text-xs opacity-60 mb-2 md:mb-4 font-bold tracking-widest">ANSWER</div>
-                                                <div class="text-4xl md:text-6xl font-bold mb-2 md:mb-4">{{ currentItem.word }}</div>
-                                                <div class="text-xl md:text-2xl opacity-80">{{ currentItem.kanji }}</div>
-                                                <div class="text-sm md:text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
-                                            </template>
-                                        </div>
-                                        <div v-if="currentItem.note" class="mt-6 md:mt-8 bg-black/20 px-3 py-1 rounded-full text-xs md:text-sm font-medium backdrop-blur-sm">
-                                            {{ currentItem.note }}
+                                        <!-- BACK -->
+                                        <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-2xl border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 md:p-12 text-white overflow-hidden">
+                                            <!-- Back Overlays (Same logic) -->
+                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }">
+                                                <icon-check class="text-white drop-shadow-lg" size="80"></icon-check>
+                                            </div>
+                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }">
+                                                <icon-x class="text-white drop-shadow-lg" size="80"></icon-x>
+                                            </div>
+
+                                            <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors z-30">
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
+                                            </button>
+                                            <span class="absolute top-8 left-8 text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
+                                            
+                                            <div class="z-10 text-center w-full">
+                                                <template v-if="flashcardMode === 'jp-zh'">
+                                                    <div class="text-3xl md:text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
+                                                    <div class="text-lg md:text-xl opacity-60 font-mono mb-8">{{ currentItem.romaji }}</div>
+                                                    <div class="w-16 h-1 bg-white/30 rounded-full mx-auto mb-8"></div>
+                                                    <div class="text-3xl md:text-5xl font-bold">{{ currentItem.meaning }}</div>
+                                                </template>
+                                                <template v-else>
+                                                    <div class="text-sm opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
+                                                    <div class="text-5xl md:text-6xl font-bold mb-4">{{ currentItem.word }}</div>
+                                                    <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
+                                                    <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
+                                                </template>
+                                            </div>
+                                            
+                                            <div v-if="currentItem.note" class="mt-8 bg-black/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                                                {{ currentItem.note }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Desktop Next Button (Hidden on Mobile) -->
+                            <!-- Desktop Next Button -->
                             <button @click="nextCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors ml-4 disabled:opacity-30" :disabled="currentIndex === currentDeck.length - 1">
                                 <icon-chevron-right size="40"></icon-chevron-right>
                             </button>
                         </div>
 
-                        <!-- Desktop Controls Hint (Hidden on Mobile) -->
+                        <!-- Desktop Controls Hint -->
                         <div class="hidden md:block text-center mb-2 text-slate-400 text-xs font-medium">
                             <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">←</span>沒記住 &nbsp; 
                             <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">→</span>記住了 &nbsp; 
@@ -265,7 +302,7 @@
                             <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">Space</span>翻面
                         </div>
 
-                        <!-- MOBILE Action Buttons (Nav Only) -->
+                        <!-- MOBILE Action Buttons (Nav Only - Updated text) -->
                         <div class="md:hidden w-full max-w-md flex gap-3 h-16 shrink-0 mb-2">
                             <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
                                 <icon-chevron-left size="24"></icon-chevron-left><span class="text-xs">上一張</span>
@@ -377,7 +414,7 @@
         </div>
 
         <!-- 3. MOBILE BOTTOM NAV (Hidden on Desktop, Fixed height, shrink-0, Safe area padding) -->
-        <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe z-50">
             <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
                 <icon-book size="20"></icon-book>
                 <span class="text-[10px] font-bold mt-1">列表</span>
@@ -396,7 +433,7 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        // --- Clean Data (Removed '字尾音' context for quiz) ---
+        // --- Clean Data ---
         const vocabularyData = [
             { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
             { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
@@ -499,6 +536,12 @@
                 const bookmarks = ref([]);
                 const roundComplete = ref(false);
 
+                // Swipe Logic Refs
+                const dragX = ref(0);
+                const dragY = ref(0); // Not used for logic, but good for reset
+                const isDragging = ref(false);
+                const cardTransition = ref('transform 0.3s ease'); // Initial transition state
+
                 // --- QUIZ STATE ---
                 const quizPhase = ref('setup');
                 const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
@@ -523,6 +566,23 @@
                 const currentQuizItem = computed(() => quizState.value.questions[quizState.value.currentQIndex] || {});
                 const sessionLearnedCount = computed(() => memorizedIds.value.length);
                 const quizPercentage = computed(() => Math.round((quizState.value.score / quizState.value.questions.length) * 100) || 0);
+
+                // Dynamic Styles for Swipe
+                const cardContainerStyle = computed(() => {
+                    const rotate = dragX.value / 20; // 1 degree per 20px move
+                    return {
+                        transform: `translateX(${dragX.value}px) rotate(${rotate}deg)`,
+                        transition: isDragging.value ? 'none' : cardTransition.value
+                    };
+                });
+
+                const swipeOverlayOpacity = computed(() => {
+                    // Opacity goes from 0 to 1 as drag goes from 0 to 100px
+                    const threshold = 100;
+                    const rightOpacity = dragX.value > 0 ? Math.min(dragX.value / threshold, 1) : 0;
+                    const leftOpacity = dragX.value < 0 ? Math.min(Math.abs(dragX.value) / threshold, 1) : 0;
+                    return { right: rightOpacity, left: leftOpacity };
+                });
 
                 // Load Data
                 onMounted(() => {
@@ -553,16 +613,18 @@
                             isFlipped.value = !isFlipped.value;
                         } else if (e.code === 'ArrowUp') {
                             e.preventDefault();
-                            prevCard(); // Desktop Nav Up = Prev
+                            prevCard(); 
                         } else if (e.code === 'ArrowDown') {
                             e.preventDefault();
-                            nextCard(); // Desktop Nav Down = Next
+                            nextCard(); 
                         } else if (e.code === 'ArrowLeft') {
                             e.preventDefault();
-                            handleCardResult('missed'); // Desktop Grading Left = Missed
+                            // Animate Swipe Left via keyboard
+                            simulateSwipe('left');
                         } else if (e.code === 'ArrowRight') {
                             e.preventDefault();
-                            handleCardResult('memorized'); // Desktop Grading Right = Memorized
+                            // Animate Swipe Right via keyboard
+                            simulateSwipe('right');
                         }
                     }
                 };
@@ -595,6 +657,7 @@
                 };
 
                 const handleCardResult = (result) => {
+                    // This function handles data update and transitions to next card
                     const currentCard = currentDeck.value[currentIndex.value];
                     if (result === 'memorized') {
                         if (!memorizedIds.value.includes(currentCard.id)) memorizedIds.value.push(currentCard.id);
@@ -606,8 +669,11 @@
                     }
 
                     if (currentIndex.value < currentDeck.value.length - 1) {
-                        isFlipped.value = false;
-                        setTimeout(() => currentIndex.value++, 150);
+                        setTimeout(() => {
+                            isFlipped.value = false;
+                            dragX.value = 0; // Ensure reset
+                            currentIndex.value++;
+                        }, 200); // Slight delay to allow fly-out animation if triggered via swipe
                     } else {
                         roundComplete.value = true;
                     }
@@ -641,39 +707,69 @@
                     flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh';
                 };
 
-                // --- Touch Logic ---
-                const touchStartX = ref(null);
-                const touchCurrentX = ref(null); // Track for visual feedback
-                
-                const onTouchStart = (e) => { 
-                    touchStartX.value = e.targetTouches[0].clientX; 
-                    touchCurrentX.value = touchStartX.value;
+                // --- Touch / Mouse Logic for Swipe ---
+                let startX = 0;
+                let startY = 0;
+                let startTime = 0;
+
+                const onTouchStart = (e) => {
+                    if(e.target.closest('button')) return; // Ignore swipes on buttons
+                    isDragging.value = true;
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    startTime = Date.now();
+                    cardTransition.value = 'none'; // Disable transition for direct follow
                 };
-                
+
                 const onTouchMove = (e) => {
-                    touchCurrentX.value = e.targetTouches[0].clientX;
+                    if (!isDragging.value) return;
+                    const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    const diffX = currentX - startX;
+                    // Optional: prevent swipe if vertical scroll is dominant?
+                    dragX.value = diffX;
                 };
 
                 const onTouchEnd = (e) => {
-                    if (!touchStartX.value) return;
-                    const endX = e.changedTouches[0].clientX;
-                    const diff = touchStartX.value - endX; // Positive = Swipe Left, Negative = Swipe Right
-                    
-                    // Logic: Swipe Left -> Next Card (or Missed?)
-                    // User requested: 
-                    // Right Swipe (Finger moves Left to Right, diff negative) -> Memorized
-                    // Left Swipe (Finger moves Right to Left, diff positive) -> Missed
-                    
-                    if (diff < -50) { 
+                    if (!isDragging.value) return;
+                    isDragging.value = false;
+                    cardTransition.value = 'transform 0.3s ease-out'; // Re-enable smooth transition
+
+                    const threshold = 100; // px to trigger swipe
+                    const timeElapsed = Date.now() - startTime;
+
+                    // Check for Click (Tap) vs Swipe
+                    if (Math.abs(dragX.value) < 5 && timeElapsed < 200) {
+                        // Treat as Click (Flip)
+                        dragX.value = 0;
+                        isFlipped.value = !isFlipped.value;
+                        return;
+                    }
+
+                    // Check Swipe Thresholds
+                    if (dragX.value > threshold) {
                         // Swipe Right (Memorized)
+                        dragX.value = window.innerWidth; // Fly out to right
                         handleCardResult('memorized');
-                    } else if (diff > 50) { 
+                    } else if (dragX.value < -threshold) {
                         // Swipe Left (Missed)
+                        dragX.value = -window.innerWidth; // Fly out to left
+                        handleCardResult('missed');
+                    } else {
+                        // Reset (Not enough swipe)
+                        dragX.value = 0;
+                    }
+                };
+
+                const simulateSwipe = (direction) => {
+                    cardTransition.value = 'transform 0.3s ease-out';
+                    if (direction === 'right') {
+                        dragX.value = window.innerWidth;
+                        handleCardResult('memorized');
+                    } else {
+                        dragX.value = -window.innerWidth;
                         handleCardResult('missed');
                     }
-                    
-                    touchStartX.value = null;
-                    touchCurrentX.value = null;
                 };
 
                 // --- Quiz Logic ---
@@ -767,7 +863,7 @@
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
                     nextCard, prevCard,
-                    onTouchStart, onTouchMove, onTouchEnd, touchStartX, touchCurrentX,
+                    onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
                     // List
                     groupedData,
                     // Quiz
