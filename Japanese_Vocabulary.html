@@ -8,75 +8,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
-        /* Disable double-tap zoom and improve touch handling */
+        /* 1. 基礎設定：禁用雙擊放大，優化觸控 */
         html, body {
-            touch-action: pan-x pan-y; /* Allow scrolling but prevent zoom */
+            touch-action: pan-x pan-y; 
             -ms-touch-action: pan-x pan-y;
             overscroll-behavior-y: none;
-            background-color: #f1f5f9; /* slate-100 */
+            background-color: #f8fafc; /* slate-50 */
+            height: 100%; /* Fallback */
+            height: 100dvh; /* Dynamic Viewport Height */
+            width: 100%;
+            overflow: hidden; /* Prevent body scroll */
         }
 
-        /* Custom CSS for 3D Flip */
+        /* 2. 3D 翻轉特效 */
         .perspective-1000 { perspective: 1000px; }
         .preserve-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
-        
-        /* Flip Class */
         .rotate-y-180 { transform: rotateY(180deg); }
         
-        /* Optimized Transitions */
+        /* 3. 硬體加速與動畫優化 */
+        .gpu-accelerated {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
         .transition-transform-only {
             transition-property: transform;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transition-duration: 300ms;
         }
 
-        /* Custom Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-
-        /* Hide scrollbar */
+        /* 4. 其他工具 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Safe area */
+        
+        /* iPhone 安全區域 */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
 
-        /* Disable selection */
+        /* 禁用選取 */
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-        /* Desktop Hover Effects */
-        @media (min-width: 768px) {
-            .hover-scale { transition: transform 0.2s; }
-            .hover-scale:hover { transform: scale(1.02); }
-        }
-        
-        /* Swipe Feedback Overlays */
+        /* 滑動回饋遮罩 */
         .swipe-overlay {
             transition: opacity 0.1s ease;
             pointer-events: none;
         }
-        
-        /* Modal */
-        .modal-enter-active, .modal-leave-active { transition: opacity 0.2s; }
-        .modal-enter-from, .modal-leave-to { opacity: 0; }
     </style>
 </head>
-<body class="font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
+<body class="font-sans text-slate-800">
 
-    <div id="app" class="flex flex-col md:flex-row h-full w-full">
+    <!-- APP CONTAINER: Full Flex Column -->
+    <div id="app" class="flex flex-col h-full w-full md:flex-row">
         
-        <!-- 1. DESKTOP SIDEBAR -->
+        <!-- === 1. SIDEBAR (Desktop Only) === -->
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">あ</div>
                 <h1 class="font-bold text-xl text-slate-800">五十音記憶</h1>
             </div>
-            
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <button @click="setActiveTab('list')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'list' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-book size="20"></icon-book> 單字列表
@@ -88,47 +79,32 @@
                     <icon-graduation-cap size="20"></icon-graduation-cap> 自我測驗
                 </button>
             </nav>
-
-            <div class="p-6 border-t border-slate-100 shrink-0">
-                <div class="bg-slate-50 p-4 rounded-xl">
-                    <div class="text-xs font-bold text-slate-400 mb-2 uppercase">學習狀態</div>
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm text-slate-600">收藏單字</span>
-                        <span class="font-bold text-yellow-500">{{ bookmarks.length }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-slate-600">待加強</span>
-                        <span class="font-bold text-red-500">{{ missedIds.length }}</span>
-                    </div>
-                </div>
-            </div>
         </aside>
 
-        <!-- 2. MAIN CONTENT AREA -->
-        <div class="flex-1 flex flex-col h-full relative overflow-hidden">
+        <!-- === 2. MAIN CONTENT WRAPPER === -->
+        <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
             
-            <!-- MOBILE HEADER -->
-            <header class="md:hidden h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe">
+            <!-- HEADER (Mobile Only) -->
+            <header class="md:hidden h-14 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
                 <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
-            <!-- CONTENT SCROLL AREA -->
-            <main class="flex-1 overflow-hidden relative bg-slate-50/50 w-full">
+            <!-- MAIN VIEW (Flex-1: Takes all remaining space) -->
+            <main class="flex-1 overflow-hidden relative w-full flex flex-col">
                 
-                <!-- === TAB: LIST VIEW === -->
-                <div v-if="activeTab === 'list'" class="h-full overflow-y-auto no-scrollbar p-4 md:p-8 pb-20 md:pb-8">
+                <!-- VIEW: LIST -->
+                <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-safe">
                     <div class="max-w-5xl mx-auto">
-                        <!-- Mobile Dashboard -->
-                        <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-8">
-                            <div class="flex justify-between text-center divide-x divide-indigo-400 mb-4">
+                        <!-- Stats (Mobile) -->
+                        <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-6">
+                            <div class="flex justify-between text-center divide-x divide-indigo-400">
                                 <div class="flex-1"><div class="text-2xl font-bold">{{ vocabularyData.length }}</div><div class="text-xs opacity-70">總數</div></div>
                                 <div class="flex-1"><div class="text-2xl font-bold text-yellow-300">{{ bookmarks.length }}</div><div class="text-xs opacity-70">收藏</div></div>
                                 <div class="flex-1"><div class="text-2xl font-bold text-red-300">{{ missedIds.length }}</div><div class="text-xs opacity-70">待加強</div></div>
                             </div>
                         </div>
-
-                        <!-- Word List -->
-                        <div class="space-y-6">
+                        <!-- List -->
+                        <div class="space-y-6 pb-4">
                             <div v-for="(items, row) in groupedData" :key="row">
                                 <div class="flex items-center gap-4 mb-3">
                                     <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
@@ -136,18 +112,18 @@
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                                     <div v-for="item in items" :key="item.id" class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group">
-                                        <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg md:text-xl shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-xl shrink-0">
                                             {{ item.kana }}
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-baseline justify-between">
-                                                <span class="font-bold text-slate-800 text-base md:text-lg truncate">{{ item.word }}</span>
+                                                <span class="font-bold text-slate-800 text-lg truncate">{{ item.word }}</span>
                                                 <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
                                             </div>
                                             <div class="text-sm text-slate-500 truncate">{{ item.meaning }}</div>
                                         </div>
-                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200 hover:text-yellow-400'">
-                                            <icon-star :filled="hasBookmark(item.id)" size="20"></icon-star>
+                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0">
+                                            <icon-star :filled="hasBookmark(item.id)" size="20" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                         </button>
                                     </div>
                                 </div>
@@ -156,25 +132,24 @@
                     </div>
                 </div>
 
-                <!-- === TAB: FLASHCARDS === -->
-                <div v-if="activeTab === 'flashcards'" class="h-full flex flex-col relative">
+                <!-- VIEW: FLASHCARDS -->
+                <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
                     
                     <!-- Empty State -->
-                    <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
-                        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full">
-                            <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
+                    <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
                                 <icon-layers size="40"></icon-layers>
                             </div>
-                            <h2 class="text-2xl font-bold text-slate-800 mb-2">單字卡練習</h2>
-                            <p class="text-slate-500 mb-8">請選擇要練習的範圍</p>
-                            <div class="space-y-3">
-                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md">
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背單字了嗎？</h2>
+                            <div class="space-y-3 mt-6">
+                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform">
                                     <icon-layers></icon-layers> 全部單字 ({{ vocabularyData.length }})
                                 </button>
-                                <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50">
                                     <icon-star class="text-yellow-400" filled="true"></icon-star> 收藏單字 ({{ bookmarks.length }})
                                 </button>
-                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold hover:bg-red-100 hover:border-red-200 active:scale-95 transition-all">
+                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform">
                                     <icon-refresh-cw></icon-refresh-cw> 錯題複習 ({{ missedIds.length }})
                                 </button>
                             </div>
@@ -182,25 +157,123 @@
                     </div>
 
                     <!-- Result Screen -->
-                    <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
-                        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 text-center max-w-md w-full">
-                            <div class="w-16 h-16 md:w-20 md:h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto">
+                    <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto">
                                 <icon-trophy size="40"></icon-trophy>
                             </div>
-                            <h2 class="text-2xl font-bold text-slate-800 mb-2">練習完成！</h2>
-                            <div class="flex justify-center gap-8 my-8">
-                                <div><div class="text-3xl font-black text-green-500">{{ sessionLearnedCount }}</div><div class="text-xs text-slate-400 font-bold uppercase tracking-wider">本輪記住</div></div>
-                                <div><div class="text-3xl font-black text-red-500">{{ missedIds.length }}</div><div class="text-xs text-slate-400 font-bold uppercase tracking-wider">剩餘待加強</div></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-6">練習完成！</h2>
+                            <div class="flex justify-center gap-8 mb-8">
+                                <div><div class="text-3xl font-black text-green-500">{{ sessionLearnedCount }}</div><div class="text-xs text-slate-400 font-bold">本輪記住</div></div>
+                                <div><div class="text-3xl font-black text-red-500">{{ missedIds.length }}</div><div class="text-xs text-slate-400 font-bold">剩餘待加強</div></div>
                             </div>
                             <div class="space-y-3">
-                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg">繼續複習錯題</button>
-                                <button @click="startSession('all')" class="w-full bg-slate-100 text-slate-600 px-6 py-4 rounded-xl font-bold hover:bg-slate-200">全部重來</button>
+                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform">繼續複習錯題</button>
+                                <button @click="startSession('all')" class="w-full bg-slate-100 text-slate-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform">全部重來</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Active Flashcard View -->
-                    <div v-else class="flex-1 flex flex-col items-center p-4 md:p-8 h-full select-none">
+                    <!-- Active Card -->
+                    <div v-else class="flex-1 flex flex-col h-full">
+                        <!-- Top Bar -->
+                        <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0">
+                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 shadow-sm flex items-center gap-2">
+                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                            </button>
+                            <span class="font-mono font-bold text-slate-400 text-xs">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
+                            <div class="flex gap-2">
+                                <button @click="shuffleDeck" class="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm active:scale-95"><icon-shuffle size="16"></icon-shuffle></button>
+                                <button @click="showDeckMenu = true" class="p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-600 shadow-sm active:scale-95"><icon-sliders size="16"></icon-sliders></button>
+                            </div>
+                        </div>
+
+                        <!-- Card Area (Takes up all available space) -->
+                        <div class="flex-1 flex items-center justify-center p-4 min-h-0 relative overflow-hidden">
+                            <!-- Desktop Prev Button -->
+                            <button @click="prevCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute left-4 z-20" :disabled="currentIndex === 0">
+                                <icon-chevron-left size="40"></icon-chevron-left>
+                            </button>
+
+                            <div class="relative w-full max-w-sm h-full max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
+                                 @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
+                                 @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd">
+                                
+                                <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
+                                    <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
+                                        <!-- Front -->
+                                        <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border border-white flex flex-col items-center justify-center p-8 z-10">
+                                            <!-- Overlays -->
+                                            <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-check class="text-green-500" size="48"></icon-check></div></div>
+                                            <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-x class="text-red-500" size="48"></icon-x></div></div>
+                                            
+                                            <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                                            </button>
+                                            
+                                            <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
+                                            <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
+                                                {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                            </h2>
+                                            <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
+                                        </div>
+
+                                        <!-- Back -->
+                                        <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-3xl shadow-xl border border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 text-white">
+                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white" size="64"></icon-check></div>
+                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white" size="64"></icon-x></div>
+
+                                            <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
+                                            </button>
+                                            <span class="absolute top-6 left-6 text-7xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
+                                            
+                                            <div class="z-10 text-center w-full">
+                                                <template v-if="flashcardMode === 'jp-zh'">
+                                                    <div class="text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
+                                                    <div class="text-xl opacity-60 font-mono mb-6">{{ currentItem.romaji }}</div>
+                                                    <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
+                                                    <div class="text-3xl font-bold">{{ currentItem.meaning }}</div>
+                                                </template>
+                                                <template v-else>
+                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
+                                                    <div class="text-5xl font-bold mb-4">{{ currentItem.word }}</div>
+                                                    <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
+                                                    <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Desktop Next Button -->
+                            <button @click="nextCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute right-4 z-20" :disabled="currentIndex === currentDeck.length - 1">
+                                <icon-chevron-right size="40"></icon-chevron-right>
+                            </button>
+                        </div>
+
+                        <!-- MOBILE Control Buttons (Fixed Height, Shrink-0) -->
+                        <div class="h-20 shrink-0 w-full max-w-md px-4 flex gap-3 mb-2 md:hidden">
+                            <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                <icon-chevron-left size="24"></icon-chevron-left>
+                                <span class="text-xs mt-1">上一張</span>
+                            </button>
+                            <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                <icon-chevron-right size="24"></icon-chevron-right>
+                                <span class="text-xs mt-1">下一張</span>
+                            </button>
+                        </div>
+
+                        <!-- DESKTOP Control Buttons -->
+                        <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4">
+                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
+                                <icon-x></icon-x> 沒記住 (←)
+                            </button>
+                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
+                                <icon-check></icon-check> 記住了 (→)
+                            </button>
+                        </div>
                         
                         <!-- Deck Menu Modal -->
                         <transition name="modal">
@@ -224,244 +297,98 @@
                                 </div>
                             </div>
                         </transition>
-
-                        <!-- Top Controls -->
-                        <div class="w-full max-w-md flex justify-between items-center mb-4 shrink-0">
-                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-2 rounded-lg text-xs md:text-sm font-bold text-slate-600 shadow-sm border border-slate-200 active:bg-slate-50 flex items-center gap-2">
-                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
-                            </button>
-                            <span class="font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-lg">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
-                            <div class="flex gap-2">
-                                <button @click="shuffleDeck" class="p-2 text-slate-400 active:text-indigo-600 bg-white rounded-lg shadow-sm border border-slate-200">
-                                    <icon-shuffle size="18"></icon-shuffle>
-                                </button>
-                                <button @click="showDeckMenu = true" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg shadow-sm border border-indigo-100 active:scale-95 transition-transform">
-                                    <icon-sliders size="18"></icon-sliders>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Card Area -->
-                        <div class="flex-1 w-full flex items-center justify-center mb-4 relative">
-                            <!-- Desktop Previous Button -->
-                            <button @click="prevCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors mr-4 disabled:opacity-30" :disabled="currentIndex === 0">
-                                <icon-chevron-left size="40"></icon-chevron-left>
-                            </button>
-
-                            <!-- Card Wrapper -->
-                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
-                                 @touchstart="onTouchStart"
-                                 @touchmove="onTouchMove"
-                                 @touchend="onTouchEnd"
-                                 @mousedown="onTouchStart"
-                                 @mousemove="onTouchMove"
-                                 @mouseup="onTouchEnd"
-                                 @mouseleave="onTouchEnd">
-                                
-                                <!-- The Animated Card Container -->
-                                <div class="relative w-full h-full transition-transform-only preserve-3d" 
-                                     :style="cardContainerStyle">
-                                    
-                                    <!-- Card Content (Flip Logic) -->
-                                    <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
-                                        
-                                        <!-- FRONT -->
-                                        <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-2xl border-2 border-white flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden">
-                                            <!-- Swipe Feedback Overlays -->
-                                            <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }">
-                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm"><icon-check class="text-green-500" size="64"></icon-check></div>
-                                            </div>
-                                            <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }">
-                                                <div class="bg-white/90 p-6 rounded-full shadow-lg backdrop-blur-sm"><icon-x class="text-red-500" size="64"></icon-x></div>
-                                            </div>
-
-                                            <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-50 transition-colors z-30">
-                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
-                                            </button>
-                                            
-                                            <span class="text-[10px] md:text-xs font-bold text-indigo-400 tracking-[0.2em] mb-6">QUESTION</span>
-                                            <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'">
-                                                {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
-                                            </h2>
-                                            <p class="mt-8 text-slate-300 text-sm font-bold animate-pulse">輕點翻面 / 滑動評分</p>
-                                        </div>
-
-                                        <!-- BACK -->
-                                        <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-2xl border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 md:p-12 text-white overflow-hidden">
-                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white drop-shadow-lg" size="80"></icon-check></div>
-                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white drop-shadow-lg" size="80"></icon-x></div>
-
-                                            <button @click.stop="toggleBookmark(currentItem.id)" @mousedown.stop @touchstart.stop class="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors z-30">
-                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
-                                            </button>
-                                            <span class="absolute top-8 left-8 text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
-                                            
-                                            <div class="z-10 text-center w-full">
-                                                <template v-if="flashcardMode === 'jp-zh'">
-                                                    <div class="text-3xl md:text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
-                                                    <div class="text-lg md:text-xl opacity-60 font-mono mb-8">{{ currentItem.romaji }}</div>
-                                                    <div class="w-16 h-1 bg-white/30 rounded-full mx-auto mb-8"></div>
-                                                    <div class="text-3xl md:text-5xl font-bold">{{ currentItem.meaning }}</div>
-                                                </template>
-                                                <template v-else>
-                                                    <div class="text-sm opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
-                                                    <div class="text-5xl md:text-6xl font-bold mb-4">{{ currentItem.word }}</div>
-                                                    <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
-                                                    <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
-                                                </template>
-                                            </div>
-                                            <div v-if="currentItem.note" class="mt-8 bg-black/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">{{ currentItem.note }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Desktop Next Button -->
-                            <button @click="nextCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors ml-4 disabled:opacity-30" :disabled="currentIndex === currentDeck.length - 1">
-                                <icon-chevron-right size="40"></icon-chevron-right>
-                            </button>
-                        </div>
-
-                        <!-- Desktop Controls Hint -->
-                        <div class="hidden md:block text-center mb-2 text-slate-400 text-xs font-medium">
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">←</span>沒記住 &nbsp; 
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">→</span>記住了 &nbsp; 
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">↑</span>上張 &nbsp; 
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">↓</span>下張 &nbsp; 
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">Space</span>翻面
-                        </div>
-
-                        <!-- MOBILE Action Buttons -->
-                        <div class="md:hidden w-full max-w-md flex gap-3 h-16 shrink-0 mb-2">
-                            <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
-                                <icon-chevron-left size="24"></icon-chevron-left><span class="text-xs">上一張</span>
-                            </button>
-                            <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
-                                <icon-chevron-right size="24"></icon-chevron-right><span class="text-xs">下一張</span>
-                            </button>
-                        </div>
-                        
-                        <!-- DESKTOP Action Buttons -->
-                        <div class="hidden md:flex w-full max-w-md gap-4 mt-2">
-                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 hover:bg-red-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
-                                <icon-x></icon-x> 沒記住 (←)
-                            </button>
-                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 hover:bg-green-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
-                                <icon-check></icon-check> 記住了 (→)
-                            </button>
-                        </div>
                     </div>
                 </div>
 
-                <!-- === TAB: QUIZ === -->
-                <div v-if="activeTab === 'quiz'" class="h-full overflow-y-auto no-scrollbar">
-                    <!-- Setup -->
+                <!-- VIEW: QUIZ -->
+                <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar">
+                    <!-- Quiz Setup -->
                     <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
-                        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 w-full max-w-lg my-auto">
-                            <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-8 text-indigo-600 mx-auto">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm">
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
                                 <icon-settings size="32"></icon-settings>
                             </div>
-                            <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">測驗設定</h2>
+                            <h2 class="text-xl font-bold text-slate-800 mb-6 text-center">測驗設定</h2>
                             <div class="space-y-6">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題庫來源</label>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題庫來源</label>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <button @click="quizConfig.source = 'all'" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">全部</button>
-                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">收藏</button>
-                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">錯題</button>
+                                        <button @click="quizConfig.source = 'all'" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">全部</button>
+                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">收藏</button>
+                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">錯題</button>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題目數量</label>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題目數量</label>
                                     <div class="grid grid-cols-4 gap-2">
-                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">{{ opt === 'all' ? '全部' : opt }}</button>
+                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">{{ opt === 'all' ? '全部' : opt }}</button>
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">模式</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button @click="quizConfig.mode = 'jp-zh'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'jp-zh' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">日 ⮕ 中</button>
-                                        <button @click="quizConfig.mode = 'zh-jp'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'zh-jp' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">中 ⮕ 日</button>
-                                    </div>
-                                </div>
+                                <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">
+                                    <icon-play-circle size="20"></icon-play-circle> 開始測驗
+                                </button>
                             </div>
-                            <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 active:scale-95 transition-transform mt-8 flex items-center justify-center gap-2">
-                                <icon-play-circle size="24"></icon-play-circle> 開始測驗
-                            </button>
                         </div>
                     </div>
 
-                    <!-- Result -->
-                    <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
-                        <div class="text-8xl mb-6 filter drop-shadow-lg">{{ quizPercentage >= 80 ? '🎉' : '💪' }}</div>
-                        <h2 class="text-3xl font-bold text-slate-800 mb-2">測驗結束</h2>
-                        <div class="my-10 p-8 bg-white rounded-3xl shadow-lg border border-slate-100 w-full max-w-xs">
-                            <div class="text-6xl font-black text-indigo-600 mb-2">{{ quizPercentage }}%</div>
-                            <div class="text-slate-400 font-bold">答對 {{ quizState.score }} / {{ quizState.questions.length }} 題</div>
-                        </div>
-                        <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-10 py-4 rounded-full font-bold shadow-xl hover:bg-indigo-700 active:scale-95 transition-transform flex items-center gap-2">
-                            <icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次
-                        </button>
-                    </div>
-
-                    <!-- Playing -->
-                    <div v-else class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-20 md:pb-8 relative">
+                    <!-- Quiz Playing -->
+                    <div v-else-if="quizPhase === 'playing'" class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-safe relative">
+                        <button @click="quizPhase = 'setup'" class="absolute top-4 left-4 p-2 text-slate-400 active:text-red-500 z-20"><icon-x size="24"></icon-x></button>
                         
-                        <!-- Abort Quiz Button -->
-                        <button @click="quizPhase = 'setup'" class="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 active:text-red-500 transition-colors z-20">
-                            <icon-x size="24"></icon-x>
-                        </button>
-
-                        <div class="flex justify-end items-center mb-4 md:mb-6 mt-2">
-                            <div class="flex items-center gap-3">
-                                <span class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full text-sm md:text-base">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
-                                <span class="text-slate-400 font-bold text-sm md:text-base">Score: {{ quizState.score }}</span>
-                            </div>
+                        <div class="flex justify-end mb-4 mt-2">
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg text-sm">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
                         </div>
 
-                        <div class="bg-white p-8 md:p-16 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 md:mb-6 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
                             <div v-if="quizState.lastCorrect === true" class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-check class="text-green-500 drop-shadow-md" size="80"></icon-check></div>
                             <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="80"></icon-x></div>
                             
-                            <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-4 md:mb-6">QUESTION</span>
-                            <template v-if="quizConfig.mode === 'jp-zh'">
-                                <h2 class="text-4xl md:text-7xl font-bold text-slate-800 mb-2 md:mb-4">{{ currentQuizItem.word }}</h2>
-                                <p class="text-indigo-400 text-lg md:text-2xl font-medium">{{ currentQuizItem.kana }}</p>
-                            </template>
-                            <template v-else>
-                                <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-2">{{ currentQuizItem.meaning }}</h2>
-                            </template>
+                            <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
+                            <h2 class="text-4xl font-bold text-slate-800 mb-2">{{ quizConfig.mode === 'jp-zh' ? currentQuizItem.word : currentQuizItem.meaning }}</h2>
+                            <p v-if="quizConfig.mode === 'jp-zh'" class="text-indigo-400 text-xl">{{ currentQuizItem.kana }}</p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0 pb-4">
                             <button v-for="(opt, i) in quizState.options" :key="i" 
                                 :disabled="quizState.lastCorrect !== null"
                                 @click="handleQuizAnswer(opt)"
-                                class="p-4 md:p-5 rounded-xl text-left font-bold border-2 transition-all text-base md:text-lg relative overflow-hidden"
+                                class="p-4 rounded-xl text-left font-bold border-2 transition-all relative overflow-hidden"
                                 :class="getQuizOptionClass(opt)"
                             >
                                 {{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}
-                                <span v-if="quizConfig.mode === 'zh-jp' && (quizState.lastCorrect !== null)" class="ml-2 text-sm font-normal opacity-70">({{ opt.kana }})</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Quiz Result -->
+                    <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">{{ quizPercentage >= 80 ? '🎉' : '💪' }}</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">測驗結束</h2>
+                        <div class="my-8 p-6 bg-white rounded-2xl shadow-md border border-slate-100 w-full max-w-xs">
+                            <div class="text-5xl font-black text-indigo-600 mb-2">{{ quizPercentage }}%</div>
+                            <div class="text-slate-400 font-bold">答對 {{ quizState.score }} / {{ quizState.questions.length }} 題</div>
+                        </div>
+                        <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2">
+                            <icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次
+                        </button>
                     </div>
                 </div>
 
             </main>
         </div>
 
-        <!-- 3. MOBILE BOTTOM NAV (Hidden on Desktop, Fixed height, shrink-0, Safe area padding) -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
-            <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
-                <icon-book size="20"></icon-book>
+        <!-- === 3. FOOTER (Mobile Only) === -->
+        <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
+            <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-book size="24"></icon-book>
                 <span class="text-[10px] font-bold mt-1">列表</span>
             </button>
-            <button @click="setActiveTab('flashcards')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'flashcards' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
-                <icon-layers size="20"></icon-layers>
+            <button @click="setActiveTab('flashcards')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'flashcards' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-layers size="24"></icon-layers>
                 <span class="text-[10px] font-bold mt-1">背單字</span>
             </button>
-            <button @click="setActiveTab('quiz')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'quiz' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'">
-                <icon-graduation-cap size="20"></icon-graduation-cap>
+            <button @click="setActiveTab('quiz')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'quiz' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-graduation-cap size="24"></icon-graduation-cap>
                 <span class="text-[10px] font-bold mt-1">測驗</span>
             </button>
         </nav>
@@ -470,7 +397,7 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        // --- Clean Data (Removed '字尾音' context for quiz) ---
+        // --- Data ---
         const vocabularyData = [
             { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
             { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
@@ -520,7 +447,7 @@
             { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
         ];
 
-        // --- ICONS Component (Inline SVG) ---
+        // --- ICONS ---
         const Icon = {
             props: ['name', 'size', 'filled'],
             template: `
@@ -575,24 +502,17 @@
                 const bookmarks = ref([]);
                 const roundComplete = ref(false);
                 const showDeckMenu = ref(false);
-                const currentSessionType = ref('all'); // Track current session type
+                const currentSessionType = ref('all');
 
                 // Swipe Logic Refs
                 const dragX = ref(0);
-                const dragY = ref(0); // Not used for logic, but good for reset
                 const isDragging = ref(false);
-                const cardTransition = ref('transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'); // Optimized Initial transition state
+                const cardTransition = ref('transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)');
 
                 // --- QUIZ STATE ---
                 const quizPhase = ref('setup');
                 const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
-                const quizState = ref({
-                    score: 0,
-                    currentQIndex: 0,
-                    options: [],
-                    lastCorrect: null,
-                    questions: []
-                });
+                const quizState = ref({ score: 0, currentQIndex: 0, options: [], lastCorrect: null, questions: [] });
 
                 // Computed
                 const groupedData = computed(() => {
@@ -608,17 +528,15 @@
                 const sessionLearnedCount = computed(() => memorizedIds.value.length);
                 const quizPercentage = computed(() => Math.round((quizState.value.score / quizState.value.questions.length) * 100) || 0);
 
-                // Dynamic Styles for Swipe
                 const cardContainerStyle = computed(() => {
-                    const rotate = dragX.value / 20; // 1 degree per 20px move
+                    const rotate = dragX.value / 20;
                     return {
-                        transform: `translateX(${dragX.value}px) rotate(${rotate}deg)`,
+                        transform: `translate3d(${dragX.value}px, 0, 0) rotate(${rotate}deg)`,
                         transition: isDragging.value ? 'none' : cardTransition.value
                     };
                 });
 
                 const swipeOverlayOpacity = computed(() => {
-                    // Opacity goes from 0 to 1 as drag goes from 0 to 100px
                     const threshold = 100;
                     const rightOpacity = dragX.value > 0 ? Math.min(dragX.value / threshold, 1) : 0;
                     const leftOpacity = dragX.value < 0 ? Math.min(Math.abs(dragX.value) / threshold, 1) : 0;
@@ -633,8 +551,6 @@
                         const savedMissed = localStorage.getItem('jp_app_missed');
                         if (savedMissed) missedIds.value = JSON.parse(savedMissed);
                     } catch(e) { console.error(e); }
-                    
-                    // Keyboard Support
                     window.addEventListener('keydown', handleKeydown);
                 });
 
@@ -642,37 +558,21 @@
                     window.removeEventListener('keydown', handleKeydown);
                 });
 
-                // Watchers
                 watch(bookmarks, (newVal) => localStorage.setItem('jp_app_bookmarks', JSON.stringify(newVal)), { deep: true });
                 watch(missedIds, (newVal) => localStorage.setItem('jp_app_missed', JSON.stringify(newVal)), { deep: true });
 
-                // --- METHODS ---
+                // Methods
                 const handleKeydown = (e) => {
                     if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0 && !showDeckMenu.value) {
-                        if (e.code === 'Space') {
-                            e.preventDefault();
-                            isFlipped.value = !isFlipped.value;
-                        } else if (e.code === 'ArrowUp') {
-                            e.preventDefault();
-                            prevCard(); 
-                        } else if (e.code === 'ArrowDown') {
-                            e.preventDefault();
-                            nextCard(); 
-                        } else if (e.code === 'ArrowLeft') {
-                            e.preventDefault();
-                            // Animate Swipe Left via keyboard
-                            simulateSwipe('left');
-                        } else if (e.code === 'ArrowRight') {
-                            e.preventDefault();
-                            // Animate Swipe Right via keyboard
-                            simulateSwipe('right');
-                        }
+                        if (e.code === 'Space') { e.preventDefault(); isFlipped.value = !isFlipped.value; }
+                        else if (e.code === 'ArrowUp') { e.preventDefault(); prevCard(); }
+                        else if (e.code === 'ArrowDown') { e.preventDefault(); nextCard(); }
+                        else if (e.code === 'ArrowLeft') { e.preventDefault(); simulateSwipe('left'); }
+                        else if (e.code === 'ArrowRight') { e.preventDefault(); simulateSwipe('right'); }
                     }
                 };
 
-                const setActiveTab = (tab) => {
-                    activeTab.value = tab;
-                };
+                const setActiveTab = (tab) => { activeTab.value = tab; };
 
                 const startSession = (type) => {
                     let deck = [];
@@ -680,10 +580,7 @@
                     else if (type === 'bookmarks') deck = vocabularyData.filter(item => bookmarks.value.includes(item.id));
                     else if (type === 'missed') deck = vocabularyData.filter(item => missedIds.value.includes(item.id));
 
-                    if (deck.length === 0) {
-                        // Optional: alert user if empty
-                        return;
-                    }
+                    if (deck.length === 0) return;
 
                     currentSessionType.value = type;
                     currentDeck.value = deck;
@@ -702,13 +599,10 @@
                 };
 
                 const handleCardResult = (result) => {
-                    // This function handles data update and transitions to next card
                     const currentCard = currentDeck.value[currentIndex.value];
                     if (result === 'memorized') {
                         if (!memorizedIds.value.includes(currentCard.id)) memorizedIds.value.push(currentCard.id);
-                        if (missedIds.value.includes(currentCard.id)) {
-                            missedIds.value = missedIds.value.filter(id => id !== currentCard.id);
-                        }
+                        if (missedIds.value.includes(currentCard.id)) missedIds.value = missedIds.value.filter(id => id !== currentCard.id);
                     } else {
                         if (!missedIds.value.includes(currentCard.id)) missedIds.value.push(currentCard.id);
                     }
@@ -716,9 +610,9 @@
                     if (currentIndex.value < currentDeck.value.length - 1) {
                         setTimeout(() => {
                             isFlipped.value = false;
-                            dragX.value = 0; // Ensure reset
+                            dragX.value = 0;
                             currentIndex.value++;
-                        }, 200); // Slight delay to allow fly-out animation if triggered via swipe
+                        }, 200);
                     } else {
                         roundComplete.value = true;
                     }
@@ -739,75 +633,58 @@
                 };
 
                 const toggleBookmark = (id) => {
-                    if (bookmarks.value.includes(id)) {
-                        bookmarks.value = bookmarks.value.filter(bid => bid !== id);
-                    } else {
-                        bookmarks.value.push(id);
-                    }
+                    if (bookmarks.value.includes(id)) bookmarks.value = bookmarks.value.filter(bid => bid !== id);
+                    else bookmarks.value.push(id);
                 };
 
                 const hasBookmark = (id) => bookmarks.value.includes(id);
+                const toggleFlashcardMode = () => { flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh'; };
 
-                const toggleFlashcardMode = () => {
-                    flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh';
-                };
-
-                // --- Touch / Mouse Logic for Swipe ---
+                // Touch Logic
                 let startX = 0;
-                let startY = 0;
                 let startTime = 0;
 
                 const onTouchStart = (e) => {
-                    if(e.target.closest('button')) return; // Ignore swipes on buttons
+                    if(e.target.closest('button')) return;
                     isDragging.value = true;
                     startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
                     startTime = Date.now();
-                    cardTransition.value = 'none'; // Disable transition for direct follow
+                    cardTransition.value = 'none';
                 };
 
                 const onTouchMove = (e) => {
                     if (!isDragging.value) return;
                     const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-                    const diffX = currentX - startX;
-                    // Optional: prevent swipe if vertical scroll is dominant?
-                    dragX.value = diffX;
+                    dragX.value = currentX - startX;
                 };
 
                 const onTouchEnd = (e) => {
                     if (!isDragging.value) return;
                     isDragging.value = false;
-                    cardTransition.value = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; // Use optimized transition
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
-                    const threshold = 80; // Lower threshold for easier swipe
-                    const clickThreshold = 10; // Increased threshold for "click" detection
+                    const threshold = 80;
+                    const clickThreshold = 10; // Pixels allowance for a click
 
-                    // Check for Click (Tap) vs Swipe - Priority to Click if movement is minimal
                     if (Math.abs(dragX.value) < clickThreshold) {
-                        // Treat as Click (Flip)
-                        dragX.value = 0; // Reset position immediately
+                        dragX.value = 0;
                         isFlipped.value = !isFlipped.value;
                         return;
                     }
 
-                    // Check Swipe Thresholds
                     if (dragX.value > threshold) {
-                        // Swipe Right (Memorized)
-                        dragX.value = window.innerWidth; // Fly out to right
+                        dragX.value = window.innerWidth;
                         handleCardResult('memorized');
                     } else if (dragX.value < -threshold) {
-                        // Swipe Left (Missed)
-                        dragX.value = -window.innerWidth; // Fly out to left
+                        dragX.value = -window.innerWidth;
                         handleCardResult('missed');
                     } else {
-                        // Reset (Not enough swipe)
                         dragX.value = 0;
                     }
                 };
 
                 const simulateSwipe = (direction) => {
-                    cardTransition.value = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                     if (direction === 'right') {
                         dragX.value = window.innerWidth;
                         handleCardResult('memorized');
@@ -817,45 +694,23 @@
                     }
                 };
 
-                // --- Quiz Logic ---
                 const startQuiz = () => {
                     let pool = [];
-                    
-                    // Filter by Source
-                    if (quizConfig.value.source === 'bookmarks') {
-                        pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
-                    } else if (quizConfig.value.source === 'missed') {
-                        pool = vocabularyData.filter(item => missedIds.value.includes(item.id));
-                    } else {
-                        pool = [...vocabularyData];
-                    }
+                    if (quizConfig.value.source === 'bookmarks') pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
+                    else if (quizConfig.value.source === 'missed') pool = vocabularyData.filter(item => missedIds.value.includes(item.id));
+                    else pool = [...vocabularyData];
 
-                    // Shuffle
                     pool = pool.sort(() => 0.5 - Math.random());
-
-                    // Filter by Count
-                    if (quizConfig.value.count !== 'all') {
-                        pool = pool.slice(0, quizConfig.value.count);
-                    }
+                    if (quizConfig.value.count !== 'all') pool = pool.slice(0, quizConfig.value.count);
                     
-                    if (pool.length === 0) {
-                        alert('選定的範圍沒有題目！');
-                        return;
-                    }
+                    if (pool.length === 0) { alert('選定的範圍沒有題目！'); return; }
 
-                    quizState.value = {
-                        questions: pool,
-                        currentQIndex: 0,
-                        score: 0,
-                        lastCorrect: null,
-                        options: generateOptions(pool[0])
-                    };
+                    quizState.value = { questions: pool, currentQIndex: 0, score: 0, lastCorrect: null, options: generateOptions(pool[0]) };
                     quizPhase.value = 'playing';
                 };
 
                 const generateOptions = (correctItem) => {
-                    const incorrect = vocabularyData.filter(item => item.id !== correctItem.id)
-                        .sort(() => 0.5 - Math.random()).slice(0, 3);
+                    const incorrect = vocabularyData.filter(item => item.id !== correctItem.id).sort(() => 0.5 - Math.random()).slice(0, 3);
                     return [correctItem, ...incorrect].sort(() => 0.5 - Math.random());
                 };
 
@@ -863,16 +718,12 @@
                     if (quizState.value.lastCorrect !== null) return;
                     
                     const currentQ = quizState.value.questions[quizState.value.currentQIndex];
-                    let isCorrect = quizConfig.value.mode === 'jp-zh' 
-                        ? selectedOption.meaning === currentQ.meaning 
-                        : selectedOption.word === currentQ.word;
+                    let isCorrect = quizConfig.value.mode === 'jp-zh' ? selectedOption.meaning === currentQ.meaning : selectedOption.word === currentQ.word;
 
                     quizState.value.lastCorrect = isCorrect;
                     if (isCorrect) {
                         quizState.value.score++;
-                        if (missedIds.value.includes(currentQ.id)) {
-                             missedIds.value = missedIds.value.filter(id => id !== currentQ.id);
-                        }
+                        if (missedIds.value.includes(currentQ.id)) missedIds.value = missedIds.value.filter(id => id !== currentQ.id);
                     } else {
                         if (!missedIds.value.includes(currentQ.id)) missedIds.value.push(currentQ.id);
                     }
@@ -890,12 +741,8 @@
 
                 const getQuizOptionClass = (opt) => {
                     if (quizState.value.lastCorrect === null) return 'bg-white border-slate-100 active:bg-indigo-50 hover:border-indigo-200';
-                    
                     const currentQ = quizState.value.questions[quizState.value.currentQIndex];
-                    const isCorrect = quizConfig.value.mode === 'jp-zh' 
-                        ? opt.meaning === currentQ.meaning 
-                        : opt.word === currentQ.word;
-
+                    const isCorrect = quizConfig.value.mode === 'jp-zh' ? opt.meaning === currentQ.meaning : opt.word === currentQ.word;
                     if (isCorrect) return 'border-green-500 bg-green-50 text-green-700';
                     if (quizState.value.lastCorrect === false && !isCorrect) return 'opacity-40 border-slate-100';
                     return 'bg-white border-slate-100';
@@ -903,18 +750,14 @@
 
                 return {
                     vocabularyData, activeTab, setActiveTab,
-                    // Flashcard
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
                     nextCard, prevCard,
                     onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
-                    // List
                     groupedData,
-                    // Quiz
                     quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
                     startQuiz, handleQuizAnswer, getQuizOptionClass,
-                    // New Features
                     showDeckMenu, currentSessionType
                 };
             }
