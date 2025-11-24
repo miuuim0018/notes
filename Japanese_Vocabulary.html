@@ -10,17 +10,27 @@
     <style>
         /* Disable double-tap zoom and improve touch handling */
         html, body {
-            touch-action: manipulation;
-            -ms-touch-action: manipulation;
-            overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+            touch-action: pan-x pan-y; /* Allow scrolling but prevent zoom */
+            -ms-touch-action: pan-x pan-y;
+            overscroll-behavior-y: none;
+            background-color: #f1f5f9; /* slate-100 */
         }
 
         /* Custom CSS for 3D Flip */
         .perspective-1000 { perspective: 1000px; }
         .preserve-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
+        
+        /* Flip Class */
         .rotate-y-180 { transform: rotateY(180deg); }
         
+        /* Optimized Transitions */
+        .transition-transform-only {
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+
         /* Custom Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -28,11 +38,11 @@
         }
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 
-        /* Hide scrollbar for cleaner UI */
+        /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Safe area padding */
+        /* Safe area */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
 
@@ -47,20 +57,20 @@
         
         /* Swipe Feedback Overlays */
         .swipe-overlay {
-            transition: opacity 0.2s ease;
+            transition: opacity 0.1s ease;
             pointer-events: none;
         }
-
-        /* Modal Backdrop */
-        .modal-enter-active, .modal-leave-active { transition: opacity 0.3s; }
+        
+        /* Modal */
+        .modal-enter-active, .modal-leave-active { transition: opacity 0.2s; }
         .modal-enter-from, .modal-leave-to { opacity: 0; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
+<body class="font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
 
     <div id="app" class="flex flex-col md:flex-row h-full w-full">
         
-        <!-- 1. DESKTOP SIDEBAR (Hidden on Mobile) -->
+        <!-- 1. DESKTOP SIDEBAR -->
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">あ</div>
@@ -225,14 +235,13 @@
                                 <button @click="shuffleDeck" class="p-2 text-slate-400 active:text-indigo-600 bg-white rounded-lg shadow-sm border border-slate-200">
                                     <icon-shuffle size="18"></icon-shuffle>
                                 </button>
-                                <!-- New Deck Settings Button -->
                                 <button @click="showDeckMenu = true" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg shadow-sm border border-indigo-100 active:scale-95 transition-transform">
                                     <icon-sliders size="18"></icon-sliders>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Card Area (Flex) -->
+                        <!-- Card Area -->
                         <div class="flex-1 w-full flex items-center justify-center mb-4 relative">
                             <!-- Desktop Previous Button -->
                             <button @click="prevCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors mr-4 disabled:opacity-30" :disabled="currentIndex === 0">
@@ -240,9 +249,9 @@
                             </button>
 
                             <!-- Card Wrapper -->
-                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
-                                 @click="isFlipped = !isFlipped"
+                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
                                  @touchstart="onTouchStart"
+                                 @touchmove="onTouchMove"
                                  @touchend="onTouchEnd"
                                  @mousedown="onTouchStart"
                                  @mousemove="onTouchMove"
@@ -250,11 +259,11 @@
                                  @mouseleave="onTouchEnd">
                                 
                                 <!-- The Animated Card Container -->
-                                <div class="relative w-full h-full transition-transform duration-100 ease-linear will-change-transform preserve-3d cursor-grab active:cursor-grabbing" 
+                                <div class="relative w-full h-full transition-transform-only preserve-3d" 
                                      :style="cardContainerStyle">
                                     
                                     <!-- Card Content (Flip Logic) -->
-                                    <div class="relative w-full h-full transition-all duration-300 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
+                                    <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
                                         
                                         <!-- FRONT -->
                                         <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-2xl border-2 border-white flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden">
@@ -461,7 +470,7 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        // --- Clean Data ---
+        // --- Clean Data (Removed '字尾音' context for quiz) ---
         const vocabularyData = [
             { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
             { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
@@ -572,7 +581,7 @@
                 const dragX = ref(0);
                 const dragY = ref(0); // Not used for logic, but good for reset
                 const isDragging = ref(false);
-                const cardTransition = ref('transform 0.3s ease'); // Initial transition state
+                const cardTransition = ref('transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'); // Optimized Initial transition state
 
                 // --- QUIZ STATE ---
                 const quizPhase = ref('setup');
@@ -769,15 +778,15 @@
                 const onTouchEnd = (e) => {
                     if (!isDragging.value) return;
                     isDragging.value = false;
-                    cardTransition.value = 'transform 0.3s ease-out'; // Re-enable smooth transition
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; // Use optimized transition
 
-                    const threshold = 100; // px to trigger swipe
-                    const timeElapsed = Date.now() - startTime;
+                    const threshold = 80; // Lower threshold for easier swipe
+                    const clickThreshold = 10; // Increased threshold for "click" detection
 
-                    // Check for Click (Tap) vs Swipe
-                    if (Math.abs(dragX.value) < 5 && timeElapsed < 200) {
+                    // Check for Click (Tap) vs Swipe - Priority to Click if movement is minimal
+                    if (Math.abs(dragX.value) < clickThreshold) {
                         // Treat as Click (Flip)
-                        dragX.value = 0;
+                        dragX.value = 0; // Reset position immediately
                         isFlipped.value = !isFlipped.value;
                         return;
                     }
@@ -798,7 +807,7 @@
                 };
 
                 const simulateSwipe = (direction) => {
-                    cardTransition.value = 'transform 0.3s ease-out';
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                     if (direction === 'right') {
                         dragX.value = window.innerWidth;
                         handleCardResult('memorized');
