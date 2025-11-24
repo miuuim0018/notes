@@ -10,7 +10,7 @@
     <style>
         /* Disable double-tap zoom globally */
         html, body {
-            touch-action: manipulation; /* 關鍵修正：禁用雙擊放大，並加速點擊反應 */
+            touch-action: manipulation;
             -ms-touch-action: manipulation;
         }
 
@@ -31,11 +31,11 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Safe area padding for iPhone X+ Home Indicator */
+        /* Safe area padding */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
 
-        /* Disable selection to feel like an App */
+        /* Disable selection */
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         /* Desktop Hover Effects */
@@ -45,7 +45,6 @@
         }
     </style>
 </head>
-<!-- Use h-[100dvh] for dynamic viewport height on mobile browsers -->
 <body class="bg-slate-100 font-sans text-slate-800 h-[100dvh] w-screen overflow-hidden">
 
     <div id="app" class="flex flex-col md:flex-row h-full w-full">
@@ -84,15 +83,15 @@
             </div>
         </aside>
 
-        <!-- 2. MAIN CONTENT AREA (Flex Column for layout stability) -->
+        <!-- 2. MAIN CONTENT AREA -->
         <div class="flex-1 flex flex-col h-full relative overflow-hidden">
             
-            <!-- MOBILE HEADER (Hidden on Desktop) - Fixed height, shrink-0 -->
+            <!-- MOBILE HEADER -->
             <header class="md:hidden h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe">
                 <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
-            <!-- CONTENT SCROLL AREA (Flex-1 takes remaining space) -->
+            <!-- CONTENT SCROLL AREA -->
             <main class="flex-1 overflow-hidden relative bg-slate-50/50 w-full">
                 
                 <!-- === TAB: LIST VIEW === -->
@@ -192,9 +191,15 @@
                             </button>
                         </div>
 
-                        <!-- Card Area (Flex grow/shrink to fit) -->
-                        <div class="flex-1 w-full max-w-md min-h-0 flex items-center justify-center mb-4 relative">
-                            <div class="relative w-full h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
+                        <!-- Card Area (Flex) -->
+                        <div class="flex-1 w-full flex items-center justify-center mb-4 relative">
+                            <!-- Desktop Previous Button (Hidden on Mobile) -->
+                            <button @click="prevCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors mr-4 disabled:opacity-30" :disabled="currentIndex === 0">
+                                <icon-chevron-left size="40"></icon-chevron-left>
+                            </button>
+
+                            <!-- Card Wrapper -->
+                            <div class="relative w-full max-w-md h-full max-h-[60vh] md:max-h-[600px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-pointer group"
                                  @click="isFlipped = !isFlipped"
                                  @touchstart="onTouchStart"
                                  @touchend="onTouchEnd">
@@ -209,7 +214,7 @@
                                             <icon-check size="24"></icon-check>
                                         </div>
 
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-slate-50">
+                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-slate-50 hover:bg-slate-50 transition-colors">
                                             <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                         </button>
                                         <span class="text-[10px] md:text-xs font-bold text-indigo-400 tracking-widest mb-4 md:mb-6">QUESTION</span>
@@ -220,7 +225,7 @@
                                     </div>
                                     <!-- BACK -->
                                     <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-[2rem] shadow-lg border-2 border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-6 md:p-12 text-white">
-                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-white/10">
+                                        <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-white/10 hover:bg-white/10 transition-colors">
                                             <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
                                         </button>
                                         <span class="absolute top-6 left-6 text-6xl md:text-8xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
@@ -244,11 +249,20 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Desktop Next Button (Hidden on Mobile) -->
+                            <button @click="nextCard" class="hidden md:flex p-3 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-white transition-colors ml-4 disabled:opacity-30" :disabled="currentIndex === currentDeck.length - 1">
+                                <icon-chevron-right size="40"></icon-chevron-right>
+                            </button>
                         </div>
 
                         <!-- Desktop Controls Hint (Hidden on Mobile) -->
                         <div class="hidden md:block text-center mb-2 text-slate-400 text-xs font-medium">
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">←</span> 沒記住 &nbsp; <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">→</span> 記住了 &nbsp; <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">Space</span> 翻面
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">←</span>沒記住 &nbsp; 
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">→</span>記住了 &nbsp; 
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">↑</span>上張 &nbsp; 
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">↓</span>下張 &nbsp; 
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1 font-mono">Space</span>翻面
                         </div>
 
                         <!-- MOBILE Action Buttons (Nav Only) -->
