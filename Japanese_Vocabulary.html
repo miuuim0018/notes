@@ -7,52 +7,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
-        /* 1. 基礎設定 */
         html, body {
             touch-action: pan-x pan-y; 
             -ms-touch-action: pan-x pan-y;
             overscroll-behavior-y: none;
             background-color: #f8fafc;
-            /* === 修改點 1: 改用 100dvh 解決手機網址列遮擋問題 === */
             height: 100vh; 
             height: 100dvh; 
             width: 100%;
             overflow: hidden; 
         }
-
-        /* 2. 3D 翻轉特效 */
         .perspective-1000 { perspective: 1000px; }
         .preserve-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        
-        /* 3. 動畫優化 */
         .gpu-accelerated {
             transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
             perspective: 1000px;
+            will-change: transform; /* 增加渲染提示，解決隱形問題 */
         }
-
         .transition-transform-only {
             transition-property: transform;
             transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transition-duration: 300ms;
         }
-
-        /* 4. 其他工具 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* === 修改點 2: 安全區域設定 (避開 iPhone 底部橫條) === */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
-
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-
-        .swipe-overlay {
-            transition: opacity 0.1s ease;
-            pointer-events: none;
-        }
+        .swipe-overlay { transition: opacity 0.1s ease; pointer-events: none; }
     </style>
 </head>
 <body class="font-sans text-slate-800">
@@ -87,13 +72,42 @@
                 
                 <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8">
                     <div class="max-w-5xl mx-auto">
-                        <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-6">
-                            <div class="flex justify-between text-center divide-x divide-indigo-400">
-                                <div class="flex-1"><div class="text-2xl font-bold">{{ vocabularyData.length }}</div><div class="text-xs opacity-70">總數</div></div>
-                                <div class="flex-1"><div class="text-2xl font-bold text-yellow-300">{{ bookmarks.length }}</div><div class="text-xs opacity-70">收藏</div></div>
-                                <div class="flex-1"><div class="text-2xl font-bold text-red-300">{{ missedIds.length }}</div><div class="text-xs opacity-70">待加強</div></div>
-                            </div>
+                        
+                        <div class="md:hidden bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-6 flex gap-2">
+                            <button @click="listFilterMode = 'all'" 
+                                class="flex-1 py-3 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'all' ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'border-transparent text-slate-500'">
+                                <span class="text-xl font-bold">{{ vocabularyData.length }}</span>
+                                <span class="text-[10px] font-bold">全部</span>
+                            </button>
+                            <button @click="listFilterMode = 'bookmarks'" 
+                                class="flex-1 py-3 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'bookmarks' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'border-transparent text-slate-500'">
+                                <span class="text-xl font-bold">{{ bookmarks.length }}</span>
+                                <span class="text-[10px] font-bold">收藏</span>
+                            </button>
+                            <button @click="listFilterMode = 'missed'" 
+                                class="flex-1 py-3 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'missed' ? 'bg-red-50 border-red-200 text-red-700' : 'border-transparent text-slate-500'">
+                                <span class="text-xl font-bold">{{ missedIds.length }}</span>
+                                <span class="text-[10px] font-bold">待加強</span>
+                            </button>
                         </div>
+
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h2 class="font-bold text-slate-400 text-sm">
+                                <span v-if="listFilterMode === 'all'">全部列表</span>
+                                <span v-else-if="listFilterMode === 'bookmarks'">我的收藏</span>
+                                <span v-else>待加強單字</span>
+                            </h2>
+                            <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">清除篩選</button>
+                        </div>
+
+                        <div v-if="Object.keys(groupedData).length === 0" class="text-center py-10 text-slate-400">
+                            <div class="mb-2 text-4xl">📭</div>
+                            <p>沒有符合條件的單字</p>
+                        </div>
+
                         <div class="space-y-6 pb-4">
                             <div v-for="(items, row) in groupedData" :key="row">
                                 <div class="flex items-center gap-4 mb-3">
@@ -125,7 +139,7 @@
                 <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
                     
                     <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
-                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
                             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背單字了嗎？</h2>
                             <div class="space-y-3 mt-6">
@@ -159,7 +173,9 @@
                             <span class="font-mono font-bold text-slate-400 text-xs">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
                             <div class="flex gap-2">
                                 <button @click="shuffleDeck" class="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm active:scale-95"><icon-shuffle size="16"></icon-shuffle></button>
-                                <button @click="showDeckMenu = true" class="p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-600 shadow-sm active:scale-95"><icon-sliders size="16"></icon-sliders></button>
+                                <button @click="showDeckMenu = true" class="p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-600 shadow-sm active:scale-95 relative">
+                                    <icon-sliders size="16"></icon-sliders>
+                                </button>
                             </div>
                         </div>
 
@@ -171,7 +187,9 @@
                             <div class="relative w-full max-w-sm h-full max-h-[420px] md:max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
                                  @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
                                  @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd"
-                                 @click="handleCardClick"> <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
+                                 @click="handleCardClick">
+                                
+                                <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
                                     <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
                                         <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border border-white flex flex-col items-center justify-center p-8 z-10">
                                             <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-check class="text-green-500" size="48"></icon-check></div></div>
@@ -222,14 +240,25 @@
                         </div>
 
                         <div class="h-16 shrink-0 w-full max-w-md px-4 flex gap-3 mb-4 md:hidden mx-auto">
-                            <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
-                                <icon-chevron-left size="20"></icon-chevron-left>
-                                <span class="text-[10px] mt-0.5">上一張</span>
-                            </button>
-                            <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
-                                <icon-chevron-right size="20"></icon-chevron-right>
-                                <span class="text-[10px] mt-0.5">下一張</span>
-                            </button>
+                            <template v-if="mobileControlMode === 'nav'">
+                                <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                    <icon-chevron-left size="20"></icon-chevron-left>
+                                    <span class="text-[10px] mt-0.5">上一張</span>
+                                </button>
+                                <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                    <icon-chevron-right size="20"></icon-chevron-right>
+                                    <span class="text-[10px] mt-0.5">下一張</span>
+                                </button>
+                            </template>
+                            
+                            <template v-else>
+                                <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors active:scale-95">
+                                    <icon-x></icon-x> 沒記住 (←)
+                                </button>
+                                <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-green-50 transition-colors active:scale-95">
+                                    <icon-check></icon-check> 記住了 (→)
+                                </button>
+                            </template>
                         </div>
 
                         <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4 mx-auto">
@@ -245,10 +274,24 @@
                             <div v-if="showDeckMenu" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="showDeckMenu = false">
                                 <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 animate-fade-in">
                                     <div class="flex justify-between items-center mb-6">
-                                        <h3 class="text-lg font-bold text-slate-800">切換題庫</h3>
+                                        <h3 class="text-lg font-bold text-slate-800">卡片設定</h3>
                                         <button @click="showDeckMenu = false" class="p-2 text-slate-400 hover:text-slate-600"><icon-x size="20"></icon-x></button>
                                     </div>
+                                    
+                                    <div class="mb-6 md:hidden">
+                                        <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">底部按鈕功能</label>
+                                        <div class="flex p-1 bg-slate-100 rounded-xl">
+                                            <button @click="mobileControlMode = 'nav'" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all" :class="mobileControlMode === 'nav' ? 'bg-white shadow text-indigo-600' : 'text-slate-400'">
+                                                翻頁
+                                            </button>
+                                            <button @click="mobileControlMode = 'grade'" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all" :class="mobileControlMode === 'grade' ? 'bg-white shadow text-indigo-600' : 'text-slate-400'">
+                                                評分
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div class="space-y-3">
+                                        <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">切換題庫</label>
                                         <button @click="startSession('all'); showDeckMenu = false" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all" :class="currentSessionType === 'all' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
                                             <icon-layers size="20" class="text-indigo-600"></icon-layers> 全部單字
                                         </button>
@@ -340,7 +383,6 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        // --- Data (略 - 與原本相同) ---
         const vocabularyData = [
            { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
            { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
@@ -390,7 +432,6 @@
            { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
         ];
 
-        // --- ICONS (略 - 與原本相同) ---
         const Icon = {
             props: ['name', 'size', 'filled'],
             template: `
@@ -434,6 +475,9 @@
             },
             setup() {
                 const activeTab = ref('list');
+                const listFilterMode = ref('all'); // 新增：控制列表篩選 'all', 'bookmarks', 'missed'
+                const mobileControlMode = ref('nav'); // 新增：控制手機底部按鈕 'nav' (翻頁), 'grade' (評分)
+
                 const currentDeck = ref([]);
                 const currentIndex = ref(0);
                 const isFlipped = ref(false);
@@ -445,7 +489,6 @@
                 const showDeckMenu = ref(false);
                 const currentSessionType = ref('all');
 
-                // Swipe Logic Refs
                 const dragX = ref(0);
                 const isDragging = ref(false);
                 const cardTransition = ref('transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)');
@@ -454,9 +497,14 @@
                 const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
                 const quizState = ref({ score: 0, currentQIndex: 0, options: [], lastCorrect: null, questions: [] });
 
-                // Computed (Unchanged)
+                // Computed
                 const groupedData = computed(() => {
-                    return vocabularyData.reduce((acc, item) => {
+                    // 新增：先過濾，再分組
+                    let data = vocabularyData;
+                    if (listFilterMode.value === 'bookmarks') data = data.filter(item => bookmarks.value.includes(item.id));
+                    else if (listFilterMode.value === 'missed') data = data.filter(item => missedIds.value.includes(item.id));
+
+                    return data.reduce((acc, item) => {
                         if (!acc[item.row]) acc[item.row] = [];
                         acc[item.row].push(item);
                         return acc;
@@ -470,6 +518,7 @@
 
                 const cardContainerStyle = computed(() => {
                     const rotate = dragX.value / 20;
+                    // 確保拖曳為 0 時有預設值
                     return {
                         transform: `translate3d(${dragX.value}px, 0, 0) rotate(${rotate}deg)`,
                         transition: isDragging.value ? 'none' : cardTransition.value
@@ -489,6 +538,8 @@
                         if (savedBookmarks) bookmarks.value = JSON.parse(savedBookmarks);
                         const savedMissed = localStorage.getItem('jp_app_missed');
                         if (savedMissed) missedIds.value = JSON.parse(savedMissed);
+                        const savedControlMode = localStorage.getItem('jp_app_mobile_control');
+                        if (savedControlMode) mobileControlMode.value = savedControlMode;
                     } catch(e) { console.error(e); }
                     window.addEventListener('keydown', handleKeydown);
                 });
@@ -499,6 +550,7 @@
 
                 watch(bookmarks, (newVal) => localStorage.setItem('jp_app_bookmarks', JSON.stringify(newVal)), { deep: true });
                 watch(missedIds, (newVal) => localStorage.setItem('jp_app_missed', JSON.stringify(newVal)), { deep: true });
+                watch(mobileControlMode, (newVal) => localStorage.setItem('jp_app_mobile_control', newVal));
 
                 const handleKeydown = (e) => {
                     if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0 && !showDeckMenu.value) {
@@ -527,6 +579,8 @@
                     roundComplete.value = false;
                     memorizedIds.value = []; 
                     activeTab.value = 'flashcards';
+                    // 強制重置拖曳狀態
+                    dragX.value = 0;
                 };
 
                 const shuffleDeck = () => {
@@ -578,8 +632,6 @@
                 const hasBookmark = (id) => bookmarks.value.includes(id);
                 const toggleFlashcardMode = () => { flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh'; };
 
-                // === 修改點 7: 拆分 Click 和 Swipe 邏輯 ===
-                // 新增一個單獨的點擊處理函數
                 const handleCardClick = () => {
                     if (!isDragging.value) {
                          isFlipped.value = !isFlipped.value;
@@ -591,7 +643,6 @@
                 const onTouchStart = (e) => {
                     if(e.target.closest('button')) return;
                     isDragging.value = true;
-                    // 非常重要：每次觸控開始都歸零，防止上次的殘留值導致誤判
                     dragX.value = 0; 
                     startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
                     cardTransition.value = 'none';
@@ -609,15 +660,11 @@
                     cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
                     const threshold = 80;
-                    
-                    // 如果移動距離很短（例如只是稍微手抖），視為點擊，不進行滑動判斷
-                    // 原本的程式碼在這裡觸發翻面，但現在我們交給 @click 處理，這裡只負責歸零
                     if (Math.abs(dragX.value) < 10) {
                         dragX.value = 0;
                         return;
                     }
 
-                    // 只有當位移夠大時才觸發「記住」或「沒記住」
                     if (dragX.value > threshold) {
                         dragX.value = window.innerWidth;
                         handleCardResult('memorized');
@@ -625,7 +672,6 @@
                         dragX.value = -window.innerWidth;
                         handleCardResult('missed');
                     } else {
-                        // 位移不夠大，回彈
                         dragX.value = 0;
                     }
                 };
@@ -641,7 +687,6 @@
                     }
                 };
 
-                // Quiz Logic (Unchanged)
                 const startQuiz = () => {
                     let pool = [];
                     if (quizConfig.value.source === 'bookmarks') pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
@@ -692,10 +737,11 @@
 
                 return {
                     vocabularyData, activeTab, setActiveTab,
+                    listFilterMode, mobileControlMode, // 新增
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
-                    nextCard, prevCard, handleCardClick, // Export new method
+                    nextCard, prevCard, handleCardClick,
                     onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
                     groupedData, quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
                     startQuiz, handleQuizAnswer, getQuizOptionClass,
