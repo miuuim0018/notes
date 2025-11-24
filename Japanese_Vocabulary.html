@@ -8,6 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
+        /* Disable double-tap zoom globally */
+        html, body {
+            touch-action: manipulation; /* 關鍵修正：禁用雙擊放大，並加速點擊反應 */
+            -ms-touch-action: manipulation;
+        }
+
         /* Custom CSS for 3D Flip */
         .perspective-1000 { perspective: 1000px; }
         .preserve-3d { transform-style: preserve-3d; }
@@ -194,7 +200,15 @@
                                  @touchend="onTouchEnd">
                                 <div class="relative w-full h-full transition-all duration-300 preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
                                     <!-- FRONT -->
-                                    <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-lg border-2 border-white flex flex-col items-center justify-center p-6 md:p-12 z-10">
+                                    <div class="absolute inset-0 backface-hidden bg-white rounded-[2rem] shadow-lg border-2 border-white flex flex-col items-center justify-center p-6 md:p-12 z-10 relative overflow-hidden">
+                                        <!-- Hints for Swipe (Mobile Only) -->
+                                        <div class="md:hidden absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center bg-gradient-to-r from-red-50/50 to-transparent text-red-200 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': touchStartX && touchCurrentX && (touchCurrentX - touchStartX < -30) }">
+                                            <icon-x size="24"></icon-x>
+                                        </div>
+                                        <div class="md:hidden absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center bg-gradient-to-l from-green-50/50 to-transparent text-green-200 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': touchStartX && touchCurrentX && (touchCurrentX - touchStartX > 30) }">
+                                            <icon-check size="24"></icon-check>
+                                        </div>
+
                                         <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full active:bg-slate-50">
                                             <icon-star :filled="hasBookmark(currentItem.id)" size="24" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                         </button>
@@ -232,13 +246,28 @@
                             </div>
                         </div>
 
-                        <!-- Bottom Action Buttons (Shrink-0, Safe from bottom) -->
-                        <div class="w-full max-w-md flex gap-3 md:gap-4 h-16 md:h-20 shrink-0 mb-2">
-                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 active:bg-red-50 rounded-2xl font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 active:scale-95 transition-transform">
-                                <icon-x size="20"></icon-x><span class="text-xs md:text-sm">沒記住</span>
+                        <!-- Desktop Controls Hint (Hidden on Mobile) -->
+                        <div class="hidden md:block text-center mb-2 text-slate-400 text-xs font-medium">
+                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">←</span> 沒記住 &nbsp; <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">→</span> 記住了 &nbsp; <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 mx-1">Space</span> 翻面
+                        </div>
+
+                        <!-- MOBILE Action Buttons (Nav Only) -->
+                        <div class="md:hidden w-full max-w-md flex gap-3 h-16 shrink-0 mb-2">
+                            <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
+                                <icon-chevron-left size="24"></icon-chevron-left><span class="text-xs">上一張</span>
                             </button>
-                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 active:bg-green-50 rounded-2xl font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 active:scale-95 transition-transform">
-                                <icon-check size="20"></icon-check><span class="text-xs md:text-sm">記住了</span>
+                            <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 active:bg-slate-50 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
+                                <icon-chevron-right size="24"></icon-chevron-right><span class="text-xs">下一張</span>
+                            </button>
+                        </div>
+                        
+                        <!-- DESKTOP Action Buttons (Grading) -->
+                        <div class="hidden md:flex w-full max-w-md gap-4 mt-2">
+                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 hover:bg-red-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                                <icon-x></icon-x> 沒記住 (←)
+                            </button>
+                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 hover:bg-green-50 py-4 rounded-xl font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                                <icon-check></icon-check> 記住了 (→)
                             </button>
                         </div>
                     </div>
@@ -257,22 +286,22 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題庫來源</label>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <button @click="quizConfig.source = 'all'" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">全部</button>
-                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">收藏</button>
-                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">錯題</button>
+                                        <button @click="quizConfig.source = 'all'" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">全部</button>
+                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">收藏</button>
+                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-3 rounded-xl font-bold border-2 transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">錯題</button>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">題目數量</label>
                                     <div class="grid grid-cols-4 gap-2">
-                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">{{ opt === 'all' ? '全部' : opt }}</button>
+                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-3 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">{{ opt === 'all' ? '全部' : opt }}</button>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">模式</label>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <button @click="quizConfig.mode = 'jp-zh'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'jp-zh' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">日 ⮕ 中</button>
-                                        <button @click="quizConfig.mode = 'zh-jp'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'zh-jp' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500'">中 ⮕ 日</button>
+                                        <button @click="quizConfig.mode = 'jp-zh'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'jp-zh' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">日 ⮕ 中</button>
+                                        <button @click="quizConfig.mode = 'zh-jp'" class="py-4 rounded-xl font-bold border-2 transition-colors" :class="quizConfig.mode === 'zh-jp' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-indigo-200'">中 ⮕ 日</button>
                                     </div>
                                 </div>
                             </div>
@@ -420,6 +449,8 @@
                 <svg v-else-if="name === 'trophy'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 1 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
                 <svg v-else-if="name === 'settings'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <svg v-else-if="name === 'play-circle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                <svg v-else-if="name === 'chevron-left'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <svg v-else-if="name === 'chevron-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             `
         };
 
@@ -438,6 +469,8 @@
                 'icon-trophy': { ...Icon, data() { return { name: 'trophy' } } },
                 'icon-settings': { ...Icon, data() { return { name: 'settings' } } },
                 'icon-play-circle': { ...Icon, data() { return { name: 'play-circle' } } },
+                'icon-chevron-left': { ...Icon, data() { return { name: 'chevron-left' } } },
+                'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
             },
             setup() {
                 const activeTab = ref('list');
@@ -504,16 +537,18 @@
                         if (e.code === 'Space') {
                             e.preventDefault();
                             isFlipped.value = !isFlipped.value;
+                        } else if (e.code === 'ArrowUp') {
+                            e.preventDefault();
+                            prevCard(); // Desktop Nav Up = Prev
+                        } else if (e.code === 'ArrowDown') {
+                            e.preventDefault();
+                            nextCard(); // Desktop Nav Down = Next
                         } else if (e.code === 'ArrowLeft') {
-                            if (currentIndex.value > 0) {
-                                isFlipped.value = false;
-                                currentIndex.value--;
-                            }
+                            e.preventDefault();
+                            handleCardResult('missed'); // Desktop Grading Left = Missed
                         } else if (e.code === 'ArrowRight') {
-                            if (currentIndex.value < currentDeck.value.length - 1) {
-                                isFlipped.value = false;
-                                currentIndex.value++;
-                            }
+                            e.preventDefault();
+                            handleCardResult('memorized'); // Desktop Grading Right = Memorized
                         }
                     }
                 };
@@ -564,6 +599,20 @@
                     }
                 };
 
+                const nextCard = () => {
+                    if (currentIndex.value < currentDeck.value.length - 1) {
+                        isFlipped.value = false;
+                        currentIndex.value++;
+                    }
+                };
+
+                const prevCard = () => {
+                    if (currentIndex.value > 0) {
+                        isFlipped.value = false;
+                        currentIndex.value--;
+                    }
+                };
+
                 const toggleBookmark = (id) => {
                     if (bookmarks.value.includes(id)) {
                         bookmarks.value = bookmarks.value.filter(bid => bid !== id);
@@ -580,23 +629,37 @@
 
                 // --- Touch Logic ---
                 const touchStartX = ref(null);
-                const onTouchStart = (e) => { touchStartX.value = e.targetTouches[0].clientX; };
+                const touchCurrentX = ref(null); // Track for visual feedback
+                
+                const onTouchStart = (e) => { 
+                    touchStartX.value = e.targetTouches[0].clientX; 
+                    touchCurrentX.value = touchStartX.value;
+                };
+                
+                const onTouchMove = (e) => {
+                    touchCurrentX.value = e.targetTouches[0].clientX;
+                };
+
                 const onTouchEnd = (e) => {
                     if (!touchStartX.value) return;
                     const endX = e.changedTouches[0].clientX;
-                    const diff = touchStartX.value - endX;
-                    if (diff > 50) { 
-                        if (currentIndex.value < currentDeck.value.length - 1) {
-                            isFlipped.value = false;
-                            currentIndex.value++;
-                        }
-                    } else if (diff < -50) { 
-                        if (currentIndex.value > 0) {
-                            isFlipped.value = false;
-                            currentIndex.value--;
-                        }
+                    const diff = touchStartX.value - endX; // Positive = Swipe Left, Negative = Swipe Right
+                    
+                    // Logic: Swipe Left -> Next Card (or Missed?)
+                    // User requested: 
+                    // Right Swipe (Finger moves Left to Right, diff negative) -> Memorized
+                    // Left Swipe (Finger moves Right to Left, diff positive) -> Missed
+                    
+                    if (diff < -50) { 
+                        // Swipe Right (Memorized)
+                        handleCardResult('memorized');
+                    } else if (diff > 50) { 
+                        // Swipe Left (Missed)
+                        handleCardResult('missed');
                     }
+                    
                     touchStartX.value = null;
+                    touchCurrentX.value = null;
                 };
 
                 // --- Quiz Logic ---
@@ -689,7 +752,8 @@
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
-                    onTouchStart, onTouchEnd,
+                    nextCard, prevCard,
+                    onTouchStart, onTouchMove, onTouchEnd, touchStartX, touchCurrentX,
                     // List
                     groupedData,
                     // Quiz
