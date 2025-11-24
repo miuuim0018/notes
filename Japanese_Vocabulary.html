@@ -2,22 +2,22 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- viewport-fit=cover ensures layout extends to full screen including notch area -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>五十音記憶神器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
-        /* 1. 基礎設定：禁用雙擊放大，優化觸控 */
+        /* 1. 基礎設定 */
         html, body {
             touch-action: pan-x pan-y; 
             -ms-touch-action: pan-x pan-y;
             overscroll-behavior-y: none;
-            background-color: #f8fafc; /* slate-50 */
-            height: 100%; /* Fallback */
-            height: 100dvh; /* Dynamic Viewport Height */
+            background-color: #f8fafc;
+            /* === 修改點 1: 改用 100dvh 解決手機網址列遮擋問題 === */
+            height: 100vh; 
+            height: 100dvh; 
             width: 100%;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden; 
         }
 
         /* 2. 3D 翻轉特效 */
@@ -26,7 +26,7 @@
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         
-        /* 3. 硬體加速與動畫優化 */
+        /* 3. 動畫優化 */
         .gpu-accelerated {
             transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
@@ -43,14 +43,12 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* iPhone 安全區域 */
+        /* === 修改點 2: 安全區域設定 (避開 iPhone 底部橫條) === */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
 
-        /* 禁用選取 */
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-        /* 滑動回饋遮罩 */
         .swipe-overlay {
             transition: opacity 0.1s ease;
             pointer-events: none;
@@ -59,10 +57,8 @@
 </head>
 <body class="font-sans text-slate-800">
 
-    <!-- APP CONTAINER: Full Flex Column -->
     <div id="app" class="flex flex-col h-full w-full md:flex-row">
         
-        <!-- === 1. SIDEBAR (Desktop Only) === -->
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">あ</div>
@@ -81,21 +77,16 @@
             </nav>
         </aside>
 
-        <!-- === 2. MAIN CONTENT WRAPPER === -->
         <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
             
-            <!-- HEADER (Mobile Only) -->
-            <header class="md:hidden h-14 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
+            <header class="md:hidden h-12 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
                 <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
-            <!-- MAIN VIEW (Flex-1: Takes all remaining space) -->
             <main class="flex-1 overflow-hidden relative w-full flex flex-col">
                 
-                <!-- VIEW: LIST -->
-                <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-safe">
+                <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8">
                     <div class="max-w-5xl mx-auto">
-                        <!-- Stats (Mobile) -->
                         <div class="md:hidden bg-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-6">
                             <div class="flex justify-between text-center divide-x divide-indigo-400">
                                 <div class="flex-1"><div class="text-2xl font-bold">{{ vocabularyData.length }}</div><div class="text-xs opacity-70">總數</div></div>
@@ -103,7 +94,6 @@
                                 <div class="flex-1"><div class="text-2xl font-bold text-red-300">{{ missedIds.length }}</div><div class="text-xs opacity-70">待加強</div></div>
                             </div>
                         </div>
-                        <!-- List -->
                         <div class="space-y-6 pb-4">
                             <div v-for="(items, row) in groupedData" :key="row">
                                 <div class="flex items-center gap-4 mb-3">
@@ -132,36 +122,23 @@
                     </div>
                 </div>
 
-                <!-- VIEW: FLASHCARDS -->
                 <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
                     
-                    <!-- Empty State -->
                     <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
-                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
-                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
-                                <icon-layers size="40"></icon-layers>
-                            </div>
+                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背單字了嗎？</h2>
                             <div class="space-y-3 mt-6">
-                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform">
-                                    <icon-layers></icon-layers> 全部單字 ({{ vocabularyData.length }})
-                                </button>
-                                <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50">
-                                    <icon-star class="text-yellow-400" filled="true"></icon-star> 收藏單字 ({{ bookmarks.length }})
-                                </button>
-                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform">
-                                    <icon-refresh-cw></icon-refresh-cw> 錯題複習 ({{ missedIds.length }})
-                                </button>
+                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><icon-layers></icon-layers> 全部單字 ({{ vocabularyData.length }})</button>
+                                <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"><icon-star class="text-yellow-400" filled="true"></icon-star> 收藏單字 ({{ bookmarks.length }})</button>
+                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform"><icon-refresh-cw></icon-refresh-cw> 錯題複習 ({{ missedIds.length }})</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Result Screen -->
                     <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
-                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto">
-                                <icon-trophy size="40"></icon-trophy>
-                            </div>
+                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto"><icon-trophy size="40"></icon-trophy></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-6">練習完成！</h2>
                             <div class="flex justify-center gap-8 mb-8">
                                 <div><div class="text-3xl font-black text-green-500">{{ sessionLearnedCount }}</div><div class="text-xs text-slate-400 font-bold">本輪記住</div></div>
@@ -174,10 +151,8 @@
                         </div>
                     </div>
 
-                    <!-- Active Card -->
                     <div v-else class="flex-1 flex flex-col h-full">
-                        <!-- Top Bar -->
-                        <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0">
+                        <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
                             <button @click="toggleFlashcardMode" class="bg-white px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 shadow-sm flex items-center gap-2">
                                 <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
                             </button>
@@ -188,22 +163,17 @@
                             </div>
                         </div>
 
-                        <!-- Card Area (Takes up all available space) -->
                         <div class="flex-1 flex items-center justify-center p-4 min-h-0 relative overflow-hidden">
-                            <!-- Desktop Prev Button -->
                             <button @click="prevCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute left-4 z-20" :disabled="currentIndex === 0">
                                 <icon-chevron-left size="40"></icon-chevron-left>
                             </button>
 
-                            <div class="relative w-full max-w-sm h-full max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
+                            <div class="relative w-full max-w-sm h-full max-h-[420px] md:max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
                                  @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
-                                 @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd">
-                                
-                                <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
+                                 @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd"
+                                 @click="handleCardClick"> <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
                                     <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
-                                        <!-- Front -->
                                         <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border border-white flex flex-col items-center justify-center p-8 z-10">
-                                            <!-- Overlays -->
                                             <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-check class="text-green-500" size="48"></icon-check></div></div>
                                             <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-x class="text-red-500" size="48"></icon-x></div></div>
                                             
@@ -218,7 +188,6 @@
                                             <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
                                         </div>
 
-                                        <!-- Back -->
                                         <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-3xl shadow-xl border border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 text-white">
                                             <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white" size="64"></icon-check></div>
                                             <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white" size="64"></icon-x></div>
@@ -247,26 +216,23 @@
                                 </div>
                             </div>
 
-                            <!-- Desktop Next Button -->
                             <button @click="nextCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute right-4 z-20" :disabled="currentIndex === currentDeck.length - 1">
                                 <icon-chevron-right size="40"></icon-chevron-right>
                             </button>
                         </div>
 
-                        <!-- MOBILE Control Buttons (Fixed Height, Shrink-0) -->
-                        <div class="h-20 shrink-0 w-full max-w-md px-4 flex gap-3 mb-2 md:hidden">
+                        <div class="h-16 shrink-0 w-full max-w-md px-4 flex gap-3 mb-4 md:hidden mx-auto">
                             <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
-                                <icon-chevron-left size="24"></icon-chevron-left>
-                                <span class="text-xs mt-1">上一張</span>
+                                <icon-chevron-left size="20"></icon-chevron-left>
+                                <span class="text-[10px] mt-0.5">上一張</span>
                             </button>
                             <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
-                                <icon-chevron-right size="24"></icon-chevron-right>
-                                <span class="text-xs mt-1">下一張</span>
+                                <icon-chevron-right size="20"></icon-chevron-right>
+                                <span class="text-[10px] mt-0.5">下一張</span>
                             </button>
                         </div>
 
-                        <!-- DESKTOP Control Buttons -->
-                        <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4">
+                        <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4 mx-auto">
                             <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
                                 <icon-x></icon-x> 沒記住 (←)
                             </button>
@@ -274,8 +240,7 @@
                                 <icon-check></icon-check> 記住了 (→)
                             </button>
                         </div>
-                        
-                        <!-- Deck Menu Modal -->
+
                         <transition name="modal">
                             <div v-if="showDeckMenu" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="showDeckMenu = false">
                                 <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 animate-fade-in">
@@ -300,14 +265,10 @@
                     </div>
                 </div>
 
-                <!-- VIEW: QUIZ -->
-                <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar">
-                    <!-- Quiz Setup -->
-                    <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar pb-20">
+                     <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm">
-                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto">
-                                <icon-settings size="32"></icon-settings>
-                            </div>
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-settings size="32"></icon-settings></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-6 text-center">測驗設定</h2>
                             <div class="space-y-6">
                                 <div>
@@ -324,43 +285,28 @@
                                         <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">{{ opt === 'all' ? '全部' : opt }}</button>
                                     </div>
                                 </div>
-                                <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">
-                                    <icon-play-circle size="20"></icon-play-circle> 開始測驗
-                                </button>
+                                <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始測驗</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quiz Playing -->
-                    <div v-else-if="quizPhase === 'playing'" class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 pb-safe relative">
+                    <div v-else-if="quizPhase === 'playing'" class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 relative">
                         <button @click="quizPhase = 'setup'" class="absolute top-4 left-4 p-2 text-slate-400 active:text-red-500 z-20"><icon-x size="24"></icon-x></button>
-                        
                         <div class="flex justify-end mb-4 mt-2">
                             <span class="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg text-sm">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
                         </div>
-
                         <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
                             <div v-if="quizState.lastCorrect === true" class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-check class="text-green-500 drop-shadow-md" size="80"></icon-check></div>
                             <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="80"></icon-x></div>
-                            
                             <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
                             <h2 class="text-4xl font-bold text-slate-800 mb-2">{{ quizConfig.mode === 'jp-zh' ? currentQuizItem.word : currentQuizItem.meaning }}</h2>
                             <p v-if="quizConfig.mode === 'jp-zh'" class="text-indigo-400 text-xl">{{ currentQuizItem.kana }}</p>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0 pb-4">
-                            <button v-for="(opt, i) in quizState.options" :key="i" 
-                                :disabled="quizState.lastCorrect !== null"
-                                @click="handleQuizAnswer(opt)"
-                                class="p-4 rounded-xl text-left font-bold border-2 transition-all relative overflow-hidden"
-                                :class="getQuizOptionClass(opt)"
-                            >
-                                {{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}
-                            </button>
+                            <button v-for="(opt, i) in quizState.options" :key="i" :disabled="quizState.lastCorrect !== null" @click="handleQuizAnswer(opt)" class="p-4 rounded-xl text-left font-bold border-2 transition-all relative overflow-hidden" :class="getQuizOptionClass(opt)">{{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}</button>
                         </div>
                     </div>
 
-                    <!-- Quiz Result -->
                     <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
                         <div class="text-8xl mb-6">{{ quizPercentage >= 80 ? '🎉' : '💪' }}</div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-2">測驗結束</h2>
@@ -368,16 +314,13 @@
                             <div class="text-5xl font-black text-indigo-600 mb-2">{{ quizPercentage }}%</div>
                             <div class="text-slate-400 font-bold">答對 {{ quizState.score }} / {{ quizState.questions.length }} 題</div>
                         </div>
-                        <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2">
-                            <icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次
-                        </button>
+                        <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次</button>
                     </div>
                 </div>
 
             </main>
         </div>
 
-        <!-- === 3. FOOTER (Mobile Only) === -->
         <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
             <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-book size="24"></icon-book>
@@ -397,57 +340,57 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        // --- Data ---
+        // --- Data (略 - 與原本相同) ---
         const vocabularyData = [
-            { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
-            { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
-            { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
-            { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
-            { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
-            { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
-            { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
-            { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
-            { id: 'k4', kana: 'け', word: 'けしき', kanji: '景色', romaji: 'keshiki', meaning: '風景', row: 'か行' },
-            { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
-            { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
-            { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
-            { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
-            { id: 's4', kana: 'せ', word: 'せなか', kanji: '背中', romaji: 'senaka', meaning: '背部', row: 'さ行' },
-            { id: 's5', kana: 'そ', word: 'そうじ', kanji: '掃除', romaji: 'souji', meaning: '打掃', row: 'さ行' },
-            { id: 't1', kana: 'た', word: 'たこ', kanji: '蛸', romaji: 'tako', meaning: '章魚', row: 'た行' },
-            { id: 't2', kana: 'ち', word: 'ちず', kanji: '地図', romaji: 'chizu', meaning: '地圖', row: 'た行' },
-            { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
-            { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
-            { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
-            { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
-            { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
-            { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
-            { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
-            { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
-            { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
-            { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
-            { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
-            { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
-            { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
-            { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
-            { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
-            { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
-            { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
-            { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
-            { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: '山', row: 'や行' },
-            { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
-            { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
-            { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
-            { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
-            { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
-            { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
-            { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
-            { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
-            { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
-            { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
+           { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
+           { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
+           { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
+           { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
+           { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
+           { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
+           { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
+           { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
+           { id: 'k4', kana: 'け', word: 'けしき', kanji: '景色', romaji: 'keshiki', meaning: '風景', row: 'か行' },
+           { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
+           { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
+           { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
+           { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
+           { id: 's4', kana: 'せ', word: 'せなか', kanji: '背中', romaji: 'senaka', meaning: '背部', row: 'さ行' },
+           { id: 's5', kana: 'そ', word: 'そうじ', kanji: '掃除', romaji: 'souji', meaning: '打掃', row: 'さ行' },
+           { id: 't1', kana: 'た', word: 'たこ', kanji: '蛸', romaji: 'tako', meaning: '章魚', row: 'た行' },
+           { id: 't2', kana: 'ち', word: 'ちず', kanji: '地図', romaji: 'chizu', meaning: '地圖', row: 'た行' },
+           { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
+           { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
+           { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
+           { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
+           { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
+           { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
+           { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
+           { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
+           { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
+           { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
+           { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
+           { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
+           { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
+           { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
+           { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
+           { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
+           { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
+           { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
+           { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: 'や行' },
+           { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
+           { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
+           { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
+           { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
+           { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
+           { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
+           { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
+           { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
+           { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
+           { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
         ];
 
-        // --- ICONS ---
+        // --- ICONS (略 - 與原本相同) ---
         const Icon = {
             props: ['name', 'size', 'filled'],
             template: `
@@ -491,8 +434,6 @@
             },
             setup() {
                 const activeTab = ref('list');
-                
-                // --- FLASHCARD STATE ---
                 const currentDeck = ref([]);
                 const currentIndex = ref(0);
                 const isFlipped = ref(false);
@@ -509,12 +450,11 @@
                 const isDragging = ref(false);
                 const cardTransition = ref('transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)');
 
-                // --- QUIZ STATE ---
                 const quizPhase = ref('setup');
                 const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
                 const quizState = ref({ score: 0, currentQIndex: 0, options: [], lastCorrect: null, questions: [] });
 
-                // Computed
+                // Computed (Unchanged)
                 const groupedData = computed(() => {
                     return vocabularyData.reduce((acc, item) => {
                         if (!acc[item.row]) acc[item.row] = [];
@@ -543,7 +483,6 @@
                     return { right: rightOpacity, left: leftOpacity };
                 });
 
-                // Load Data
                 onMounted(() => {
                     try {
                         const savedBookmarks = localStorage.getItem('jp_app_bookmarks');
@@ -561,7 +500,6 @@
                 watch(bookmarks, (newVal) => localStorage.setItem('jp_app_bookmarks', JSON.stringify(newVal)), { deep: true });
                 watch(missedIds, (newVal) => localStorage.setItem('jp_app_missed', JSON.stringify(newVal)), { deep: true });
 
-                // Methods
                 const handleKeydown = (e) => {
                     if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0 && !showDeckMenu.value) {
                         if (e.code === 'Space') { e.preventDefault(); isFlipped.value = !isFlipped.value; }
@@ -640,15 +578,22 @@
                 const hasBookmark = (id) => bookmarks.value.includes(id);
                 const toggleFlashcardMode = () => { flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh'; };
 
-                // Touch Logic
+                // === 修改點 7: 拆分 Click 和 Swipe 邏輯 ===
+                // 新增一個單獨的點擊處理函數
+                const handleCardClick = () => {
+                    if (!isDragging.value) {
+                         isFlipped.value = !isFlipped.value;
+                    }
+                };
+
                 let startX = 0;
-                let startTime = 0;
 
                 const onTouchStart = (e) => {
                     if(e.target.closest('button')) return;
                     isDragging.value = true;
+                    // 非常重要：每次觸控開始都歸零，防止上次的殘留值導致誤判
+                    dragX.value = 0; 
                     startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    startTime = Date.now();
                     cardTransition.value = 'none';
                 };
 
@@ -664,14 +609,15 @@
                     cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
                     const threshold = 80;
-                    const clickThreshold = 10; // Pixels allowance for a click
-
-                    if (Math.abs(dragX.value) < clickThreshold) {
+                    
+                    // 如果移動距離很短（例如只是稍微手抖），視為點擊，不進行滑動判斷
+                    // 原本的程式碼在這裡觸發翻面，但現在我們交給 @click 處理，這裡只負責歸零
+                    if (Math.abs(dragX.value) < 10) {
                         dragX.value = 0;
-                        isFlipped.value = !isFlipped.value;
                         return;
                     }
 
+                    // 只有當位移夠大時才觸發「記住」或「沒記住」
                     if (dragX.value > threshold) {
                         dragX.value = window.innerWidth;
                         handleCardResult('memorized');
@@ -679,6 +625,7 @@
                         dragX.value = -window.innerWidth;
                         handleCardResult('missed');
                     } else {
+                        // 位移不夠大，回彈
                         dragX.value = 0;
                     }
                 };
@@ -694,17 +641,15 @@
                     }
                 };
 
+                // Quiz Logic (Unchanged)
                 const startQuiz = () => {
                     let pool = [];
                     if (quizConfig.value.source === 'bookmarks') pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
                     else if (quizConfig.value.source === 'missed') pool = vocabularyData.filter(item => missedIds.value.includes(item.id));
                     else pool = [...vocabularyData];
-
                     pool = pool.sort(() => 0.5 - Math.random());
                     if (quizConfig.value.count !== 'all') pool = pool.slice(0, quizConfig.value.count);
-                    
                     if (pool.length === 0) { alert('選定的範圍沒有題目！'); return; }
-
                     quizState.value = { questions: pool, currentQIndex: 0, score: 0, lastCorrect: null, options: generateOptions(pool[0]) };
                     quizPhase.value = 'playing';
                 };
@@ -716,10 +661,8 @@
 
                 const handleQuizAnswer = (selectedOption) => {
                     if (quizState.value.lastCorrect !== null) return;
-                    
                     const currentQ = quizState.value.questions[quizState.value.currentQIndex];
                     let isCorrect = quizConfig.value.mode === 'jp-zh' ? selectedOption.meaning === currentQ.meaning : selectedOption.word === currentQ.word;
-
                     quizState.value.lastCorrect = isCorrect;
                     if (isCorrect) {
                         quizState.value.score++;
@@ -727,7 +670,6 @@
                     } else {
                         if (!missedIds.value.includes(currentQ.id)) missedIds.value.push(currentQ.id);
                     }
-
                     setTimeout(() => {
                         if (quizState.value.currentQIndex + 1 < quizState.value.questions.length) {
                             quizState.value.currentQIndex++;
@@ -753,15 +695,14 @@
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
-                    nextCard, prevCard,
+                    nextCard, prevCard, handleCardClick, // Export new method
                     onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
-                    groupedData,
-                    quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
+                    groupedData, quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
                     startQuiz, handleQuizAnswer, getQuizOptionClass,
                     showDeckMenu, currentSessionType
                 };
             }
-        });
+        }); 
 
         app.mount('#app');
     </script>
