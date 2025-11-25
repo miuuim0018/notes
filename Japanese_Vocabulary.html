@@ -65,7 +65,7 @@
         <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
             
             <header class="md:hidden h-12 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
-                <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
+                <h1 class="font-bold text-slate-800 text-lg">五十音單字</h1>
             </header>
 
             <main class="flex-1 overflow-hidden relative w-full flex flex-col">
@@ -458,7 +458,7 @@
            { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
            { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
            { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
-           { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: 'や行' },
+           { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: '山', row: 'や行' },
            { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
            { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
            { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
@@ -514,8 +514,8 @@
             },
             setup() {
                 const activeTab = ref('list');
-                const listFilterMode = ref('all'); // 新增：控制列表篩選 'all', 'bookmarks', 'missed'
-                const mobileControlMode = ref('nav'); // 新增：控制手機底部按鈕 'nav' (翻頁), 'grade' (評分)
+                const listFilterMode = ref('all'); 
+                const mobileControlMode = ref('nav'); 
 
                 const currentDeck = ref([]);
                 const currentIndex = ref(0);
@@ -538,7 +538,6 @@
 
                 // Computed
                 const groupedData = computed(() => {
-                    // 新增：先過濾，再分組
                     let data = vocabularyData;
                     if (listFilterMode.value === 'bookmarks') data = data.filter(item => bookmarks.value.includes(item.id));
                     else if (listFilterMode.value === 'missed') data = data.filter(item => missedIds.value.includes(item.id));
@@ -557,7 +556,6 @@
 
                 const cardContainerStyle = computed(() => {
                     const rotate = dragX.value / 20;
-                    // 確保拖曳為 0 時有預設值
                     return {
                         transform: `translate3d(${dragX.value}px, 0, 0) rotate(${rotate}deg)`,
                         transition: isDragging.value ? 'none' : cardTransition.value
