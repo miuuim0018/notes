@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五十音單字</title>
+    <title>五十音記憶神器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -65,15 +65,15 @@
         <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
             
             <header class="md:hidden h-12 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
-                <h1 class="font-bold text-slate-800 text-lg">五十音單字</h1>
+                <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
             <main class="flex-1 overflow-hidden relative w-full flex flex-col">
                 
                 <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8">
-                    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 items-start">
+                    <div class="max-w-5xl mx-auto">
                         
-                        <div class="lg:hidden w-full bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-2 flex gap-2 shrink-0">
+                        <div class="md:hidden bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-6 flex gap-2">
                             <button @click="listFilterMode = 'all'" 
                                 class="flex-1 py-3 rounded-xl flex flex-col items-center justify-center transition-all border-2"
                                 :class="listFilterMode === 'all' ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'border-transparent text-slate-500'">
@@ -94,104 +94,50 @@
                             </button>
                         </div>
 
-                        <div class="flex-1 w-full min-w-0">
-                             <div class="flex items-center justify-between mb-4 px-1">
-                                <h2 class="font-bold text-slate-400 text-sm">
-                                    <span v-if="listFilterMode === 'all'">全部列表</span>
-                                    <span v-else-if="listFilterMode === 'bookmarks'" class="text-yellow-600 flex items-center gap-2"><icon-star size="16" filled="true"></icon-star> 我的收藏</span>
-                                    <span v-else class="text-red-500 flex items-center gap-2"><icon-refresh-cw size="16"></icon-refresh-cw> 待加強單字</span>
-                                </h2>
-                                <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors">
-                                    清除篩選 ✕
-                                </button>
-                            </div>
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h2 class="font-bold text-slate-400 text-sm">
+                                <span v-if="listFilterMode === 'all'">全部列表</span>
+                                <span v-else-if="listFilterMode === 'bookmarks'">我的收藏</span>
+                                <span v-else>待加強單字</span>
+                            </h2>
+                            <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">清除篩選</button>
+                        </div>
 
-                            <div v-if="Object.keys(groupedData).length === 0" class="text-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed">
-                                <div class="mb-4 text-6xl opacity-50">📭</div>
-                                <p class="text-slate-400 font-bold">沒有符合條件的單字</p>
-                                <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="mt-4 text-indigo-600 font-bold hover:underline">顯示全部</button>
-                            </div>
+                        <div v-if="Object.keys(groupedData).length === 0" class="text-center py-10 text-slate-400">
+                            <div class="mb-2 text-4xl">📭</div>
+                            <p>沒有符合條件的單字</p>
+                        </div>
 
-                            <div class="space-y-6 pb-4">
-                                <div v-for="(items, row) in groupedData" :key="row">
-                                    <div class="flex items-center gap-4 mb-3">
-                                        <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
-                                        <div class="h-px flex-1 bg-slate-200"></div>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
-                                        <div v-for="item in items" :key="item.id" class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group relative overflow-hidden">
-                                            <div v-if="listFilterMode === 'bookmarks'" class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
-                                            <div v-if="listFilterMode === 'missed'" class="absolute left-0 top-0 bottom-0 w-1 bg-red-400"></div>
-
-                                            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-xl shrink-0">
-                                                {{ item.kana }}
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex items-baseline justify-between">
-                                                    <span class="font-bold text-slate-800 text-lg truncate">{{ item.word }}</span>
-                                                    <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
-                                                </div>
-                                                <div class="text-sm text-slate-500 truncate">{{ item.meaning }}</div>
-                                            </div>
-                                            <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0">
-                                                <icon-star :filled="hasBookmark(item.id)" size="20" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
-                                            </button>
+                        <div class="space-y-6 pb-4">
+                            <div v-for="(items, row) in groupedData" :key="row">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
+                                    <div class="h-px flex-1 bg-slate-200"></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                                    <div v-for="item in items" :key="item.id" class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group">
+                                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-xl shrink-0">
+                                            {{ item.kana }}
                                         </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-0.5 sm:gap-2">
+                                                <span class="font-bold text-slate-800 text-lg leading-snug break-words">{{ item.word }}</span>
+                                                <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
+                                            </div>
+                                            <div class="text-sm text-slate-500 mt-0.5">{{ item.meaning }}</div>
+                                            </div>
+                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0">
+                                            <icon-star :filled="hasBookmark(item.id)" size="20" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="hidden lg:block w-72 shrink-0">
-                            <div class="sticky top-8 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                                <h3 class="font-bold text-slate-400 text-sm mb-6 flex items-center gap-2">
-                                    <icon-layers size="16"></icon-layers> 學習狀態
-                                </h3>
-                                
-                                <div class="space-y-2">
-                                    <button @click="listFilterMode = 'bookmarks'" 
-                                            class="w-full flex items-center justify-between p-3 rounded-xl transition-all group"
-                                            :class="listFilterMode === 'bookmarks' ? 'bg-yellow-50 ring-2 ring-yellow-200' : 'hover:bg-slate-50'">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
-                                            <span class="font-bold text-slate-600 group-hover:text-slate-800">收藏單字</span>
-                                        </div>
-                                        <span class="font-black text-xl text-yellow-500">{{ bookmarks.length }}</span>
-                                    </button>
-
-                                    <button @click="listFilterMode = 'missed'" 
-                                            class="w-full flex items-center justify-between p-3 rounded-xl transition-all group"
-                                            :class="listFilterMode === 'missed' ? 'bg-red-50 ring-2 ring-red-200' : 'hover:bg-slate-50'">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                                            <span class="font-bold text-slate-600 group-hover:text-slate-800">待加強</span>
-                                        </div>
-                                        <span class="font-black text-xl text-red-500">{{ missedIds.length }}</span>
-                                    </button>
-
-                                    <button @click="listFilterMode = 'all'" 
-                                            class="w-full flex items-center justify-between p-3 rounded-xl transition-all group"
-                                            :class="listFilterMode === 'all' ? 'bg-indigo-50 ring-2 ring-indigo-200' : 'hover:bg-slate-50'">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
-                                            <span class="font-bold text-slate-600 group-hover:text-slate-800">全部單字</span>
-                                        </div>
-                                        <span class="font-black text-xl text-indigo-500">{{ vocabularyData.length }}</span>
-                                    </button>
-                                </div>
-
-                                <div class="mt-8 pt-6 border-t border-slate-100">
-                                    <p class="text-xs text-slate-400 leading-relaxed">
-                                        點擊上方項目可篩選列表。<br>想背單字時，請切換至「背單字卡」頁面。
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
                 <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
+                    
                     <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
                             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
@@ -203,6 +149,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
                             <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto"><icon-trophy size="40"></icon-trophy></div>
@@ -217,6 +164,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div v-else class="flex-1 flex flex-col h-full">
                         <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
                             <button @click="toggleFlashcardMode" class="bg-white px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 shadow-sm flex items-center gap-2">
@@ -235,31 +183,38 @@
                             <button @click="prevCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute left-4 z-20" :disabled="currentIndex === 0">
                                 <icon-chevron-left size="40"></icon-chevron-left>
                             </button>
+
                             <div class="relative w-full max-w-sm h-full max-h-[420px] md:max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
                                  @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
                                  @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd"
                                  @click="handleCardClick">
+                                
                                 <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
                                     <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
                                         <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border border-white flex flex-col items-center justify-center p-8 z-10">
                                             <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-check class="text-green-500" size="48"></icon-check></div></div>
                                             <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-x class="text-red-500" size="48"></icon-x></div></div>
+                                            
                                             <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
                                                 <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                             </button>
+                                            
                                             <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
                                             <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
                                                 {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
                                             </h2>
                                             <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
                                         </div>
+
                                         <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-3xl shadow-xl border border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 text-white">
                                             <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white" size="64"></icon-check></div>
                                             <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white" size="64"></icon-x></div>
+
                                             <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
                                                 <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
                                             </button>
                                             <span class="absolute top-6 left-6 text-7xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
+                                            
                                             <div class="z-10 text-center w-full">
                                                 <template v-if="flashcardMode === 'jp-zh'">
                                                     <div class="text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
@@ -278,6 +233,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <button @click="nextCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute right-4 z-20" :disabled="currentIndex === currentDeck.length - 1">
                                 <icon-chevron-right size="40"></icon-chevron-right>
                             </button>
@@ -294,6 +250,7 @@
                                     <span class="text-[10px] mt-0.5">下一張</span>
                                 </button>
                             </template>
+                            
                             <template v-else>
                                 <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors active:scale-95">
                                     <icon-x></icon-x> 沒記住 (←)
@@ -303,6 +260,7 @@
                                 </button>
                             </template>
                         </div>
+
                         <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4 mx-auto">
                             <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
                                 <icon-x></icon-x> 沒記住 (←)
@@ -319,6 +277,7 @@
                                         <h3 class="text-lg font-bold text-slate-800">卡片設定</h3>
                                         <button @click="showDeckMenu = false" class="p-2 text-slate-400 hover:text-slate-600"><icon-x size="20"></icon-x></button>
                                     </div>
+                                    
                                     <div class="mb-6 md:hidden">
                                         <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">底部按鈕功能</label>
                                         <div class="flex p-1 bg-slate-100 rounded-xl">
@@ -330,6 +289,7 @@
                                             </button>
                                         </div>
                                     </div>
+
                                     <div class="space-y-3">
                                         <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">切換題庫</label>
                                         <button @click="startSession('all'); showDeckMenu = false" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all" :class="currentSessionType === 'all' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
@@ -400,6 +360,7 @@
                         <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次</button>
                     </div>
                 </div>
+
             </main>
         </div>
 
@@ -423,52 +384,52 @@
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
         const vocabularyData = [
-           { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
-           { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
-           { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
-           { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
-           { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
-           { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
-           { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
-           { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
-           { id: 'k4', kana: 'け', word: 'けしき', kanji: '景色', romaji: 'keshiki', meaning: '風景', row: 'か行' },
-           { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
-           { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
-           { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
-           { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
-           { id: 's4', kana: 'せ', word: 'せなか', kanji: '背中', romaji: 'senaka', meaning: '背部', row: 'さ行' },
-           { id: 's5', kana: 'そ', word: 'そうじ', kanji: '掃除', romaji: 'souji', meaning: '打掃', row: 'さ行' },
-           { id: 't1', kana: 'た', word: 'たこ', kanji: '蛸', romaji: 'tako', meaning: '章魚', row: 'た行' },
-           { id: 't2', kana: 'ち', word: 'ちず', kanji: '地図', romaji: 'chizu', meaning: '地圖', row: 'た行' },
-           { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
-           { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
-           { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
-           { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
-           { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
-           { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
-           { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
-           { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
-           { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
-           { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
-           { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
-           { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
-           { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
-           { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
-           { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
-           { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
-           { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
-           { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
-           { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: '山', row: 'や行' },
-           { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
-           { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
-           { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
-           { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
-           { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
-           { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
-           { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
-           { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
-           { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
-           { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
+            { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
+            { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
+            { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
+            { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
+            { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
+            { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
+            { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
+            { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
+            { id: 'k4', kana: 'け', word: 'けしき', kanji: '景色', romaji: 'keshiki', meaning: '風景', row: 'か行' },
+            { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
+            { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
+            { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
+            { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
+            { id: 's4', kana: 'せ', word: 'せなか', kanji: '背中', romaji: 'senaka', meaning: '背部', row: 'さ行' },
+            { id: 's5', kana: 'そ', word: 'そうじ', kanji: '掃除', romaji: 'souji', meaning: '打掃', row: 'さ行' },
+            { id: 't1', kana: 'た', word: 'たこ', kanji: '蛸', romaji: 'tako', meaning: '章魚', row: 'た行' },
+            { id: 't2', kana: 'ち', word: 'ちず', kanji: '地図', romaji: 'chizu', meaning: '地圖', row: 'た行' },
+            { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
+            { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
+            { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
+            { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
+            { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
+            { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
+            { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
+            { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
+            { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
+            { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
+            { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
+            { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
+            { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
+            { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
+            { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
+            { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
+            { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
+            { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
+            { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: 'や行' },
+            { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
+            { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
+            { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
+            { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
+            { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
+            { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
+            { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
+            { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
+            { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
+            { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
         ];
 
         const Icon = {
@@ -514,8 +475,8 @@
             },
             setup() {
                 const activeTab = ref('list');
-                const listFilterMode = ref('all'); 
-                const mobileControlMode = ref('nav'); 
+                const listFilterMode = ref('all'); // 新增：控制列表篩選 'all', 'bookmarks', 'missed'
+                const mobileControlMode = ref('nav'); // 新增：控制手機底部按鈕 'nav' (翻頁), 'grade' (評分)
 
                 const currentDeck = ref([]);
                 const currentIndex = ref(0);
@@ -538,6 +499,7 @@
 
                 // Computed
                 const groupedData = computed(() => {
+                    // 新增：先過濾，再分組
                     let data = vocabularyData;
                     if (listFilterMode.value === 'bookmarks') data = data.filter(item => bookmarks.value.includes(item.id));
                     else if (listFilterMode.value === 'missed') data = data.filter(item => missedIds.value.includes(item.id));
@@ -556,6 +518,7 @@
 
                 const cardContainerStyle = computed(() => {
                     const rotate = dragX.value / 20;
+                    // 確保拖曳為 0 時有預設值
                     return {
                         transform: `translate3d(${dragX.value}px, 0, 0) rotate(${rotate}deg)`,
                         transition: isDragging.value ? 'none' : cardTransition.value
@@ -616,7 +579,7 @@
                     roundComplete.value = false;
                     memorizedIds.value = []; 
                     activeTab.value = 'flashcards';
-                    // 強制重置拖曳狀態
+                    // 強制重置拖曳狀態，解決初始隱形問題
                     dragX.value = 0;
                 };
 
@@ -774,7 +737,7 @@
 
                 return {
                     vocabularyData, activeTab, setActiveTab,
-                    listFilterMode, mobileControlMode, 
+                    listFilterMode, mobileControlMode, // 新增
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
                     startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
