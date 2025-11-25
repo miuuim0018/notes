@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五十音記憶神器</title>
+    <title>五十音記憶神器 (含語音)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -127,8 +127,11 @@
                                         </div>
 
                                         <div class="flex-1 min-w-0 flex flex-col justify-center min-h-[3rem] text-left">
-                                            <div class="font-bold text-slate-800 text-lg leading-tight mb-1 break-words">
+                                            <div class="font-bold text-slate-800 text-lg leading-tight mb-1 break-words flex items-center gap-1">
                                                 {{ item.word }}
+                                                <button @click.stop="playAudio(item.word)" class="ml-1 p-1.5 text-indigo-400 bg-indigo-50 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors active:scale-95">
+                                                    <icon-volume-2 size="14"></icon-volume-2>
+                                                </button>
                                             </div>
                                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                                                 <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
@@ -203,11 +206,18 @@
                                                 <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                             </button>
                                             <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
-                                            <h2 class="font-bold text-slate-800 text-center break-words" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
+                                            
+                                            <h2 class="font-bold text-slate-800 text-center break-words flex flex-col items-center gap-2" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
                                                 {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                                
+                                                <button v-if="flashcardMode === 'jp-zh'" @click.stop="playAudio(currentItem.word)" class="mt-4 p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
+                                                    <icon-volume-2 size="32"></icon-volume-2>
+                                                </button>
                                             </h2>
+
                                             <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
                                         </div>
+
                                         <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-3xl shadow-xl border border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 text-white">
                                             <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white" size="64"></icon-check></div>
                                             <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white" size="64"></icon-x></div>
@@ -221,10 +231,18 @@
                                                     <div class="text-xl opacity-60 font-mono mb-6">{{ currentItem.romaji }}</div>
                                                     <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
                                                     <div class="text-3xl font-bold">{{ currentItem.meaning }}</div>
+                                                    <button @click.stop="playAudio(currentItem.word)" class="mt-6 p-2 bg-white/20 text-white rounded-full hover:bg-white/30 transition-colors active:scale-95 mx-auto block" @mousedown.stop @touchstart.stop>
+                                                        <icon-volume-2 size="24"></icon-volume-2>
+                                                    </button>
                                                 </template>
                                                 <template v-else>
                                                     <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
-                                                    <div class="text-5xl font-bold mb-4">{{ currentItem.word }}</div>
+                                                    <div class="text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+                                                        {{ currentItem.word }}
+                                                        <button @click.stop="playAudio(currentItem.word)" class="p-3 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
+                                                            <icon-volume-2 size="32"></icon-volume-2>
+                                                        </button>
+                                                    </div>
                                                     <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
                                                     <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
                                                 </template>
@@ -338,7 +356,10 @@
                             <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="80"></icon-x></div>
                             <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
                             <h2 class="text-4xl font-bold text-slate-800 mb-2">{{ quizConfig.mode === 'jp-zh' ? currentQuizItem.word : currentQuizItem.meaning }}</h2>
-                            <p v-if="quizConfig.mode === 'jp-zh'" class="text-indigo-400 text-xl">{{ currentQuizItem.kana }}</p>
+                            <button v-if="quizConfig.mode === 'jp-zh'" @click="playAudio(currentQuizItem.word)" class="mt-2 p-2 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors">
+                                <icon-volume-2 size="24"></icon-volume-2>
+                            </button>
+                            <p v-if="quizConfig.mode === 'jp-zh'" class="text-indigo-400 text-xl mt-2">{{ currentQuizItem.kana }}</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0 pb-4">
                             <button v-for="(opt, i) in quizState.options" :key="i" :disabled="quizState.lastCorrect !== null" @click="handleQuizAnswer(opt)" class="p-4 rounded-xl text-left font-bold border-2 transition-all relative overflow-hidden" :class="getQuizOptionClass(opt)">{{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}</button>
@@ -378,52 +399,52 @@
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
         const vocabularyData = [
-           { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
-           { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
-           { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
-           { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
-           { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
-           { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
-           { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
-           { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
-           { id: 'k4', kana: 'け', word: 'いけ', kanji: '池', romaji: 'ike', meaning: '水池', row: 'か行', note: '取字尾音' },
-           { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
-           { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
-           { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
-           { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
-           { id: 's4', kana: 'せ', word: 'あせ', kanji: '汗', romaji: 'ase', meaning: '汗', row: 'さ行', note: '取字尾音' },
-           { id: 's5', kana: 'そ', word: 'そこ', kanji: '底', romaji: 'soko', meaning: '底部 / 那裡', row: 'さ行' },
-           { id: 't1', kana: 'た', word: 'たこ', kanji: '凧', romaji: 'tako', meaning: '風箏', row: 'た行' },
-           { id: 't2', kana: 'ち', word: 'くち', kanji: '口', romaji: 'kuchi', meaning: '嘴巴', row: 'た行', note: '取字尾音' },
-           { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
-           { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
-           { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
-           { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
-           { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
-           { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
-           { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
-           { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
-           { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
-           { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
-           { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
-           { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
-           { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
-           { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
-           { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
-           { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
-           { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
-           { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
-           { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: '山', row: 'や行' },
-           { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
-           { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
-           { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
-           { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
-           { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
-           { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
-           { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
-           { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
-           { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
-           { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
+            { id: 'a1', kana: 'あ', word: 'あし', kanji: '足', romaji: 'ashi', meaning: '腳 / 腿', row: 'あ行' },
+            { id: 'a2', kana: 'い', word: 'いす', kanji: '椅子', romaji: 'isu', meaning: '椅子', row: 'あ行' },
+            { id: 'a3', kana: 'う', word: 'うし', kanji: '牛', romaji: 'ushi', meaning: '牛', row: 'あ行' },
+            { id: 'a4', kana: 'え', word: 'えき', kanji: '駅', romaji: 'eki', meaning: '車站', row: 'あ行' },
+            { id: 'a5', kana: 'お', word: 'おかし', kanji: 'お菓子', romaji: 'okashi', meaning: '點心 / 糖果', row: 'あ行' },
+            { id: 'k1', kana: 'か', word: 'かお', kanji: '顔', romaji: 'kao', meaning: '臉', row: 'か行' },
+            { id: 'k2', kana: 'き', word: 'きく', kanji: '菊', romaji: 'kiku', meaning: '菊花', row: 'か行' },
+            { id: 'k3', kana: 'く', word: 'くし', kanji: '櫛', romaji: 'kushi', meaning: '梳子', row: 'か行' },
+            { id: 'k4', kana: 'け', word: 'いけ', kanji: '池', romaji: 'ike', meaning: '水池', row: 'か行', note: '取字尾音' },
+            { id: 'k5', kana: 'こ', word: 'こい', kanji: '鯉', romaji: 'koi', meaning: '鯉魚', row: 'か行' },
+            { id: 's1', kana: 'さ', word: 'さけ', kanji: '酒', romaji: 'sake', meaning: '酒', row: 'さ行' },
+            { id: 's2', kana: 'し', word: 'しか', kanji: '鹿', romaji: 'shika', meaning: '鹿', row: 'さ行' },
+            { id: 's3', kana: 'す', word: 'すし', kanji: '寿司', romaji: 'sushi', meaning: '壽司', row: 'さ行' },
+            { id: 's4', kana: 'せ', word: 'あせ', kanji: '汗', romaji: 'ase', meaning: '汗', row: 'さ行', note: '取字尾音' },
+            { id: 's5', kana: 'そ', word: 'そこ', kanji: '底', romaji: 'soko', meaning: '底部 / 那裡', row: 'さ行' },
+            { id: 't1', kana: 'た', word: 'たこ', kanji: '凧', romaji: 'tako', meaning: '風箏', row: 'た行' },
+            { id: 't2', kana: 'ち', word: 'くち', kanji: '口', romaji: 'kuchi', meaning: '嘴巴', row: 'た行', note: '取字尾音' },
+            { id: 't3', kana: 'つ', word: 'つくえ', kanji: '机', romaji: 'tsukue', meaning: '書桌', row: 'た行' },
+            { id: 't4', kana: 'て', word: 'て', kanji: '手', romaji: 'te', meaning: '手', row: 'た行' },
+            { id: 't5', kana: 'と', word: 'とけい', kanji: '時計', romaji: 'tokei', meaning: '時鐘 / 手錶', row: 'た行' },
+            { id: 'n1', kana: 'な', word: 'なし', kanji: '梨', romaji: 'nashi', meaning: '梨子', row: 'な行' },
+            { id: 'n2', kana: 'に', word: 'にく', kanji: '肉', romaji: 'niku', meaning: '肉', row: 'な行' },
+            { id: 'n3', kana: 'ぬ', word: 'いぬ', kanji: '犬', romaji: 'inu', meaning: '狗', row: 'な行', note: '取字尾音' },
+            { id: 'n4', kana: 'ね', word: 'ねこ', kanji: '猫', romaji: 'neko', meaning: '貓', row: 'な行' },
+            { id: 'n5', kana: 'の', word: 'きのこ', kanji: '茸', romaji: 'kinoko', meaning: '蘑菇', row: 'な行', note: '取中間音' },
+            { id: 'h1', kana: 'は', word: 'はな', kanji: '花', romaji: 'hana', meaning: '花', row: 'は行' },
+            { id: 'h2', kana: 'ひ', word: 'ひこうき', kanji: '飛行機', romaji: 'hikouki', meaning: '飛機', row: 'は行' },
+            { id: 'h3', kana: 'ふ', word: 'ふね', kanji: '船', romaji: 'fune', meaning: '船', row: 'は行' },
+            { id: 'h4', kana: 'へ', word: 'へや', kanji: '部屋', romaji: 'heya', meaning: '房間', row: 'は行' },
+            { id: 'h5', kana: 'ほ', word: 'ほし', kanji: '星', romaji: 'hoshi', meaning: '星星', row: 'は行' },
+            { id: 'm1', kana: 'ま', word: 'まくら', kanji: '枕', romaji: 'makura', meaning: '枕頭', row: 'ま行' },
+            { id: 'm2', kana: 'み', word: 'みみ', kanji: '耳', romaji: 'mimi', meaning: '耳朵', row: 'ま行' },
+            { id: 'm3', kana: 'む', word: 'むね', kanji: '胸', romaji: 'mune', meaning: '胸部', row: 'ま行' },
+            { id: 'm4', kana: 'め', word: 'めいし', kanji: '名刺', romaji: 'meishi', meaning: '名片', row: 'ま行' },
+            { id: 'm5', kana: 'も', word: 'もも', kanji: '桃', romaji: 'momo', meaning: '桃子', row: 'ま行' },
+            { id: 'y1', kana: 'や', word: 'やま', kanji: '山', romaji: 'yama', meaning: '山', row: 'や行' },
+            { id: 'y2', kana: 'ゆ', word: 'ゆかた', kanji: '浴衣', romaji: 'yukata', meaning: '浴衣', row: 'や行' },
+            { id: 'y3', kana: 'よ', word: 'よる', kanji: '夜', romaji: 'yoru', meaning: '夜晚', row: 'や行' },
+            { id: 'r1', kana: 'ら', word: 'とら', kanji: '虎', romaji: 'tora', meaning: '老虎', row: 'ら行', note: '取字尾音' },
+            { id: 'r2', kana: 'り', word: 'とり', kanji: '鳥', romaji: 'tori', meaning: '鳥', row: 'ら行', note: '取字尾音' },
+            { id: 'r3', kana: 'る', word: 'くるま', kanji: '車', romaji: 'kuruma', meaning: '車子', row: 'ら行', note: '取中間音' },
+            { id: 'r4', kana: 'れ', word: 'すみれ', kanji: '菫', romaji: 'sumire', meaning: '紫羅蘭', row: 'ら行', note: '取字尾音' },
+            { id: 'r5', kana: 'ろ', word: 'しろ', kanji: '城', romaji: 'shiro', meaning: '城堡', row: 'ら行', note: '取字尾音' },
+            { id: 'w1', kana: 'わ', word: 'わに', kanji: '鰐', romaji: 'wani', meaning: '鱷魚', row: 'わ行・其他' },
+            { id: 'w2', kana: 'を', word: 'かおをあらいます', kanji: '顔を洗います', romaji: 'kao wo araimasu', meaning: '洗臉', row: 'わ行・其他', note: '助詞用法' },
+            { id: 'w3', kana: 'ん', word: 'ほん', kanji: '本', romaji: 'hon', meaning: '書', row: 'わ行・其他', note: '取字尾音' },
         ];
 
         const Icon = {
@@ -445,6 +466,7 @@
                 <svg v-else-if="name === 'chevron-left'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                 <svg v-else-if="name === 'chevron-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 <svg v-else-if="name === 'sliders'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                <svg v-else-if="name === 'volume-2'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
             `
         };
 
@@ -466,6 +488,7 @@
                 'icon-chevron-left': { ...Icon, data() { return { name: 'chevron-left' } } },
                 'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
                 'icon-sliders': { ...Icon, data() { return { name: 'sliders' } } },
+                'icon-volume-2': { ...Icon, data() { return { name: 'volume-2' } } },
             },
             setup() {
                 const activeTab = ref('list');
@@ -524,6 +547,16 @@
                     return { right: rightOpacity, left: leftOpacity };
                 });
 
+                // Audio Function
+                const playAudio = (text) => {
+                    if (!window.speechSynthesis) return;
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ja-JP'; 
+                    utterance.rate = 0.8; 
+                    window.speechSynthesis.speak(utterance);
+                };
+
                 onMounted(() => {
                     try {
                         const savedBookmarks = localStorage.getItem('jp_app_bookmarks');
@@ -571,7 +604,7 @@
                     roundComplete.value = false;
                     memorizedIds.value = []; 
                     activeTab.value = 'flashcards';
-                    // 強制重置拖曳狀態
+                    
                     dragX.value = 0;
                 };
 
@@ -737,7 +770,8 @@
                     onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
                     groupedData, quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
                     startQuiz, handleQuizAnswer, getQuizOptionClass,
-                    showDeckMenu, currentSessionType
+                    showDeckMenu, currentSessionType,
+                    playAudio // Exported function
                 };
             }
         }); 
