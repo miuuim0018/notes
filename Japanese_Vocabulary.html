@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五十音記憶神器 (含語音)</title>
+    <title>五十音記憶神器 (含語音 & 對對樂)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -38,12 +38,29 @@
         .pt-safe { padding-top: env(safe-area-inset-top); }
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         .swipe-overlay { transition: opacity 0.1s ease; pointer-events: none; }
+
+        /* Game Card Flip Animation */
+        .game-card-inner {
+            transition: transform 0.4s;
+            transform-style: preserve-3d;
+        }
+        .game-card.flipped .game-card-inner {
+            transform: rotateY(180deg);
+        }
+        .game-card.matched .game-card-inner {
+            transform: rotateY(180deg);
+        }
+        .game-card.matched {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="font-sans text-slate-800">
 
     <div id="app" class="flex flex-col h-full w-full md:flex-row">
         
+        <!-- Desktop Sidebar -->
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">あ</div>
@@ -56,6 +73,9 @@
                 <button @click="setActiveTab('flashcards')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'flashcards' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-layers size="20"></icon-layers> 背單字卡
                 </button>
+                <button @click="setActiveTab('game')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'game' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-puzzle size="20"></icon-puzzle> 翻翻對對樂
+                </button>
                 <button @click="setActiveTab('quiz')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'quiz' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-graduation-cap size="20"></icon-graduation-cap> 自我測驗
                 </button>
@@ -64,12 +84,14 @@
 
         <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
             
+            <!-- Mobile Header -->
             <header class="md:hidden h-12 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
                 <h1 class="font-bold text-slate-800 text-lg">五十音記憶神器</h1>
             </header>
 
             <main class="flex-1 overflow-hidden relative w-full flex flex-col">
                 
+                <!-- 1. List Tab -->
                 <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8">
                     <div class="max-w-6xl mx-auto">
                         
@@ -149,6 +171,7 @@
                     </div>
                 </div>
 
+                <!-- 2. Flashcards Tab -->
                 <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
                     <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
@@ -208,9 +231,9 @@
                                             <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
                                             
                                             <h2 class="font-bold text-slate-800 text-center break-words flex flex-col items-center gap-2" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
-                                                {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                                {{ flashcardMode === 'jp-zh' ? currentItem.meaning : currentItem.word }}
                                                 
-                                                <button v-if="flashcardMode === 'jp-zh'" @click.stop="playAudio(currentItem.word)" class="mt-4 p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
+                                                <button v-if="flashcardMode !== 'jp-zh'" @click.stop="playAudio(currentItem.word)" class="mt-4 p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
                                                     <icon-volume-2 size="32"></icon-volume-2>
                                                 </button>
                                             </h2>
@@ -227,16 +250,6 @@
                                             <span class="absolute top-6 left-6 text-7xl font-black text-white/10 select-none">{{ currentItem.kana }}</span>
                                             <div class="z-10 text-center w-full">
                                                 <template v-if="flashcardMode === 'jp-zh'">
-                                                    <div class="text-4xl font-bold opacity-90 mb-2">{{ currentItem.kanji }}</div>
-                                                    <div class="text-xl opacity-60 font-mono mb-6">{{ currentItem.romaji }}</div>
-                                                    <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6"></div>
-                                                    <div class="text-3xl font-bold">{{ currentItem.meaning }}</div>
-                                                    <button @click.stop="playAudio(currentItem.word)" class="mt-6 p-2 bg-white/20 text-white rounded-full hover:bg-white/30 transition-colors active:scale-95 mx-auto block" @mousedown.stop @touchstart.stop>
-                                                        <icon-volume-2 size="24"></icon-volume-2>
-                                                    </button>
-                                                </template>
-                                                <template v-else>
-                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
                                                     <div class="text-5xl font-bold mb-4 flex items-center justify-center gap-3">
                                                         {{ currentItem.word }}
                                                         <button @click.stop="playAudio(currentItem.word)" class="p-3 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
@@ -245,6 +258,10 @@
                                                     </div>
                                                     <div class="text-2xl opacity-80">{{ currentItem.kanji }}</div>
                                                     <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
+                                                </template>
+                                                <template v-else>
+                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">ANSWER</div>
+                                                    <div class="text-3xl font-bold">{{ currentItem.meaning }}</div>
                                                 </template>
                                             </div>
                                         </div>
@@ -321,6 +338,90 @@
                     </div>
                 </div>
 
+                <!-- 3. New Game Tab: Memory Match -->
+                <div v-if="activeTab === 'game'" class="flex-1 overflow-y-auto no-scrollbar pb-20 bg-slate-100">
+                    <div v-if="gamePhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
+                            <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6 text-pink-600 mx-auto"><icon-puzzle size="32"></icon-puzzle></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">翻字卡對對樂</h2>
+                            <p class="text-slate-400 text-sm mb-6">配對日文單字與中文意思</p>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">選擇難度</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button @click="gameConfig.difficulty = 'easy'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'easy' ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">簡單<br><span class="text-[10px] opacity-70">6 組</span></button>
+                                        <button @click="gameConfig.difficulty = 'normal'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'normal' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">普通<br><span class="text-[10px] opacity-70">8 組</span></button>
+                                        <button @click="gameConfig.difficulty = 'hard'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'hard' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">困難<br><span class="text-[10px] opacity-70">12 組</span></button>
+                                    </div>
+                                </div>
+                                <button @click="startGame" class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始遊戲</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="gamePhase === 'playing'" class="flex flex-col h-full w-full relative">
+                         <!-- Game Header -->
+                        <div class="h-14 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between px-4 z-20">
+                            <button @click="gamePhase = 'setup'" class="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><icon-x size="20"></icon-x></button>
+                            <div class="flex gap-4 font-mono font-bold text-slate-600">
+                                <div class="flex items-center gap-1"><icon-clock size="14"></icon-clock> {{ formatTime(gameState.time) }}</div>
+                                <div class="flex items-center gap-1 text-indigo-600"><icon-mouse-pointer size="14"></icon-mouse-pointer> {{ gameState.moves }}</div>
+                            </div>
+                            <div class="w-8"></div> <!-- Spacer -->
+                        </div>
+
+                        <!-- Game Grid -->
+                        <div class="flex-1 overflow-y-auto p-4 flex items-center justify-center">
+                            <div class="grid w-full max-w-2xl mx-auto gap-2 sm:gap-4" 
+                                :class="{
+                                    'grid-cols-3': gameConfig.difficulty === 'easy',
+                                    'grid-cols-4': gameConfig.difficulty !== 'easy',
+                                }">
+                                <div v-for="card in gameState.cards" :key="card.id" 
+                                     class="game-card aspect-square cursor-pointer perspective-1000"
+                                     :class="{ 'flipped': card.isFlipped || card.isMatched, 'matched': card.isMatched }"
+                                     @click="handleGameCardClick(card)">
+                                    <div class="game-card-inner relative w-full h-full duration-500">
+                                        <!-- Front (Cover) -->
+                                        <div class="absolute inset-0 bg-white rounded-xl shadow-sm border-2 border-slate-200 flex items-center justify-center backface-hidden group hover:border-indigo-300 transition-colors">
+                                            <div class="text-indigo-100 font-bold text-2xl">?</div>
+                                        </div>
+                                        <!-- Back (Content) -->
+                                        <div class="absolute inset-0 bg-white rounded-xl shadow-md border-2 rotate-y-180 flex items-center justify-center backface-hidden p-2 text-center select-none"
+                                             :class="card.isMatched ? 'border-green-400 bg-green-50' : 'border-indigo-500'">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <span class="font-bold text-slate-800 break-words" :class="card.type === 'word' ? 'text-lg sm:text-xl' : 'text-sm sm:text-base'">
+                                                    {{ card.content }}
+                                                </span>
+                                                <span v-if="card.sub" class="text-[10px] text-slate-400 mt-1">{{ card.sub }}</span>
+                                            </div>
+                                            <div v-if="card.isMatched" class="absolute top-1 right-1 text-green-500"><icon-check size="16"></icon-check></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="gamePhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">🏆</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">挑戰成功！</h2>
+                        <div class="flex gap-4 mt-6 mb-8">
+                            <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[100px]">
+                                <div class="text-3xl font-black text-indigo-600 mb-1">{{ gameState.moves }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總步數</div>
+                            </div>
+                            <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[100px]">
+                                <div class="text-3xl font-black text-indigo-600 mb-1">{{ formatTime(gameState.time) }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總時間</div>
+                            </div>
+                        </div>
+                        <button @click="gamePhase = 'setup'" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再玩一次</button>
+                    </div>
+                </div>
+
+                <!-- 4. Quiz Tab -->
                 <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar pb-20">
                      <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm">
@@ -379,6 +480,7 @@
             </main>
         </div>
 
+        <!-- Mobile Bottom Nav -->
         <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
             <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-book size="24"></icon-book>
@@ -387,6 +489,10 @@
             <button @click="setActiveTab('flashcards')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'flashcards' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-layers size="24"></icon-layers>
                 <span class="text-[10px] font-bold mt-1">背單字</span>
+            </button>
+            <button @click="setActiveTab('game')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'game' ? 'text-pink-600' : 'text-slate-400'">
+                <icon-puzzle size="24"></icon-puzzle>
+                <span class="text-[10px] font-bold mt-1">對對樂</span>
             </button>
             <button @click="setActiveTab('quiz')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'quiz' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-graduation-cap size="24"></icon-graduation-cap>
@@ -453,6 +559,7 @@
                 <svg v-if="name === 'book'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 <svg v-else-if="name === 'layers'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                 <svg v-else-if="name === 'graduation-cap'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                <svg v-else-if="name === 'puzzle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 15.424a1 1 0 0 0-1.026-.145c-2.433.953-4.145 1.488-5.65.643-1.638-.919-2.028-3.033-1.027-4.814a1 1 0 0 0 .151-1.034C10.942 7.643 10.407 5.931 11.252 4.426c.919-1.638 3.033-2.028 4.814-1.027a1 1 0 0 0 1.034.15c2.433-.953 4.145-1.487 5.65-.642 1.638.919 2.028 3.033 1.027 4.814a1 1 0 0 0-.151 1.034c.954 2.433 1.489 4.145.643 5.65-.918 1.638-3.032 2.028-4.814 1.027a1 1 0 0 0-.016-.008z"></path><path d="M4.56 8.576a1 1 0 0 1 1.026.145c2.433-.953 4.145-1.488 5.65-.643 1.638.919 2.028 3.033 1.027 4.814a1 1 0 0 1-.151 1.034c.954 2.433 1.489 4.145.643 5.65.919 1.638 3.033 2.028 4.814 1.027a1 1 0 0 1-1.034-.15c-2.433.953-4.145 1.487-5.65.642-1.638-.919-2.028-3.033-1.027-4.814a1 1 0 0 1 .151-1.034c-.954-2.433-1.489-4.145-.643-5.65.918-1.638 3.032-2.028 4.814-1.027a1 1 0 0 1 .016.008z"></path></svg>
                 <svg v-else-if="name === 'rotate-ccw'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                 <svg v-else-if="name === 'check'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <svg v-else-if="name === 'x'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -467,6 +574,8 @@
                 <svg v-else-if="name === 'chevron-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 <svg v-else-if="name === 'sliders'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                 <svg v-else-if="name === 'volume-2'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <svg v-else-if="name === 'clock'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <svg v-else-if="name === 'mouse-pointer'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
             `
         };
 
@@ -475,6 +584,7 @@
                 'icon-book': { ...Icon, data() { return { name: 'book' } } },
                 'icon-layers': { ...Icon, data() { return { name: 'layers' } } },
                 'icon-graduation-cap': { ...Icon, data() { return { name: 'graduation-cap' } } },
+                'icon-puzzle': { ...Icon, data() { return { name: 'puzzle' } } }, // Added
                 'icon-rotate-ccw': { ...Icon, data() { return { name: 'rotate-ccw' } } },
                 'icon-check': { ...Icon, data() { return { name: 'check' } } },
                 'icon-x': { ...Icon, data() { return { name: 'x' } } },
@@ -489,6 +599,8 @@
                 'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
                 'icon-sliders': { ...Icon, data() { return { name: 'sliders' } } },
                 'icon-volume-2': { ...Icon, data() { return { name: 'volume-2' } } },
+                'icon-clock': { ...Icon, data() { return { name: 'clock' } } }, // Added
+                'icon-mouse-pointer': { ...Icon, data() { return { name: 'mouse-pointer' } } }, // Added
             },
             setup() {
                 const activeTab = ref('list');
@@ -513,6 +625,11 @@
                 const quizPhase = ref('setup');
                 const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
                 const quizState = ref({ score: 0, currentQIndex: 0, options: [], lastCorrect: null, questions: [] });
+
+                // Memory Match Game State
+                const gamePhase = ref('setup');
+                const gameConfig = ref({ difficulty: 'normal' }); // easy (6), normal (8), hard (12)
+                const gameState = ref({ cards: [], flippedCards: [], isLocked: false, moves: 0, time: 0, timerId: null });
 
                 // Computed
                 const groupedData = computed(() => {
@@ -571,6 +688,7 @@
 
                 onUnmounted(() => {
                     window.removeEventListener('keydown', handleKeydown);
+                    if (gameState.value.timerId) clearInterval(gameState.value.timerId);
                 });
 
                 watch(bookmarks, (newVal) => localStorage.setItem('jp_app_bookmarks', JSON.stringify(newVal)), { deep: true });
@@ -587,7 +705,12 @@
                     }
                 };
 
-                const setActiveTab = (tab) => { activeTab.value = tab; };
+                const setActiveTab = (tab) => { 
+                    activeTab.value = tab; 
+                    if (tab !== 'game' && gameState.value.timerId) {
+                        clearInterval(gameState.value.timerId);
+                    }
+                };
 
                 const startSession = (type) => {
                     let deck = [];
@@ -659,7 +782,7 @@
 
                 const handleCardClick = () => {
                     if (!isDragging.value) {
-                         isFlipped.value = !isFlipped.value;
+                          isFlipped.value = !isFlipped.value;
                     }
                 };
 
@@ -760,6 +883,97 @@
                     return 'bg-white border-slate-100';
                 };
 
+                // --- Game Logic ---
+
+                const startGame = () => {
+                    const pairCount = gameConfig.value.difficulty === 'easy' ? 6 : (gameConfig.value.difficulty === 'normal' ? 8 : 12);
+                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    
+                    let cards = [];
+                    pool.forEach(item => {
+                        // Card 1: Japanese
+                        cards.push({
+                            id: item.id + '-jp',
+                            vocabId: item.id,
+                            content: item.word,
+                            sub: item.kana,
+                            type: 'word',
+                            isFlipped: false,
+                            isMatched: false
+                        });
+                        // Card 2: Meaning
+                        cards.push({
+                            id: item.id + '-zh',
+                            vocabId: item.id,
+                            content: item.meaning,
+                            type: 'meaning',
+                            isFlipped: false,
+                            isMatched: false
+                        });
+                    });
+
+                    gameState.value = {
+                        cards: cards.sort(() => 0.5 - Math.random()),
+                        flippedCards: [],
+                        isLocked: false,
+                        moves: 0,
+                        time: 0,
+                        timerId: setInterval(() => gameState.value.time++, 1000)
+                    };
+                    gamePhase.value = 'playing';
+                };
+
+                const handleGameCardClick = (card) => {
+                    if (gameState.value.isLocked || card.isMatched || card.isFlipped) return;
+
+                    // Play audio if it's a word card
+                    if (card.type === 'word') playAudio(card.content);
+
+                    card.isFlipped = true;
+                    gameState.value.flippedCards.push(card);
+
+                    if (gameState.value.flippedCards.length === 2) {
+                        gameState.value.isLocked = true;
+                        gameState.value.moves++;
+                        
+                        const [card1, card2] = gameState.value.flippedCards;
+                        
+                        if (card1.vocabId === card2.vocabId) {
+                            // Match
+                            setTimeout(() => {
+                                card1.isMatched = true;
+                                card2.isMatched = true;
+                                gameState.value.flippedCards = [];
+                                gameState.value.isLocked = false;
+                                
+                                // Play audio on match if one of them is word, just in case first one wasn't
+                                const wordCard = card1.type === 'word' ? card1 : card2;
+                                playAudio(wordCard.content);
+
+                                // Check Win
+                                if (gameState.value.cards.every(c => c.isMatched)) {
+                                    clearInterval(gameState.value.timerId);
+                                    setTimeout(() => gamePhase.value = 'result', 500);
+                                }
+                            }, 500);
+                        } else {
+                            // No Match
+                            setTimeout(() => {
+                                card1.isFlipped = false;
+                                card2.isFlipped = false;
+                                gameState.value.flippedCards = [];
+                                gameState.value.isLocked = false;
+                            }, 1000);
+                        }
+                    }
+                };
+
+                const formatTime = (seconds) => {
+                    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const s = (seconds % 60).toString().padStart(2, '0');
+                    return `${m}:${s}`;
+                };
+
                 return {
                     vocabularyData, activeTab, setActiveTab,
                     listFilterMode, mobileControlMode, 
@@ -771,7 +985,9 @@
                     groupedData, quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
                     startQuiz, handleQuizAnswer, getQuizOptionClass,
                     showDeckMenu, currentSessionType,
-                    playAudio // Exported function
+                    playAudio,
+                    // Game
+                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime
                 };
             }
         }); 
