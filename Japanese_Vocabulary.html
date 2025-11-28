@@ -372,12 +372,9 @@
                         </div>
 
                         <!-- Game Grid -->
-                        <div class="flex-1 overflow-y-auto p-4 flex items-center justify-center">
-                            <div class="grid w-full max-w-2xl mx-auto gap-2 sm:gap-4" 
-                                :class="{
-                                    'grid-cols-3': gameConfig.difficulty === 'easy',
-                                    'grid-cols-4': gameConfig.difficulty !== 'easy',
-                                }">
+                        <div class="flex-1 overflow-y-auto p-2 flex items-center justify-center content-center">
+                            <div class="grid w-full mx-auto gap-2 sm:gap-3 transition-all duration-300" 
+                                :class="getGameGridClass">
                                 <div v-for="card in gameState.cards" :key="card.id" 
                                      class="game-card aspect-square cursor-pointer perspective-1000"
                                      :class="{ 'flipped': card.isFlipped || card.isMatched, 'matched': card.isMatched }"
@@ -662,6 +659,25 @@
                     const rightOpacity = dragX.value > 0 ? Math.min(dragX.value / threshold, 1) : 0;
                     const leftOpacity = dragX.value < 0 ? Math.min(Math.abs(dragX.value) / threshold, 1) : 0;
                     return { right: rightOpacity, left: leftOpacity };
+                });
+
+                // Game Grid Responsive Logic
+                const getGameGridClass = computed(() => {
+                    const diff = gameConfig.value.difficulty;
+                    if (diff === 'easy') {
+                        // 12 cards: 3x4 layout usually.
+                        // Mobile: max-w-sm (fits well). Desktop: max-w-md (slightly larger but contained).
+                        return 'grid-cols-3 max-w-sm md:max-w-md'; 
+                    } else if (diff === 'normal') {
+                        // 16 cards: 4x4 layout.
+                        // Mobile: max-w-sm (small cards). Desktop: max-w-lg (moderate cards).
+                        return 'grid-cols-4 max-w-sm md:max-w-lg';
+                    } else { // hard
+                        // 24 cards.
+                        // Mobile: 4 cols x 6 rows. max-w-sm.
+                        // Desktop: 6 cols x 4 rows. max-w-2xl (wider is ok because more columns).
+                        return 'grid-cols-4 max-w-md md:grid-cols-6 md:max-w-3xl';
+                    }
                 });
 
                 // Audio Function
@@ -987,7 +1003,8 @@
                     showDeckMenu, currentSessionType,
                     playAudio,
                     // Game
-                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime
+                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime,
+                    getGameGridClass // Added
                 };
             }
         }); 
