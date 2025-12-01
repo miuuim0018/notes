@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五十音記憶神器 (含語音 & 對對樂)</title>
+    <title>五十音記憶神器 (含語音 & 對對樂 & 配對消除)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -39,7 +39,7 @@
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         .swipe-overlay { transition: opacity 0.1s ease; pointer-events: none; }
 
-        /* Game Card Flip Animation */
+        /* Memory Match Card Flip Animation */
         .game-card-inner {
             transition: transform 0.4s;
             transform-style: preserve-3d;
@@ -53,6 +53,22 @@
         .game-card.matched {
             opacity: 0.5;
             pointer-events: none;
+        }
+
+        /* Speed Match Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        .speed-card-matched {
+            transform: scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease-out;
         }
     </style>
 </head>
@@ -75,6 +91,9 @@
                 </button>
                 <button @click="setActiveTab('game')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'game' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-puzzle size="20"></icon-puzzle> 翻翻對對樂
+                </button>
+                <button @click="setActiveTab('speedmatch')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'speedmatch' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-zap size="20"></icon-zap> 配對消除
                 </button>
                 <button @click="setActiveTab('quiz')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'quiz' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-graduation-cap size="20"></icon-graduation-cap> 自我測驗
@@ -338,13 +357,13 @@
                     </div>
                 </div>
 
-                <!-- 3. New Game Tab: Memory Match -->
+                <!-- 3. Memory Match Game Tab -->
                 <div v-if="activeTab === 'game'" class="flex-1 overflow-y-auto no-scrollbar pb-20 bg-slate-100">
                     <div v-if="gamePhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
                             <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6 text-pink-600 mx-auto"><icon-puzzle size="32"></icon-puzzle></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">翻字卡對對樂</h2>
-                            <p class="text-slate-400 text-sm mb-6">配對日文單字與中文意思</p>
+                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出日文與中文的配對</p>
                             
                             <div class="space-y-6">
                                 <div>
@@ -418,7 +437,81 @@
                     </div>
                 </div>
 
-                <!-- 4. Quiz Tab -->
+                <!-- 4. Speed Match Tab (New) -->
+                <div v-if="activeTab === 'speedmatch'" class="flex-1 overflow-y-auto no-scrollbar pb-20 bg-slate-100">
+                    <div v-if="speedMatchPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600 mx-auto"><icon-zap size="32"></icon-zap></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">配對消除</h2>
+                            <p class="text-slate-400 text-sm mb-6">點擊成對的卡片來消除它們</p>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">選擇難度</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button @click="speedMatchConfig.difficulty = 'easy'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'easy' ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">簡單<br><span class="text-[10px] opacity-70">6 組</span></button>
+                                        <button @click="speedMatchConfig.difficulty = 'normal'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'normal' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">普通<br><span class="text-[10px] opacity-70">8 組</span></button>
+                                        <button @click="speedMatchConfig.difficulty = 'hard'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'hard' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">困難<br><span class="text-[10px] opacity-70">12 組</span></button>
+                                    </div>
+                                </div>
+                                <button @click="startSpeedMatch" class="w-full bg-amber-500 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始挑戰</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="speedMatchPhase === 'playing'" class="flex flex-col h-full w-full relative">
+                         <!-- Game Header -->
+                        <div class="h-14 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between px-4 z-20">
+                            <button @click="speedMatchPhase = 'setup'" class="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><icon-x size="20"></icon-x></button>
+                            <div class="flex gap-4 font-mono font-bold text-slate-600">
+                                <div class="flex items-center gap-1"><icon-clock size="14"></icon-clock> {{ formatTime(speedMatchState.time) }}</div>
+                            </div>
+                            <div class="w-8"></div>
+                        </div>
+
+                        <!-- Game Grid -->
+                        <div class="flex-1 overflow-y-auto p-2 flex items-center justify-center content-center">
+                            <div class="grid w-full mx-auto gap-2 sm:gap-3 transition-all duration-300" 
+                                :class="getSpeedMatchGridClass">
+                                <div v-for="card in speedMatchState.cards" :key="card.id" 
+                                     class="relative aspect-square cursor-pointer transition-all duration-200"
+                                     :class="[
+                                        card.isMatched ? 'speed-card-matched' : 'hover:scale-[1.02] active:scale-95',
+                                        card.isError ? 'animate-shake' : ''
+                                     ]"
+                                     @click="handleSpeedMatchCardClick(card)">
+                                    
+                                    <div class="absolute inset-0 bg-white rounded-xl shadow-md border-2 flex items-center justify-center p-2 text-center select-none transition-colors duration-200"
+                                         :class="[
+                                            speedMatchState.selectedId === card.id ? 'border-amber-500 bg-amber-50 ring-4 ring-amber-100' : 'border-slate-200',
+                                            card.isError ? 'border-red-500 bg-red-50' : ''
+                                         ]">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <span class="font-bold text-slate-800 break-words" :class="card.type === 'word' ? 'text-lg sm:text-xl' : 'text-sm sm:text-base'">
+                                                {{ card.content }}
+                                            </span>
+                                            <span v-if="card.sub" class="text-[10px] text-slate-400 mt-1">{{ card.sub }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="speedMatchPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">⚡️</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">速度驚人！</h2>
+                        <div class="flex gap-4 mt-6 mb-8">
+                            <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[140px]">
+                                <div class="text-4xl font-black text-amber-500 mb-2">{{ formatTime(speedMatchState.time) }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總時間</div>
+                            </div>
+                        </div>
+                        <button @click="speedMatchPhase = 'setup'" class="bg-amber-500 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再玩一次</button>
+                    </div>
+                </div>
+
+                <!-- 5. Quiz Tab -->
                 <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar pb-20">
                      <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm">
@@ -487,9 +580,9 @@
                 <icon-layers size="24"></icon-layers>
                 <span class="text-[10px] font-bold mt-1">背單字</span>
             </button>
-            <button @click="setActiveTab('game')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'game' ? 'text-pink-600' : 'text-slate-400'">
-                <icon-puzzle size="24"></icon-puzzle>
-                <span class="text-[10px] font-bold mt-1">對對樂</span>
+            <button @click="setActiveTab('speedmatch')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'speedmatch' ? 'text-amber-600' : 'text-slate-400'">
+                <icon-zap size="24"></icon-zap>
+                <span class="text-[10px] font-bold mt-1">配對</span>
             </button>
             <button @click="setActiveTab('quiz')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'quiz' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-graduation-cap size="24"></icon-graduation-cap>
@@ -573,6 +666,7 @@
                 <svg v-else-if="name === 'volume-2'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                 <svg v-else-if="name === 'clock'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <svg v-else-if="name === 'mouse-pointer'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                <svg v-else-if="name === 'zap'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
             `
         };
 
@@ -581,7 +675,7 @@
                 'icon-book': { ...Icon, data() { return { name: 'book' } } },
                 'icon-layers': { ...Icon, data() { return { name: 'layers' } } },
                 'icon-graduation-cap': { ...Icon, data() { return { name: 'graduation-cap' } } },
-                'icon-puzzle': { ...Icon, data() { return { name: 'puzzle' } } }, // Added
+                'icon-puzzle': { ...Icon, data() { return { name: 'puzzle' } } },
                 'icon-rotate-ccw': { ...Icon, data() { return { name: 'rotate-ccw' } } },
                 'icon-check': { ...Icon, data() { return { name: 'check' } } },
                 'icon-x': { ...Icon, data() { return { name: 'x' } } },
@@ -596,8 +690,9 @@
                 'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
                 'icon-sliders': { ...Icon, data() { return { name: 'sliders' } } },
                 'icon-volume-2': { ...Icon, data() { return { name: 'volume-2' } } },
-                'icon-clock': { ...Icon, data() { return { name: 'clock' } } }, // Added
-                'icon-mouse-pointer': { ...Icon, data() { return { name: 'mouse-pointer' } } }, // Added
+                'icon-clock': { ...Icon, data() { return { name: 'clock' } } },
+                'icon-mouse-pointer': { ...Icon, data() { return { name: 'mouse-pointer' } } },
+                'icon-zap': { ...Icon, data() { return { name: 'zap' } } },
             },
             setup() {
                 const activeTab = ref('list');
@@ -627,6 +722,11 @@
                 const gamePhase = ref('setup');
                 const gameConfig = ref({ difficulty: 'normal' }); // easy (6), normal (8), hard (12)
                 const gameState = ref({ cards: [], flippedCards: [], isLocked: false, moves: 0, time: 0, timerId: null });
+
+                // Speed Match Game State (New)
+                const speedMatchPhase = ref('setup');
+                const speedMatchConfig = ref({ difficulty: 'normal' });
+                const speedMatchState = ref({ cards: [], selectedId: null, time: 0, timerId: null });
 
                 // Computed
                 const groupedData = computed(() => {
@@ -665,17 +765,21 @@
                 const getGameGridClass = computed(() => {
                     const diff = gameConfig.value.difficulty;
                     if (diff === 'easy') {
-                        // 12 cards: 3x4 layout usually.
-                        // Mobile: max-w-sm (fits well). Desktop: max-w-md (slightly larger but contained).
                         return 'grid-cols-3 max-w-sm md:max-w-md'; 
                     } else if (diff === 'normal') {
-                        // 16 cards: 4x4 layout.
-                        // Mobile: max-w-sm (small cards). Desktop: max-w-lg (moderate cards).
                         return 'grid-cols-4 max-w-sm md:max-w-lg';
-                    } else { // hard
-                        // 24 cards.
-                        // Mobile: 4 cols x 6 rows. max-w-sm.
-                        // Desktop: 6 cols x 4 rows. max-w-2xl (wider is ok because more columns).
+                    } else { 
+                        return 'grid-cols-4 max-w-md md:grid-cols-6 md:max-w-3xl';
+                    }
+                });
+
+                const getSpeedMatchGridClass = computed(() => {
+                    const diff = speedMatchConfig.value.difficulty;
+                    if (diff === 'easy') {
+                        return 'grid-cols-3 max-w-sm md:max-w-md'; 
+                    } else if (diff === 'normal') {
+                        return 'grid-cols-4 max-w-sm md:max-w-lg';
+                    } else { 
                         return 'grid-cols-4 max-w-md md:grid-cols-6 md:max-w-3xl';
                     }
                 });
@@ -705,6 +809,7 @@
                 onUnmounted(() => {
                     window.removeEventListener('keydown', handleKeydown);
                     if (gameState.value.timerId) clearInterval(gameState.value.timerId);
+                    if (speedMatchState.value.timerId) clearInterval(speedMatchState.value.timerId);
                 });
 
                 watch(bookmarks, (newVal) => localStorage.setItem('jp_app_bookmarks', JSON.stringify(newVal)), { deep: true });
@@ -723,9 +828,8 @@
 
                 const setActiveTab = (tab) => { 
                     activeTab.value = tab; 
-                    if (tab !== 'game' && gameState.value.timerId) {
-                        clearInterval(gameState.value.timerId);
-                    }
+                    if (tab !== 'game' && gameState.value.timerId) clearInterval(gameState.value.timerId);
+                    if (tab !== 'speedmatch' && speedMatchState.value.timerId) clearInterval(speedMatchState.value.timerId);
                 };
 
                 const startSession = (type) => {
@@ -899,7 +1003,7 @@
                     return 'bg-white border-slate-100';
                 };
 
-                // --- Game Logic ---
+                // --- Game Logic: Memory Match ---
 
                 const startGame = () => {
                     const pairCount = gameConfig.value.difficulty === 'easy' ? 6 : (gameConfig.value.difficulty === 'normal' ? 8 : 12);
@@ -907,25 +1011,8 @@
                     
                     let cards = [];
                     pool.forEach(item => {
-                        // Card 1: Japanese
-                        cards.push({
-                            id: item.id + '-jp',
-                            vocabId: item.id,
-                            content: item.word,
-                            sub: item.kana,
-                            type: 'word',
-                            isFlipped: false,
-                            isMatched: false
-                        });
-                        // Card 2: Meaning
-                        cards.push({
-                            id: item.id + '-zh',
-                            vocabId: item.id,
-                            content: item.meaning,
-                            type: 'meaning',
-                            isFlipped: false,
-                            isMatched: false
-                        });
+                        cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: item.kana, type: 'word', isFlipped: false, isMatched: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, type: 'meaning', isFlipped: false, isMatched: false });
                     });
 
                     gameState.value = {
@@ -942,7 +1029,6 @@
                 const handleGameCardClick = (card) => {
                     if (gameState.value.isLocked || card.isMatched || card.isFlipped) return;
 
-                    // Play audio if it's a word card
                     if (card.type === 'word') playAudio(card.content);
 
                     card.isFlipped = true;
@@ -955,25 +1041,21 @@
                         const [card1, card2] = gameState.value.flippedCards;
                         
                         if (card1.vocabId === card2.vocabId) {
-                            // Match
                             setTimeout(() => {
                                 card1.isMatched = true;
                                 card2.isMatched = true;
                                 gameState.value.flippedCards = [];
                                 gameState.value.isLocked = false;
                                 
-                                // Play audio on match if one of them is word, just in case first one wasn't
                                 const wordCard = card1.type === 'word' ? card1 : card2;
                                 playAudio(wordCard.content);
 
-                                // Check Win
                                 if (gameState.value.cards.every(c => c.isMatched)) {
                                     clearInterval(gameState.value.timerId);
                                     setTimeout(() => gamePhase.value = 'result', 500);
                                 }
                             }, 500);
                         } else {
-                            // No Match
                             setTimeout(() => {
                                 card1.isFlipped = false;
                                 card2.isFlipped = false;
@@ -981,6 +1063,71 @@
                                 gameState.value.isLocked = false;
                             }, 1000);
                         }
+                    }
+                };
+
+                // --- Game Logic: Speed Match (New) ---
+
+                const startSpeedMatch = () => {
+                    const pairCount = speedMatchConfig.value.difficulty === 'easy' ? 6 : (speedMatchConfig.value.difficulty === 'normal' ? 8 : 12);
+                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    
+                    let cards = [];
+                    pool.forEach(item => {
+                        cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: item.kana, type: 'word', isMatched: false, isError: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, type: 'meaning', isMatched: false, isError: false });
+                    });
+
+                    speedMatchState.value = {
+                        cards: cards.sort(() => 0.5 - Math.random()),
+                        selectedId: null,
+                        time: 0,
+                        timerId: setInterval(() => speedMatchState.value.time++, 1000)
+                    };
+                    speedMatchPhase.value = 'playing';
+                };
+
+                const handleSpeedMatchCardClick = (card) => {
+                    if (card.isMatched) return;
+
+                    // If same card clicked, deselect
+                    if (speedMatchState.value.selectedId === card.id) {
+                        speedMatchState.value.selectedId = null;
+                        return;
+                    }
+
+                    // First selection
+                    if (!speedMatchState.value.selectedId) {
+                        speedMatchState.value.selectedId = card.id;
+                        if (card.type === 'word') playAudio(card.content);
+                        return;
+                    }
+
+                    // Second selection
+                    const prevCard = speedMatchState.value.cards.find(c => c.id === speedMatchState.value.selectedId);
+                    
+                    if (prevCard.vocabId === card.vocabId) {
+                        // Match!
+                        prevCard.isMatched = true;
+                        card.isMatched = true;
+                        speedMatchState.value.selectedId = null;
+                        
+                        const wordCard = card.type === 'word' ? card : prevCard;
+                        playAudio(wordCard.content);
+
+                        if (speedMatchState.value.cards.every(c => c.isMatched)) {
+                            clearInterval(speedMatchState.value.timerId);
+                            setTimeout(() => speedMatchPhase.value = 'result', 500);
+                        }
+                    } else {
+                        // Mismatch
+                        prevCard.isError = true;
+                        card.isError = true;
+                        speedMatchState.value.selectedId = null;
+                        setTimeout(() => {
+                            prevCard.isError = false;
+                            card.isError = false;
+                        }, 400);
                     }
                 };
 
@@ -1003,8 +1150,9 @@
                     showDeckMenu, currentSessionType,
                     playAudio,
                     // Game
-                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime,
-                    getGameGridClass // Added
+                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime, getGameGridClass,
+                    // Speed Match
+                    speedMatchPhase, speedMatchConfig, speedMatchState, startSpeedMatch, handleSpeedMatchCardClick, getSpeedMatchGridClass
                 };
             }
         }); 
