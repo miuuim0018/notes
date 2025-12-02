@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>日本都道府縣記憶神器 (含縣廳所在地)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        html, body {
+            touch-action: pan-x pan-y; 
+            -ms-touch-action: pan-x pan-y;
+            overscroll-behavior-y: none;
+            background-color: #f8fafc;
+            height: 100vh; 
+            height: 100dvh; 
+            width: 100%;
+            overflow: hidden; 
+        }
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .gpu-accelerated {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform;
+        }
+        .transition-transform-only {
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition-duration: 300ms;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .swipe-overlay { transition: opacity 0.1s ease; pointer-events: none; }
+
+        /* Memory Match Card Flip Animation */
+        .game-card-inner {
+            transition: transform 0.4s;
+            transform-style: preserve-3d;
+        }
+        .game-card.flipped .game-card-inner {
+            transform: rotateY(180deg);
+        }
+        .game-card.matched .game-card-inner {
+            transform: rotateY(180deg);
+        }
+        .game-card.matched {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Speed Match Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        .speed-card-matched {
+            transform: scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease-out;
+        }
+        
+        /* Font size adjustment for long text */
+        .text-fit { container-type: inline-size; }
+    </style>
+</head>
+<body class="font-sans text-slate-800">
+
+    <div id="app" class="flex flex-col h-full w-full md:flex-row">
+        
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
+            <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">JP</div>
+                <h1 class="font-bold text-xl text-slate-800">都道府縣記憶</h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button @click="setActiveTab('list')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'list' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-book size="20"></icon-book> 縣名列表
+                </button>
+                <button @click="setActiveTab('flashcards')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'flashcards' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-layers size="20"></icon-layers> 背縣名卡
+                </button>
+                <button @click="setActiveTab('game')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'game' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-puzzle size="20"></icon-puzzle> 翻翻對對樂
+                </button>
+                <button @click="setActiveTab('speedmatch')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'speedmatch' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-zap size="20"></icon-zap> 配對消除
+                </button>
+                <button @click="setActiveTab('quiz')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'quiz' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
+                    <icon-graduation-cap size="20"></icon-graduation-cap> 自我測驗
+                </button>
+            </nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
+            
+            <header class="md:hidden h-12 bg-white border-b border-slate-200 flex items-center justify-center shrink-0 z-20 pt-safe shadow-sm">
+                <h1 class="font-bold text-slate-800 text-lg">日本都道府縣記憶神器</h1>
+            </header>
+
+            <main class="flex-1 overflow-hidden relative w-full flex flex-col">
+                
+                <div v-if="activeTab === 'list'" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-24 md:pb-8">
+                    <div class="max-w-6xl mx-auto">
+                        
+                        <div class="w-full bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-6 flex gap-4 shrink-0 overflow-x-auto">
+                            <button @click="listFilterMode = 'all'" 
+                                class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'all' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-50'">
+                                <span class="text-3xl font-bold mb-1">{{ vocabularyData.length }}</span>
+                                <span class="text-xs font-bold">全部</span>
+                            </button>
+                            <button @click="listFilterMode = 'bookmarks'" 
+                                class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'bookmarks' ? 'bg-yellow-50 border-yellow-200 text-yellow-700 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-50'">
+                                <span class="text-3xl font-bold mb-1">{{ bookmarks.length }}</span>
+                                <span class="text-xs font-bold">收藏</span>
+                            </button>
+                            <button @click="listFilterMode = 'missed'" 
+                                class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'missed' ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-50'">
+                                <span class="text-3xl font-bold mb-1">{{ missedIds.length }}</span>
+                                <span class="text-xs font-bold">待加強</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h2 class="font-bold text-slate-400 text-sm flex items-center gap-2">
+                                <span v-if="listFilterMode === 'all'">全部列表</span>
+                                <span v-else-if="listFilterMode === 'bookmarks'" class="text-yellow-600 flex items-center gap-2"><icon-star size="16" filled="true"></icon-star> 我的收藏</span>
+                                <span v-else class="text-red-500 flex items-center gap-2"><icon-refresh-cw size="16"></icon-refresh-cw> 待加強縣名</span>
+                            </h2>
+                            <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors">
+                                清除篩選 ✕
+                            </button>
+                        </div>
+
+                        <div v-if="Object.keys(groupedData).length === 0" class="text-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed">
+                            <div class="mb-4 text-6xl opacity-50">📭</div>
+                            <p class="text-slate-400 font-bold">沒有符合條件的項目</p>
+                            <button v-if="listFilterMode !== 'all'" @click="listFilterMode = 'all'" class="mt-4 text-indigo-600 font-bold hover:underline">顯示全部</button>
+                        </div>
+
+                        <div class="space-y-6 pb-4">
+                            <div v-for="(items, row) in groupedData" :key="row">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <h3 class="text-lg font-bold text-slate-700">{{ row }}</h3>
+                                    <div class="h-px flex-1 bg-slate-200"></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                                    <div v-for="item in items" :key="item.id" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-all group relative overflow-hidden">
+                                        <div v-if="listFilterMode === 'bookmarks'" class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+                                        <div v-if="listFilterMode === 'missed'" class="absolute left-0 top-0 bottom-0 w-1 bg-red-400"></div>
+
+                                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg shrink-0 mt-0.5">
+                                            {{ item.id }}
+                                        </div>
+
+                                        <div class="flex-1 min-w-0 flex flex-col justify-center min-h-[3rem] text-left">
+                                            <div class="font-bold text-slate-800 text-lg leading-tight mb-1 break-words flex items-center gap-1">
+                                                {{ item.word }}
+                                                <button @click.stop="playAudio(item.word)" class="ml-1 p-1.5 text-indigo-400 bg-indigo-50 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors active:scale-95">
+                                                    <icon-volume-2 size="14"></icon-volume-2>
+                                                </button>
+                                            </div>
+                                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                                                <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
+                                                <span class="text-sm text-slate-500 w-full sm:w-auto mt-0.5 sm:mt-0">首府: {{ item.meaning }}</span>
+                                            </div>
+                                        </div>
+
+                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0 -mt-1 -mr-1">
+                                            <icon-star :filled="hasBookmark(item.id)" size="20" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'flashcards'" class="flex-1 flex flex-col h-full relative overflow-hidden">
+                    <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背縣名了嗎？</h2>
+                            <div class="space-y-3 mt-6">
+                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><icon-layers></icon-layers> 全部縣名 ({{ vocabularyData.length }})</button>
+                                <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"><icon-star class="text-yellow-400" filled="true"></icon-star> 收藏縣名 ({{ bookmarks.length }})</button>
+                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform"><icon-refresh-cw></icon-refresh-cw> 錯題複習 ({{ missedIds.length }})</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else-if="roundComplete" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
+                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 mx-auto"><icon-trophy size="40"></icon-trophy></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-6">練習完成！</h2>
+                            <div class="flex justify-center gap-8 mb-8">
+                                <div><div class="text-3xl font-black text-green-500">{{ sessionLearnedCount }}</div><div class="text-xs text-slate-400 font-bold">本輪記住</div></div>
+                                <div><div class="text-3xl font-black text-red-500">{{ missedIds.length }}</div><div class="text-xs text-slate-400 font-bold">剩餘待加強</div></div>
+                            </div>
+                            <div class="space-y-3">
+                                <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform">繼續複習錯題</button>
+                                <button @click="startSession('all')" class="w-full bg-slate-100 text-slate-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform">全部重來</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex-1 flex flex-col h-full">
+                        <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
+                            <button @click="toggleFlashcardMode" class="bg-white px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 shadow-sm flex items-center gap-2">
+                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                            </button>
+                            <span class="font-mono font-bold text-slate-400 text-xs">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
+                            <div class="flex gap-2">
+                                <button @click="shuffleDeck" class="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm active:scale-95"><icon-shuffle size="16"></icon-shuffle></button>
+                                <button @click="showDeckMenu = true" class="p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-600 shadow-sm active:scale-95 relative">
+                                    <icon-sliders size="16"></icon-sliders>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 flex items-center justify-center p-4 min-h-0 relative overflow-hidden">
+                            <button @click="prevCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute left-4 z-20" :disabled="currentIndex === 0">
+                                <icon-chevron-left size="40"></icon-chevron-left>
+                            </button>
+                            <div class="relative w-full max-w-sm h-full max-h-[420px] md:max-h-[500px] aspect-[3/4] md:aspect-[4/3] perspective-1000 cursor-grab active:cursor-grabbing"
+                                 @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
+                                 @mousedown="onTouchStart" @mousemove="onTouchMove" @mouseup="onTouchEnd" @mouseleave="onTouchEnd"
+                                 @click="handleCardClick">
+                                <div class="relative w-full h-full transition-transform-only preserve-3d gpu-accelerated" :style="cardContainerStyle">
+                                    
+                                    <div class="relative w-full h-full transition-transform-only preserve-3d" :class="{ 'rotate-y-180': isFlipped }">
+                                        
+                                        <div class="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-xl border border-white flex flex-col items-center justify-center p-8 z-10">
+                                            <div class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-check class="text-green-500" size="48"></icon-check></div></div>
+                                            <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><div class="bg-white/90 p-4 rounded-full shadow-lg"><icon-x class="text-red-500" size="48"></icon-x></div></div>
+                                            
+                                            <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
+                                            </button>
+                                            
+                                            <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
+                                            
+                                            <h2 class="font-bold text-slate-800 text-center break-words flex flex-col items-center gap-2" :class="flashcardMode === 'jp-zh' ? 'text-6xl' : 'text-4xl'">
+                                                {{ flashcardMode === 'jp-zh' ? currentItem.word : currentItem.meaning }}
+                                                
+                                                <button v-if="flashcardMode === 'jp-zh'" @click.stop="playAudio(currentItem.word)" class="mt-4 p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
+                                                    <icon-volume-2 size="32"></icon-volume-2>
+                                                </button>
+                                            </h2>
+                                            <span v-if="flashcardMode !== 'jp-zh'" class="text-sm text-slate-400 mt-2">首府在哪個縣？</span>
+
+                                            <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
+                                        </div>
+
+                                        <div class="absolute inset-0 backface-hidden bg-indigo-600 rounded-3xl shadow-xl border border-indigo-500 rotate-y-180 flex flex-col items-center justify-center p-8 text-white overflow-hidden">
+                                            <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.right }"><icon-check class="text-white" size="64"></icon-check></div>
+                                            <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20 swipe-overlay" :style="{ opacity: swipeOverlayOpacity.left }"><icon-x class="text-white" size="64"></icon-x></div>
+                                            
+                                            <button @click.stop="toggleBookmark(currentItem.id)" class="absolute top-4 right-4 p-2 rounded-full z-30" @mousedown.stop @touchstart.stop>
+                                                <icon-star :filled="hasBookmark(currentItem.id)" size="28" :class="hasBookmark(currentItem.id) ? 'text-yellow-400' : 'text-white/30'"></icon-star>
+                                            </button>
+                                            
+                                            <span class="absolute top-10 left-0 w-full text-center text-7xl font-black text-white/10 select-none break-all p-4 leading-none" style="word-break: break-all;">
+                                                {{ currentItem.kana }}
+                                            </span>
+
+                                            <div class="z-10 text-center w-full">
+                                                <template v-if="flashcardMode === 'jp-zh'">
+                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">首府</div>
+                                                    <div class="text-4xl font-bold mb-4">{{ currentItem.meaning }}</div>
+                                                    <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
+                                                </template>
+                                                <template v-else>
+                                                    <div class="text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+                                                        {{ currentItem.word }}
+                                                        <button @click.stop="playAudio(currentItem.word)" class="p-3 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors active:scale-95" @mousedown.stop @touchstart.stop>
+                                                            <icon-volume-2 size="32"></icon-volume-2>
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-xl opacity-80">{{ currentItem.kana }}</div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <button @click="nextCard" class="hidden md:flex p-4 rounded-full text-slate-400 hover:bg-white hover:text-indigo-600 transition-colors absolute right-4 z-20" :disabled="currentIndex === currentDeck.length - 1">
+                                <icon-chevron-right size="40"></icon-chevron-right>
+                            </button>
+                        </div>
+
+                        <div class="h-16 shrink-0 w-full max-w-md px-4 flex gap-3 mb-4 md:hidden mx-auto">
+                            <template v-if="mobileControlMode === 'nav'">
+                                <button @click="prevCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                    <icon-chevron-left size="20"></icon-chevron-left>
+                                    <span class="text-[10px] mt-0.5">上一張</span>
+                                </button>
+                                <button @click="nextCard" class="flex-1 bg-white border-2 border-slate-200 text-slate-500 rounded-2xl font-bold shadow-sm flex flex-col items-center justify-center active:scale-95 transition-transform active:bg-slate-50">
+                                    <icon-chevron-right size="20"></icon-chevron-right>
+                                    <span class="text-[10px] mt-0.5">下一張</span>
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors active:scale-95">
+                                    <icon-x></icon-x> 沒記住 (←)
+                                </button>
+                                <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-green-50 transition-colors active:scale-95">
+                                    <icon-check></icon-check> 記住了 (→)
+                                </button>
+                            </template>
+                        </div>
+                        <div class="hidden md:flex h-20 shrink-0 w-full max-w-md px-4 gap-4 mb-4 mx-auto">
+                            <button @click="handleCardResult('missed')" class="flex-1 bg-white border-2 border-red-100 text-red-500 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
+                                <icon-x></icon-x> 沒記住 (←)
+                            </button>
+                            <button @click="handleCardResult('memorized')" class="flex-1 bg-white border-2 border-green-100 text-green-600 rounded-2xl font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
+                                <icon-check></icon-check> 記住了 (→)
+                            </button>
+                        </div>
+
+                        <transition name="modal">
+                            <div v-if="showDeckMenu" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="showDeckMenu = false">
+                                <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 animate-fade-in">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <h3 class="text-lg font-bold text-slate-800">卡片設定</h3>
+                                        <button @click="showDeckMenu = false" class="p-2 text-slate-400 hover:text-slate-600"><icon-x size="20"></icon-x></button>
+                                    </div>
+                                    <div class="mb-6 md:hidden">
+                                        <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">底部按鈕功能</label>
+                                        <div class="flex p-1 bg-slate-100 rounded-xl">
+                                            <button @click="mobileControlMode = 'nav'" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all" :class="mobileControlMode === 'nav' ? 'bg-white shadow text-indigo-600' : 'text-slate-400'">
+                                                翻頁
+                                            </button>
+                                            <button @click="mobileControlMode = 'grade'" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all" :class="mobileControlMode === 'grade' ? 'bg-white shadow text-indigo-600' : 'text-slate-400'">
+                                                評分
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">切換題庫</label>
+                                        <button @click="startSession('all'); showDeckMenu = false" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all" :class="currentSessionType === 'all' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
+                                            <icon-layers size="20" class="text-indigo-600"></icon-layers> 全部縣名
+                                        </button>
+                                        <button @click="startSession('bookmarks'); showDeckMenu = false" :disabled="bookmarks.length === 0" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all disabled:opacity-50" :class="currentSessionType === 'bookmarks' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
+                                            <icon-star size="20" class="text-yellow-400" filled="true"></icon-star> 收藏縣名
+                                        </button>
+                                        <button @click="startSession('missed'); showDeckMenu = false" :disabled="missedIds.length === 0" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-red-200 hover:bg-red-50 transition-all disabled:opacity-50" :class="currentSessionType === 'missed' ? 'border-red-500 bg-red-50' : 'border-slate-100'">
+                                            <icon-refresh-cw size="20" class="text-red-500"></icon-refresh-cw> 錯題複習
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'game'" class="flex-1 overflow-y-auto no-scrollbar pb-20 bg-slate-100">
+                    <div v-if="gamePhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
+                            <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6 text-pink-600 mx-auto"><icon-puzzle size="32"></icon-puzzle></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">翻縣名對對樂</h2>
+                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出縣名與首府的配對</p>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">選擇難度</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button @click="gameConfig.difficulty = 'easy'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'easy' ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">簡單<br><span class="text-[10px] opacity-70">6 組</span></button>
+                                        <button @click="gameConfig.difficulty = 'normal'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'normal' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">普通<br><span class="text-[10px] opacity-70">8 組</span></button>
+                                        <button @click="gameConfig.difficulty = 'hard'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="gameConfig.difficulty === 'hard' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">困難<br><span class="text-[10px] opacity-70">12 組</span></button>
+                                    </div>
+                                </div>
+                                <button @click="startGame" class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始遊戲</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="gamePhase === 'playing'" class="flex flex-col h-full w-full relative"> 
+                        <div class="h-14 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between px-4 z-20">
+                            <button @click="gamePhase = 'setup'" class="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><icon-x size="20"></icon-x></button>
+                            <div class="flex gap-4 font-mono font-bold text-slate-600">
+                                <div class="flex items-center gap-1"><icon-clock size="14"></icon-clock> {{ formatTime(gameState.time) }}</div>
+                                <div class="flex items-center gap-1 text-indigo-600"><icon-mouse-pointer size="14"></icon-mouse-pointer> {{ gameState.moves }}</div>
+                            </div>
+                            <div class="w-8"></div> </div>
+
+                        <div class="flex-1 overflow-y-auto p-2 flex items-center justify-center content-center">
+                            <div class="grid w-full mx-auto gap-2 sm:gap-3 transition-all duration-300"
+                                 :class="getGameGridClass">
+                                <div v-for="card in gameState.cards" :key="card.id" 
+                                     class="game-card aspect-square cursor-pointer perspective-1000"
+                                     :class="{ 'flipped': card.isFlipped || card.isMatched, 'matched': card.isMatched }"
+                                     @click="handleGameCardClick(card)">
+                                    <div class="game-card-inner relative w-full h-full duration-500">
+                                        <div class="absolute inset-0 bg-white rounded-xl shadow-sm border-2 border-slate-200 flex items-center justify-center backface-hidden group hover:border-indigo-300 transition-colors">
+                                            <div class="text-indigo-100 font-bold text-2xl">?</div>
+                                        </div>
+                                        <div class="absolute inset-0 bg-white rounded-xl shadow-md border-2 rotate-y-180 flex items-center justify-center backface-hidden p-2 text-center select-none"
+                                             :class="card.isMatched ? 'border-green-400 bg-green-50' : 'border-indigo-500'">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <span class="font-bold text-slate-800 break-words" :class="card.type === 'word' ? 'text-lg sm:text-xl' : 'text-sm sm:text-base'">
+                                                    {{ card.content }}
+                                                </span>
+                                                <span v-if="card.sub" class="text-[10px] text-slate-400 mt-1">{{ card.sub }}</span>
+                                            </div>
+                                            <div v-if="card.isMatched" class="absolute top-1 right-1 text-green-500"><icon-check size="16"></icon-check></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="gamePhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">🏆</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">挑戰成功！</h2>
+                        <div class="flex gap-4 mt-6 mb-8">
+                            <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[100px]">
+                                <div class="text-3xl font-black text-indigo-600 mb-1">{{ gameState.moves }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總步數</div>
+                            </div>
+                            <div class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[100px]">
+                                <div class="text-3xl font-black text-indigo-600 mb-1">{{ formatTime(gameState.time) }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總時間</div>
+                            </div>
+                        </div>
+                        <button @click="gamePhase = 'setup'" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再玩一次</button>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'speedmatch'" class="flex-1 overflow-y-auto no-scrollbar pb-20 bg-slate-100">
+                    <div v-if="speedMatchPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600 mx-auto"><icon-zap size="32"></icon-zap></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">配對消除</h2>
+                            <p class="text-slate-400 text-sm mb-6">點擊成對的縣名與首府來消除它們</p>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">選擇難度</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button @click="speedMatchConfig.difficulty = 'easy'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'easy' ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">簡單<br><span class="text-[10px] opacity-70">6 組</span></button>
+                                        <button @click="speedMatchConfig.difficulty = 'normal'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'normal' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">普通<br><span class="text-[10px] opacity-70">8 組</span></button>
+                                        <button @click="speedMatchConfig.difficulty = 'hard'" class="py-3 rounded-xl font-bold border-2 text-sm transition-all" :class="speedMatchConfig.difficulty === 'hard' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'">困難<br><span class="text-[10px] opacity-70">12 組</span></button>
+                                    </div>
+                                </div>
+                                <button @click="startSpeedMatch" class="w-full bg-amber-500 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始挑戰</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="speedMatchPhase === 'playing'" class="flex flex-col h-full w-full relative"> 
+                        <div class="h-14 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between px-4 z-20">
+                            <button @click="speedMatchPhase = 'setup'" class="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><icon-x size="20"></icon-x></button>
+                            <div class="flex gap-4 font-mono font-bold text-slate-600">
+                                <div class="flex items-center gap-1"><icon-clock size="14"></icon-clock> {{ formatTime(speedMatchState.time) }}</div>
+                            </div>
+                            <div class="w-8"></div>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-2 flex items-center justify-center content-center">
+                            <div class="grid w-full mx-auto gap-2 sm:gap-3 transition-all duration-300"
+                                 :class="getSpeedMatchGridClass">
+                                <div v-for="card in speedMatchState.cards" :key="card.id" 
+                                     class="relative aspect-square cursor-pointer transition-all duration-200"
+                                     :class="[
+                                        card.isMatched ? 'speed-card-matched' : 'hover:scale-[1.02] active:scale-95',
+                                        card.isError ? 'animate-shake' : '' 
+                                     ]"
+                                     @click="handleSpeedMatchCardClick(card)">
+                                    
+                                    <div class="absolute inset-0 bg-white rounded-xl shadow-md border-2 flex items-center justify-center p-2 text-center select-none transition-colors duration-200"
+                                         :class="[
+                                            speedMatchState.selectedId === card.id ? 'border-amber-500 bg-amber-50 ring-4 ring-amber-100' : 'border-slate-200',
+                                            card.isError ? 'border-red-500 bg-red-50' : '' 
+                                         ]">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <span class="font-bold text-slate-800 break-words" :class="card.type === 'word' ? 'text-lg sm:text-xl' : 'text-sm sm:text-base'">
+                                                {{ card.content }}
+                                            </span>
+                                            <span v-if="card.sub" class="text-[10px] text-slate-400 mt-1">{{ card.sub }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="speedMatchPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">⚡️</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">速度驚人！</h2>
+                        <div class="flex gap-4 mt-6 mb-8">
+                            <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[140px]">
+                                <div class="text-4xl font-black text-amber-500 mb-2">{{ formatTime(speedMatchState.time) }}</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">總時間</div>
+                            </div>
+                        </div>
+                        <button @click="speedMatchPhase = 'setup'" class="bg-amber-500 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再玩一次</button>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'quiz'" class="flex-1 overflow-y-auto no-scrollbar pb-20"> 
+                    <div v-if="quizPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm">
+                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-settings size="32"></icon-settings></div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-6 text-center">測驗設定</h2>
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題庫來源</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button @click="quizConfig.source = 'all'" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">全部</button>
+                                        <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">收藏</button>
+                                        <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">錯題</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題目數量</label>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        <button v-for="opt in [5, 10, 20, 'all']" :key="opt" @click="quizConfig.count = opt" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.count === opt ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">{{ opt === 'all' ? '全部' : opt }}</button>
+                                    </div>
+                                </div>
+                                <button @click="startQuiz" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4"><icon-play-circle size="20"></icon-play-circle> 開始測驗</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="quizPhase === 'playing'" class="flex flex-col min-h-full max-w-2xl mx-auto w-full p-4 md:p-8 relative">
+                        <button @click="quizPhase = 'setup'" class="absolute top-4 left-4 p-2 text-slate-400 active:text-red-500 z-20"><icon-x size="24"></icon-x></button>
+                        <div class="flex justify-end mb-4 mt-2">
+                            <span class="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg text-sm">Q. {{ quizState.currentQIndex + 1 }} / {{ quizState.questions.length }}</span>
+                        </div>
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-center mb-4 relative overflow-hidden flex-1 flex flex-col justify-center items-center min-h-[200px]">
+                            <div v-if="quizState.lastCorrect === true" class="absolute inset-0 bg-green-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-check class="text-green-500 drop-shadow-md" size="80"></icon-check></div>
+                            <div v-if="quizState.lastCorrect === false" class="absolute inset-0 bg-red-500/10 flex items-center justify-center z-10 animate-fade-in"><icon-x class="text-red-500 drop-shadow-md" size="80"></icon-x></div>
+                            
+                            <span class="text-xs font-bold text-indigo-300 tracking-widest mb-4">QUESTION</span>
+                            <h2 class="text-4xl font-bold text-slate-800 mb-2">{{ quizConfig.mode === 'jp-zh' ? currentQuizItem.word : currentQuizItem.meaning }}</h2>
+                            
+                            <button v-if="quizConfig.mode === 'jp-zh'" @click="playAudio(currentQuizItem.word)" class="mt-2 p-2 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors">
+                                <icon-volume-2 size="24"></icon-volume-2>
+                            </button>
+                            
+                            <p v-if="quizConfig.mode === 'jp-zh'" class="text-indigo-400 text-xl mt-2">{{ currentQuizItem.kana }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 shrink-0 pb-4">
+                            <button v-for="(opt, i) in quizState.options" :key="i" :disabled="quizState.lastCorrect !== null" @click="handleQuizAnswer(opt)" class="p-4 rounded-xl text-left font-bold border-2 transition-all relative overflow-hidden" :class="getQuizOptionClass(opt)">{{ quizConfig.mode === 'jp-zh' ? opt.meaning : `${opt.word}` }}</button>
+                        </div>
+                    </div>
+
+                    <div v-else-if="quizPhase === 'result'" class="flex flex-col items-center justify-center min-h-full p-6 text-center animate-fade-in">
+                        <div class="text-8xl mb-6">{{ quizPercentage >= 80 ? '🎉' : '💪' }}</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">測驗結束</h2>
+                        <div class="my-8 p-6 bg-white rounded-2xl shadow-md border border-slate-100 w-full max-w-xs">
+                            <div class="text-5xl font-black text-indigo-600 mb-2">{{ quizPercentage }}%</div>
+                            <div class="text-slate-400 font-bold">答對 {{ quizState.score }} / {{ quizState.questions.length }} 題</div>
+                        </div>
+                        <button @click="quizPhase = 'setup'" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"><icon-rotate-ccw size="20"></icon-rotate-ccw> 再測驗一次</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <nav class="md:hidden h-16 bg-white border-t border-slate-200 flex justify-around p-1 pb-safe shrink-0 z-50">
+            <button @click="setActiveTab('list')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'list' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-book size="24"></icon-book>
+                <span class="text-[10px] font-bold mt-1">列表</span>
+            </button>
+            <button @click="setActiveTab('flashcards')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'flashcards' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-layers size="24"></icon-layers>
+                <span class="text-[10px] font-bold mt-1">背縣名</span>
+            </button>
+            <button @click="setActiveTab('speedmatch')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'speedmatch' ? 'text-amber-600' : 'text-slate-400'">
+                <icon-zap size="24"></icon-zap>
+                <span class="text-[10px] font-bold mt-1">配對</span>
+            </button>
+            <button @click="setActiveTab('quiz')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'quiz' ? 'text-indigo-600' : 'text-slate-400'">
+                <icon-graduation-cap size="24"></icon-graduation-cap>
+                <span class="text-[10px] font-bold mt-1">測驗</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
+
+        const vocabularyData = [
+            // 北海道
+            { id: 1, kana: 'ほっかいどう', word: '北海道', kanji: '札幌', romaji: 'Hokkaido', meaning: '札幌', row: '北海道・東北' },
+            // 東北
+            { id: 2, kana: 'あおもり', word: '青森', kanji: '青森', romaji: 'Aomori', meaning: '青森', row: '北海道・東北' },
+            { id: 3, kana: 'いわて', word: '岩手', kanji: '盛岡', romaji: 'Iwate', meaning: '盛岡', row: '北海道・東北' },
+            { id: 4, kana: 'みやぎ', word: '宮城', kanji: '仙台', romaji: 'Miyagi', meaning: '仙台', row: '北海道・東北' },
+            { id: 5, kana: 'あきた', word: '秋田', kanji: '秋田', romaji: 'Akita', meaning: '秋田', row: '北海道・東北' },
+            { id: 6, kana: 'やまがた', word: '山形', kanji: '山形', romaji: 'Yamagata', meaning: '山形', row: '北海道・東北' },
+            { id: 7, kana: 'ふくしま', word: '福島', kanji: '福島', romaji: 'Fukushima', meaning: '福島', row: '北海道・東北' },
+            // 關東
+            { id: 8, kana: 'いばらき', word: '茨城', kanji: '水戸', romaji: 'Ibaraki', meaning: '水戸', row: '関東' },
+            { id: 9, kana: 'とちぎ', word: '栃木', kanji: '宇都宮', romaji: 'Tochigi', meaning: '宇都宮', row: '関東' },
+            { id: 10, kana: 'ぐんま', word: '群馬', kanji: '前橋', romaji: 'Gunma', meaning: '前橋', row: '関東' },
+            { id: 11, kana: 'さいたま', word: '埼玉', kanji: 'さいたま', romaji: 'Saitama', meaning: '埼玉 (浦和)', row: '関東' },
+            { id: 12, kana: 'ちば', word: '千葉', kanji: '千葉', romaji: 'Chiba', meaning: '千葉', row: '関東' },
+            { id: 13, kana: 'とうきょう', word: '東京', kanji: '東京', romaji: 'Tokyo', meaning: '東京 (新宿)', row: '関東' },
+            { id: 14, kana: 'かながわ', word: '神奈川', kanji: '横浜', romaji: 'Kanagawa', meaning: '横浜', row: '関東' },
+            // 中部
+            { id: 15, kana: 'にいがた', word: '新潟', kanji: '新潟', romaji: 'Niigata', meaning: '新潟', row: '中部' },
+            { id: 16, kana: 'とやま', word: '富山', kanji: '富山', romaji: 'Toyama', meaning: '富山', row: '中部' },
+            { id: 17, kana: 'いしかわ', word: '石川', kanji: '金沢', romaji: 'Ishikawa', meaning: '金沢', row: '中部' },
+            { id: 18, kana: 'ふくい', word: '福井', kanji: '福井', romaji: 'Fukui', meaning: '福井', row: '中部' },
+            { id: 19, kana: 'やまなし', word: '山梨', kanji: '甲府', romaji: 'Yamanashi', meaning: '甲府', row: '中部' },
+            { id: 20, kana: 'ながの', word: '長野', kanji: '長野', romaji: 'Nagano', meaning: '長野', row: '中部' },
+            { id: 21, kana: 'ぎふ', word: '岐阜', kanji: '岐阜', romaji: 'Gifu', meaning: '岐阜', row: '中部' },
+            { id: 22, kana: 'しずおか', word: '静岡', kanji: '静岡', romaji: 'Shizuoka', meaning: '静岡', row: '中部' },
+            { id: 23, kana: 'あいち', word: '愛知', kanji: '名古屋', romaji: 'Aichi', meaning: '名古屋', row: '中部' },
+            // 近畿
+            { id: 24, kana: 'みえ', word: '三重', kanji: '津', romaji: 'Mie', meaning: '津', row: '近畿' },
+            { id: 25, kana: 'しが', word: '滋賀', kanji: '大津', romaji: 'Shiga', meaning: '大津', row: '近畿' },
+            { id: 26, kana: 'きょうと', word: '京都', kanji: '京都', romaji: 'Kyoto', meaning: '京都', row: '近畿' },
+            { id: 27, kana: 'おおさか', word: '大阪', kanji: '大阪', romaji: 'Osaka', meaning: '大阪', row: '近畿' },
+            { id: 28, kana: 'ひょうご', word: '兵庫', kanji: '神戸', romaji: 'Hyogo', meaning: '神戸', row: '近畿' },
+            { id: 29, kana: 'なら', word: '奈良', kanji: '奈良', romaji: 'Nara', meaning: '奈良', row: '近畿' },
+            { id: 30, kana: 'わかやま', word: '和歌山', kanji: '和歌山', romaji: 'Wakayama', meaning: '和歌山', row: '近畿' },
+            // 中国
+            { id: 31, kana: 'とっとり', word: '鳥取', kanji: '鳥取', romaji: 'Tottori', meaning: '鳥取', row: '中国・四国' },
+            { id: 32, kana: 'しまね', word: '島根', kanji: '松江', romaji: 'Shimane', meaning: '松江', row: '中国・四国' },
+            { id: 33, kana: 'おかやま', word: '岡山', kanji: '岡山', romaji: 'Okayama', meaning: '岡山', row: '中国・四国' },
+            { id: 34, kana: 'ひろしま', word: '広島', kanji: '広島', romaji: 'Hiroshima', meaning: '広島', row: '中国・四国' },
+            { id: 35, kana: 'やまぐち', word: '山口', kanji: '山口', romaji: 'Yamaguchi', meaning: '山口', row: '中国・四国' },
+            // 四国
+            { id: 36, kana: 'かがわ', word: '香川', kanji: '高松', romaji: 'Kagawa', meaning: '高松', row: '中国・四国' },
+            { id: 37, kana: 'とくしま', word: '徳島', kanji: '徳島', romaji: 'Tokushima', meaning: '徳島', row: '中国・四国' },
+            { id: 38, kana: 'えひめ', word: '愛媛', kanji: '松山', romaji: 'Ehime', meaning: '松山', row: '中国・四国' },
+            { id: 39, kana: 'こうち', word: '高知', kanji: '高知', romaji: 'Kochi', meaning: '高知', row: '中国・四国' },
+            // 九州
+            { id: 40, kana: 'ふくおか', word: '福岡', kanji: '福岡', romaji: 'Fukuoka', meaning: '福岡', row: '九州・沖縄' },
+            { id: 41, kana: 'さが', word: '佐賀', kanji: '佐賀', romaji: 'Saga', meaning: '佐賀', row: '九州・沖縄' },
+            { id: 42, kana: 'ながさき', word: '長崎', kanji: '長崎', romaji: 'Nagasaki', meaning: '長崎', row: '九州・沖縄' },
+            { id: 43, kana: 'くまもと', word: '熊本', kanji: '熊本', romaji: 'Kumamoto', meaning: '熊本', row: '九州・沖縄' },
+            { id: 44, kana: 'おおいた', word: '大分', kanji: '大分', romaji: 'Oita', meaning: '大分', row: '九州・沖縄' },
+            { id: 45, kana: 'みやざき', word: '宮崎', kanji: '宮崎', romaji: 'Miyazaki', meaning: '宮崎', row: '九州・沖縄' },
+            { id: 46, kana: 'かごしま', word: '鹿児島', kanji: '鹿児島', romaji: 'Kagoshima', meaning: '鹿児島', row: '九州・沖縄' },
+            { id: 47, kana: 'おきなわ', word: '沖縄', kanji: '那覇', romaji: 'Okinawa', meaning: '那覇', row: '九州・沖縄' }
+        ];
+
+        const Icon = {
+            props: ['name', 'size', 'filled'],
+            template: `
+                <svg v-if="name === 'book'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <svg v-else-if="name === 'layers'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                <svg v-else-if="name === 'graduation-cap'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                <svg v-else-if="name === 'puzzle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 15.424a1 1 0 0 0-1.026-.145c-2.433.953-4.145 1.488-5.65.643-1.638-.919-2.028-3.033-1.027-4.814a1 1 0 0 0 .151-1.034C10.942 7.643 10.407 5.931 11.252 4.426c.919-1.638 3.033-2.028 4.814-1.027a1 1 0 0 0 1.034.15c2.433-.953 4.145-1.487 5.65-.642 1.638.919 2.028 3.033 1.027 4.814a1 1 0 0 0-.151 1.034c.954 2.433 1.489 4.145.643 5.65-.918 1.638-3.032 2.028-4.814 1.027a1 1 0 0 0-.016-.008z"></path><path d="M4.56 8.576a1 1 0 0 1 1.026.145c2.433-.953 4.145-1.488 5.65-.643 1.638.919 2.028 3.033 1.027 4.814a1 1 0 0 1-.151 1.034c.954 2.433 1.489 4.145.643 5.65.919 1.638 3.033 2.028 4.814 1.027a1 1 0 0 1-1.034-.15c-2.433.953-4.145 1.487-5.65.642-1.638-.919-2.028-3.033-1.027-4.814a1 1 0 0 1 .151-1.034c-.954-2.433-1.489-4.145-.643-5.65.918-1.638 3.032-2.028 4.814-1.027a1 1 0 0 1 .016.008z"></path></svg>
+                <svg v-else-if="name === 'rotate-ccw'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                <svg v-else-if="name === 'check'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg v-else-if="name === 'x'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg v-else-if="name === 'shuffle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                <svg v-else-if="name === 'arrow-left-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"></path><path d="M4 7h16"></path><path d="M16 21l4-4-4-4"></path><path d="M20 17H4"></path></svg>
+                <svg v-else-if="name === 'star'" :width="size||24" :height="size||24" viewBox="0 0 24 24" :fill="filled ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <svg v-else-if="name === 'refresh-cw'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                <svg v-else-if="name === 'trophy'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 1 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                <svg v-else-if="name === 'settings'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg v-else-if="name === 'play-circle'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                <svg v-else-if="name === 'chevron-left'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <svg v-else-if="name === 'chevron-right'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <svg v-else-if="name === 'sliders'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                <svg v-else-if="name === 'volume-2'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <svg v-else-if="name === 'clock'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <svg v-else-if="name === 'mouse-pointer'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                <svg v-else-if="name === 'zap'" :width="size||24" :height="size||24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            `
+        };
+
+        const app = createApp({
+            components: {
+                'icon-book': { ...Icon, data() { return { name: 'book' } } },
+                'icon-layers': { ...Icon, data() { return { name: 'layers' } } },
+                'icon-graduation-cap': { ...Icon, data() { return { name: 'graduation-cap' } } },
+                'icon-puzzle': { ...Icon, data() { return { name: 'puzzle' } } },
+                'icon-rotate-ccw': { ...Icon, data() { return { name: 'rotate-ccw' } } },
+                'icon-check': { ...Icon, data() { return { name: 'check' } } },
+                'icon-x': { ...Icon, data() { return { name: 'x' } } },
+                'icon-shuffle': { ...Icon, data() { return { name: 'shuffle' } } },
+                'icon-arrow-left-right': { ...Icon, data() { return { name: 'arrow-left-right' } } },
+                'icon-star': { ...Icon, data() { return { name: 'star' } } },
+                'icon-refresh-cw': { ...Icon, data() { return { name: 'refresh-cw' } } },
+                'icon-trophy': { ...Icon, data() { return { name: 'trophy' } } },
+                'icon-settings': { ...Icon, data() { return { name: 'settings' } } },
+                'icon-play-circle': { ...Icon, data() { return { name: 'play-circle' } } },
+                'icon-chevron-left': { ...Icon, data() { return { name: 'chevron-left' } } },
+                'icon-chevron-right': { ...Icon, data() { return { name: 'chevron-right' } } },
+                'icon-sliders': { ...Icon, data() { return { name: 'sliders' } } },
+                'icon-volume-2': { ...Icon, data() { return { name: 'volume-2' } } },
+                'icon-clock': { ...Icon, data() { return { name: 'clock' } } },
+                'icon-mouse-pointer': { ...Icon, data() { return { name: 'mouse-pointer' } } },
+                'icon-zap': { ...Icon, data() { return { name: 'zap' } } },
+            },
+            setup() {
+                const activeTab = ref('list');
+                const listFilterMode = ref('all'); 
+                const mobileControlMode = ref('nav'); 
+
+                const currentDeck = ref([]);
+                const currentIndex = ref(0);
+                const isFlipped = ref(false);
+                const flashcardMode = ref('jp-zh');
+                const memorizedIds = ref([]);
+                const missedIds = ref([]);
+                const bookmarks = ref([]);
+                const roundComplete = ref(false);
+                const showDeckMenu = ref(false);
+                const currentSessionType = ref('all');
+
+                const dragX = ref(0);
+                const isDragging = ref(false);
+                const cardTransition = ref('transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)');
+
+                const quizPhase = ref('setup');
+                const quizConfig = ref({ mode: 'jp-zh', count: 10, source: 'all' });
+                const quizState = ref({ score: 0, currentQIndex: 0, options: [], lastCorrect: null, questions: [] });
+
+                // Memory Match Game State
+                const gamePhase = ref('setup');
+                const gameConfig = ref({ difficulty: 'normal' }); // easy (6), normal (8), hard (12)
+                const gameState = ref({ cards: [], flippedCards: [], isLocked: false, moves: 0, time: 0, timerId: null });
+
+                // Speed Match Game State (New)
+                const speedMatchPhase = ref('setup');
+                const speedMatchConfig = ref({ difficulty: 'normal' });
+                const speedMatchState = ref({ cards: [], selectedId: null, time: 0, timerId: null });
+
+                // Computed
+                const groupedData = computed(() => {
+                    let data = vocabularyData;
+                    if (listFilterMode.value === 'bookmarks') data = data.filter(item => bookmarks.value.includes(item.id));
+                    else if (listFilterMode.value === 'missed') data = data.filter(item => missedIds.value.includes(item.id));
+
+                    return data.reduce((acc, item) => {
+                        if (!acc[item.row]) acc[item.row] = [];
+                        acc[item.row].push(item);
+                        return acc;
+                    }, {});
+                });
+
+                const currentItem = computed(() => currentDeck.value[currentIndex.value] || {});
+                const currentQuizItem = computed(() => quizState.value.questions[quizState.value.currentQIndex] || {});
+                const sessionLearnedCount = computed(() => memorizedIds.value.length);
+                const quizPercentage = computed(() => Math.round((quizState.value.score / quizState.value.questions.length) * 100) || 0);
+
+                const cardContainerStyle = computed(() => {
+                    const rotate = dragX.value / 20;
+                    return {
+                        transform: `translate3d(${dragX.value}px, 0, 0) rotate(${rotate}deg)`,
+                        transition: isDragging.value ? 'none' : cardTransition.value
+                    };
+                });
+
+                const swipeOverlayOpacity = computed(() => {
+                    const threshold = 100;
+                    const rightOpacity = dragX.value > 0 ? Math.min(dragX.value / threshold, 1) : 0;
+                    const leftOpacity = dragX.value < 0 ? Math.min(Math.abs(dragX.value) / threshold, 1) : 0;
+                    return { right: rightOpacity, left: leftOpacity };
+                });
+
+                // Game Grid Responsive Logic
+                const getGameGridClass = computed(() => {
+                    const diff = gameConfig.value.difficulty;
+                    if (diff === 'easy') {
+                        return 'grid-cols-3 max-w-sm md:max-w-md'; 
+                    } else if (diff === 'normal') {
+                        return 'grid-cols-4 max-w-sm md:max-w-lg';
+                    } else { 
+                        return 'grid-cols-4 max-w-md md:grid-cols-6 md:max-w-3xl';
+                    }
+                });
+
+                const getSpeedMatchGridClass = computed(() => {
+                    const diff = speedMatchConfig.value.difficulty;
+                    if (diff === 'easy') {
+                        return 'grid-cols-3 max-w-sm md:max-w-md'; 
+                    } else if (diff === 'normal') {
+                        return 'grid-cols-4 max-w-sm md:max-w-lg';
+                    } else { 
+                        return 'grid-cols-4 max-w-md md:grid-cols-6 md:max-w-3xl';
+                    }
+                });
+
+                // Audio Function
+                const playAudio = (text) => {
+                    if (!window.speechSynthesis) return;
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ja-JP'; 
+                    utterance.rate = 0.8; 
+                    window.speechSynthesis.speak(utterance);
+                };
+
+                onMounted(() => {
+                    try {
+                        const savedBookmarks = localStorage.getItem('jp_prefectures_bookmarks');
+                        if (savedBookmarks) bookmarks.value = JSON.parse(savedBookmarks);
+                        const savedMissed = localStorage.getItem('jp_prefectures_missed');
+                        if (savedMissed) missedIds.value = JSON.parse(savedMissed);
+                        const savedControlMode = localStorage.getItem('jp_app_mobile_control');
+                        if (savedControlMode) mobileControlMode.value = savedControlMode;
+                    } catch(e) { console.error(e); }
+                    window.addEventListener('keydown', handleKeydown);
+                });
+
+                onUnmounted(() => {
+                    window.removeEventListener('keydown', handleKeydown);
+                    if (gameState.value.timerId) clearInterval(gameState.value.timerId);
+                    if (speedMatchState.value.timerId) clearInterval(speedMatchState.value.timerId);
+                });
+
+                watch(bookmarks, (newVal) => localStorage.setItem('jp_prefectures_bookmarks', JSON.stringify(newVal)), { deep: true });
+                watch(missedIds, (newVal) => localStorage.setItem('jp_prefectures_missed', JSON.stringify(newVal)), { deep: true });
+                watch(mobileControlMode, (newVal) => localStorage.setItem('jp_app_mobile_control', newVal));
+
+                const handleKeydown = (e) => {
+                    if (activeTab.value === 'flashcards' && !roundComplete.value && currentDeck.value.length > 0 && !showDeckMenu.value) {
+                        if (e.code === 'Space') { e.preventDefault(); isFlipped.value = !isFlipped.value; }
+                        else if (e.code === 'ArrowUp') { e.preventDefault(); prevCard(); }
+                        else if (e.code === 'ArrowDown') { e.preventDefault(); nextCard(); }
+                        else if (e.code === 'ArrowLeft') { e.preventDefault(); simulateSwipe('left'); }
+                        else if (e.code === 'ArrowRight') { e.preventDefault(); simulateSwipe('right'); }
+                    }
+                };
+
+                const setActiveTab = (tab) => { 
+                    activeTab.value = tab; 
+                    if (tab !== 'game' && gameState.value.timerId) clearInterval(gameState.value.timerId);
+                    if (tab !== 'speedmatch' && speedMatchState.value.timerId) clearInterval(speedMatchState.value.timerId);
+                };
+
+                const startSession = (type) => {
+                    let deck = [];
+                    if (type === 'all') deck = [...vocabularyData];
+                    else if (type === 'bookmarks') deck = vocabularyData.filter(item => bookmarks.value.includes(item.id));
+                    else if (type === 'missed') deck = vocabularyData.filter(item => missedIds.value.includes(item.id));
+
+                    if (deck.length === 0) return;
+
+                    currentSessionType.value = type;
+                    currentDeck.value = deck;
+                    currentIndex.value = 0;
+                    isFlipped.value = false;
+                    roundComplete.value = false;
+                    memorizedIds.value = []; 
+                    activeTab.value = 'flashcards';
+                    
+                    dragX.value = 0;
+                };
+
+                const shuffleDeck = () => {
+                    const shuffled = [...currentDeck.value].sort(() => 0.5 - Math.random());
+                    currentDeck.value = shuffled;
+                    currentIndex.value = 0;
+                    isFlipped.value = false;
+                };
+
+                const handleCardResult = (result) => {
+                    const currentCard = currentDeck.value[currentIndex.value];
+                    if (result === 'memorized') {
+                        if (!memorizedIds.value.includes(currentCard.id)) memorizedIds.value.push(currentCard.id);
+                        if (missedIds.value.includes(currentCard.id)) missedIds.value = missedIds.value.filter(id => id !== currentCard.id);
+                    } else {
+                        if (!missedIds.value.includes(currentCard.id)) missedIds.value.push(currentCard.id);
+                    }
+
+                    if (currentIndex.value < currentDeck.value.length - 1) {
+                        setTimeout(() => {
+                            isFlipped.value = false;
+                            dragX.value = 0;
+                            currentIndex.value++;
+                        }, 200);
+                    } else {
+                        roundComplete.value = true;
+                    }
+                };
+
+                const nextCard = () => {
+                    if (currentIndex.value < currentDeck.value.length - 1) {
+                        isFlipped.value = false;
+                        currentIndex.value++;
+                    }
+                };
+
+                const prevCard = () => {
+                    if (currentIndex.value > 0) {
+                        isFlipped.value = false;
+                        currentIndex.value--;
+                    }
+                };
+
+                const toggleBookmark = (id) => {
+                    if (bookmarks.value.includes(id)) bookmarks.value = bookmarks.value.filter(bid => bid !== id);
+                    else bookmarks.value.push(id);
+                };
+
+                const hasBookmark = (id) => bookmarks.value.includes(id);
+                const toggleFlashcardMode = () => { flashcardMode.value = flashcardMode.value === 'jp-zh' ? 'zh-jp' : 'jp-zh'; };
+
+                const handleCardClick = () => {
+                    if (!isDragging.value) {  
+                        isFlipped.value = !isFlipped.value;
+                    }
+                };
+
+                let startX = 0;
+
+                const onTouchStart = (e) => {
+                    if(e.target.closest('button')) return;
+                    isDragging.value = true;
+                    dragX.value = 0; 
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    cardTransition.value = 'none';
+                };
+
+                const onTouchMove = (e) => {
+                    if (!isDragging.value) return;
+                    const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    dragX.value = currentX - startX;
+                };
+
+                const onTouchEnd = (e) => {
+                    if (!isDragging.value) return;
+                    isDragging.value = false;
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+                    const threshold = 80;
+                    if (Math.abs(dragX.value) < 10) {
+                        dragX.value = 0;
+                        return;
+                    }
+
+                    if (dragX.value > threshold) {
+                        dragX.value = window.innerWidth;
+                        handleCardResult('memorized');
+                    } else if (dragX.value < -threshold) {
+                        dragX.value = -window.innerWidth;
+                        handleCardResult('missed');
+                    } else {
+                        dragX.value = 0;
+                    }
+                };
+
+                const simulateSwipe = (direction) => {
+                    cardTransition.value = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    if (direction === 'right') {
+                        dragX.value = window.innerWidth;
+                        handleCardResult('memorized');
+                    } else {
+                        dragX.value = -window.innerWidth;
+                        handleCardResult('missed');
+                    }
+                };
+
+                const startQuiz = () => {
+                    let pool = [];
+                    if (quizConfig.value.source === 'bookmarks') pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
+                    else if (quizConfig.value.source === 'missed') pool = vocabularyData.filter(item => missedIds.value.includes(item.id));
+                    else pool = [...vocabularyData];
+                    pool = pool.sort(() => 0.5 - Math.random());
+                    if (quizConfig.value.count !== 'all') pool = pool.slice(0, quizConfig.value.count);
+                    if (pool.length === 0) { alert('選定的範圍沒有題目！'); return; }
+                    quizState.value = { questions: pool, currentQIndex: 0, score: 0, lastCorrect: null, options: generateOptions(pool[0]) };
+                    quizPhase.value = 'playing';
+                };
+
+                const generateOptions = (correctItem) => {
+                    const incorrect = vocabularyData.filter(item => item.id !== correctItem.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+                    return [correctItem, ...incorrect].sort(() => 0.5 - Math.random());
+                };
+
+                const handleQuizAnswer = (selectedOption) => {
+                    if (quizState.value.lastCorrect !== null) return;
+                    const currentQ = quizState.value.questions[quizState.value.currentQIndex];
+                    let isCorrect = quizConfig.value.mode === 'jp-zh' ? selectedOption.meaning === currentQ.meaning : selectedOption.word === currentQ.word;
+                    quizState.value.lastCorrect = isCorrect;
+                    if (isCorrect) {
+                        quizState.value.score++;
+                        if (missedIds.value.includes(currentQ.id)) missedIds.value = missedIds.value.filter(id => id !== currentQ.id);
+                    } else {
+                        if (!missedIds.value.includes(currentQ.id)) missedIds.value.push(currentQ.id);
+                    }
+                    setTimeout(() => {
+                        if (quizState.value.currentQIndex + 1 < quizState.value.questions.length) {
+                            quizState.value.currentQIndex++;
+                            quizState.value.lastCorrect = null;
+                            quizState.value.options = generateOptions(quizState.value.questions[quizState.value.currentQIndex]);
+                        } else {
+                            quizPhase.value = 'result';
+                        }
+                    }, 1000);
+                };
+
+                const getQuizOptionClass = (opt) => {
+                    if (quizState.value.lastCorrect === null) return 'bg-white border-slate-100 active:bg-indigo-50 hover:border-indigo-200';
+                    const currentQ = quizState.value.questions[quizState.value.currentQIndex];
+                    const isCorrect = quizConfig.value.mode === 'jp-zh' ? opt.meaning === currentQ.meaning : opt.word === currentQ.word;
+                    if (isCorrect) return 'border-green-500 bg-green-50 text-green-700';
+                    if (quizState.value.lastCorrect === false && !isCorrect) return 'opacity-40 border-slate-100';
+                    return 'bg-white border-slate-100';
+                };
+
+                // --- Game Logic: Memory Match ---
+
+                const startGame = () => {
+                    const pairCount = gameConfig.value.difficulty === 'easy' ? 6 : (gameConfig.value.difficulty === 'normal' ? 8 : 12);
+                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    
+                    let cards = [];
+                    pool.forEach(item => {
+                        cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isFlipped: false, isMatched: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(首府)', type: 'meaning', isFlipped: false, isMatched: false });
+                    });
+
+                    gameState.value = {
+                        cards: cards.sort(() => 0.5 - Math.random()),
+                        flippedCards: [],
+                        isLocked: false,
+                        moves: 0,
+                        time: 0,
+                        timerId: setInterval(() => gameState.value.time++, 1000)
+                    };
+                    gamePhase.value = 'playing';
+                };
+
+                const handleGameCardClick = (card) => {
+                    if (gameState.value.isLocked || card.isMatched || card.isFlipped) return;
+
+                    if (card.type === 'word') playAudio(card.content);
+
+                    card.isFlipped = true;
+                    gameState.value.flippedCards.push(card);
+
+                    if (gameState.value.flippedCards.length === 2) {
+                        gameState.value.isLocked = true;
+                        gameState.value.moves++;
+                        
+                        const [card1, card2] = gameState.value.flippedCards;
+                        
+                        if (card1.vocabId === card2.vocabId) {
+                            setTimeout(() => {
+                                card1.isMatched = true;
+                                card2.isMatched = true;
+                                gameState.value.flippedCards = [];
+                                gameState.value.isLocked = false;
+                                
+                                const wordCard = card1.type === 'word' ? card1 : card2;
+                                playAudio(wordCard.content);
+
+                                if (gameState.value.cards.every(c => c.isMatched)) {
+                                    clearInterval(gameState.value.timerId);
+                                    setTimeout(() => gamePhase.value = 'result', 500);
+                                }
+                            }, 500);
+                        } else {
+                            setTimeout(() => {
+                                card1.isFlipped = false;
+                                card2.isFlipped = false;
+                                gameState.value.flippedCards = [];
+                                gameState.value.isLocked = false;
+                            }, 1000);
+                        }
+                    }
+                };
+
+                // --- Game Logic: Speed Match (New) ---
+
+                const startSpeedMatch = () => {
+                    const pairCount = speedMatchConfig.value.difficulty === 'easy' ? 6 : (speedMatchConfig.value.difficulty === 'normal' ? 8 : 12);
+                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    
+                    let cards = [];
+                    pool.forEach(item => {
+                        cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isMatched: false, isError: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(首府)', type: 'meaning', isMatched: false, isError: false });
+                    });
+
+                    speedMatchState.value = {
+                        cards: cards.sort(() => 0.5 - Math.random()),
+                        selectedId: null,
+                        time: 0,
+                        timerId: setInterval(() => speedMatchState.value.time++, 1000)
+                    };
+                    speedMatchPhase.value = 'playing';
+                };
+
+                const handleSpeedMatchCardClick = (card) => {
+                    if (card.isMatched) return;
+
+                    // If same card clicked, deselect
+                    if (speedMatchState.value.selectedId === card.id) {
+                        speedMatchState.value.selectedId = null;
+                        return;
+                    }
+
+                    // First selection
+                    if (!speedMatchState.value.selectedId) {
+                        speedMatchState.value.selectedId = card.id;
+                        if (card.type === 'word') playAudio(card.content);
+                        return;
+                    }
+
+                    // Second selection
+                    const prevCard = speedMatchState.value.cards.find(c => c.id === speedMatchState.value.selectedId);
+                    
+                    if (prevCard.vocabId === card.vocabId) {
+                        // Match!
+                        prevCard.isMatched = true;
+                        card.isMatched = true;
+                        speedMatchState.value.selectedId = null;
+                        
+                        const wordCard = card.type === 'word' ? card : prevCard;
+                        playAudio(wordCard.content);
+
+                        if (speedMatchState.value.cards.every(c => c.isMatched)) {
+                            clearInterval(speedMatchState.value.timerId);
+                            setTimeout(() => speedMatchPhase.value = 'result', 500);
+                        }
+                    } else {
+                        // Mismatch
+                        prevCard.isError = true;
+                        card.isError = true;
+                        speedMatchState.value.selectedId = null;
+                        setTimeout(() => {
+                            prevCard.isError = false;
+                            card.isError = false;
+                        }, 400);
+                    }
+                };
+
+                const formatTime = (seconds) => {
+                    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const s = (seconds % 60).toString().padStart(2, '0');
+                    return `${m}:${s}`;
+                };
+
+                return {
+                    vocabularyData, activeTab, setActiveTab,
+                    listFilterMode, mobileControlMode, 
+                    currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
+                    memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
+                    startSession, shuffleDeck, handleCardResult, toggleBookmark, hasBookmark, toggleFlashcardMode,
+                    nextCard, prevCard, handleCardClick,
+                    onTouchStart, onTouchMove, onTouchEnd, dragX, cardContainerStyle, swipeOverlayOpacity,
+                    groupedData, quizPhase, quizConfig, quizState, currentQuizItem, quizPercentage,
+                    startQuiz, handleQuizAnswer, getQuizOptionClass,
+                    showDeckMenu, currentSessionType,
+                    playAudio,
+                    // Game
+                    gamePhase, gameConfig, gameState, startGame, handleGameCardClick, formatTime, getGameGridClass,
+                    // Speed Match
+                    speedMatchPhase, speedMatchConfig, speedMatchState, startSpeedMatch, handleSpeedMatchCardClick, getSpeedMatchGridClass
+                };
+            }
+        }); 
+
+        app.mount('#app');
+    </script>
+</body>
+</html>
