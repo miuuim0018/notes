@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>日本都道府縣記憶神器 (含讀音)</title>
+    <title>日本都道府縣記憶神器 (含讀音 - 考試重點版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -73,6 +73,12 @@
         
         /* Font size adjustment for long text */
         .text-fit { container-type: inline-size; }
+        
+        /* Excluded item style */
+        .item-excluded {
+            opacity: 0.6;
+            background-color: #f1f5f9;
+        }
     </style>
 </head>
 <body class="font-sans text-slate-800">
@@ -118,8 +124,14 @@
                             <button @click="listFilterMode = 'all'" 
                                 class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
                                 :class="listFilterMode === 'all' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-50'">
-                                <span class="text-3xl font-bold mb-1">{{ vocabularyData.length }}</span>
-                                <span class="text-xs font-bold">全部</span>
+                                <span class="text-3xl font-bold mb-1">{{ activeVocabularyData.length }}</span>
+                                <span class="text-xs font-bold">考試範圍</span>
+                            </button>
+                            <button @click="listFilterMode = 'excluded'" 
+                                class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
+                                :class="listFilterMode === 'excluded' ? 'bg-gray-100 border-gray-300 text-gray-600 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-50'">
+                                <span class="text-3xl font-bold mb-1">{{ excludedCount }}</span>
+                                <span class="text-xs font-bold">不考</span>
                             </button>
                             <button @click="listFilterMode = 'bookmarks'" 
                                 class="flex-1 min-w-[100px] py-4 rounded-xl flex flex-col items-center justify-center transition-all border-2"
@@ -137,7 +149,8 @@
 
                         <div class="flex items-center justify-between mb-4 px-1">
                             <h2 class="font-bold text-slate-400 text-sm flex items-center gap-2">
-                                <span v-if="listFilterMode === 'all'">全部列表</span>
+                                <span v-if="listFilterMode === 'all'">全部列表 (含不考標記)</span>
+                                <span v-else-if="listFilterMode === 'excluded'" class="text-gray-500 flex items-center gap-2">🚫 老師說不考的</span>
                                 <span v-else-if="listFilterMode === 'bookmarks'" class="text-yellow-600 flex items-center gap-2"><icon-star size="16" filled="true"></icon-star> 我的收藏</span>
                                 <span v-else class="text-red-500 flex items-center gap-2"><icon-refresh-cw size="16"></icon-refresh-cw> 待加強縣名</span>
                             </h2>
@@ -159,28 +172,37 @@
                                     <div class="h-px flex-1 bg-slate-200"></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                    <div v-for="item in items" :key="item.id" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-all group relative overflow-hidden">
+                                    <div v-for="item in items" :key="item.id" 
+                                         class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-all group relative overflow-hidden"
+                                         :class="{ 'item-excluded': item.excluded }">
+                                        
+                                        <div v-if="item.excluded" class="absolute top-0 right-0 bg-gray-400 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-20">
+                                            🚫 不考
+                                        </div>
+
                                         <div v-if="listFilterMode === 'bookmarks'" class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                                         <div v-if="listFilterMode === 'missed'" class="absolute left-0 top-0 bottom-0 w-1 bg-red-400"></div>
 
-                                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg shrink-0 mt-0.5">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 mt-0.5"
+                                             :class="item.excluded ? 'bg-gray-200 text-gray-500' : 'bg-indigo-50 text-indigo-600'">
                                             {{ item.id }}
                                         </div>
 
                                         <div class="flex-1 min-w-0 flex flex-col justify-center min-h-[3rem] text-left">
-                                            <div class="font-bold text-slate-800 text-lg leading-tight mb-1 break-words flex items-center gap-1">
+                                            <div class="font-bold text-slate-800 text-lg leading-tight mb-1 break-words flex items-center gap-1"
+                                                 :class="{ 'text-gray-500': item.excluded }">
                                                 {{ item.word }}
-                                                <button @click.stop="playAudio(item.word)" class="ml-1 p-1.5 text-indigo-400 bg-indigo-50 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors active:scale-95">
+                                                <button v-if="!item.excluded" @click.stop="playAudio(item.word)" class="ml-1 p-1.5 text-indigo-400 bg-indigo-50 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors active:scale-95">
                                                     <icon-volume-2 size="14"></icon-volume-2>
                                                 </button>
                                             </div>
                                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                                                 <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
-                                                <span class="text-sm text-slate-500 w-full sm:w-auto mt-0.5 sm:mt-0 ml-2 font-bold text-indigo-500">讀音: {{ item.meaning }}</span>
+                                                <span class="text-sm w-full sm:w-auto mt-0.5 sm:mt-0 ml-2 font-bold text-indigo-500" :class="{ 'text-gray-400': item.excluded }">{{ item.meaning }}</span>
                                             </div>
                                         </div>
 
-                                        <button @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0 -mt-1 -mr-1">
+                                        <button v-if="!item.excluded" @click.stop="toggleBookmark(item.id)" class="p-2 rounded-full hover:bg-slate-50 transition-colors shrink-0 -mt-1 -mr-1">
                                             <icon-star :filled="hasBookmark(item.id)" size="20" :class="hasBookmark(item.id) ? 'text-yellow-400' : 'text-slate-200'"></icon-star>
                                         </button>
                                     </div>
@@ -195,8 +217,9 @@
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
                             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背讀音了嗎？</h2>
+                            <p class="text-sm text-slate-400 mb-6">已自動過濾不考的項目</p>
                             <div class="space-y-3 mt-6">
-                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><icon-layers></icon-layers> 全部縣名 ({{ vocabularyData.length }})</button>
+                                <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><icon-layers></icon-layers> 開始複習 ({{ activeVocabularyData.length }})</button>
                                 <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"><icon-star class="text-yellow-400" filled="true"></icon-star> 收藏縣名 ({{ bookmarks.length }})</button>
                                 <button v-if="missedIds.length > 0" @click="startSession('missed')" class="w-full flex items-center justify-center gap-3 bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform"><icon-refresh-cw></icon-refresh-cw> 錯題複習 ({{ missedIds.length }})</button>
                             </div>
@@ -278,7 +301,7 @@
 
                                             <div class="z-10 text-center w-full">
                                                 <template v-if="flashcardMode === 'jp-zh'">
-                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">讀音 (假名)</div>
+                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">讀音</div>
                                                     <div class="text-4xl font-bold mb-4">{{ currentItem.meaning }}</div>
                                                     <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
                                                 </template>
@@ -352,7 +375,7 @@
                                     <div class="space-y-3">
                                         <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">切換題庫</label>
                                         <button @click="startSession('all'); showDeckMenu = false" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all" :class="currentSessionType === 'all' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
-                                            <icon-layers size="20" class="text-indigo-600"></icon-layers> 全部縣名
+                                            <icon-layers size="20" class="text-indigo-600"></icon-layers> 考試範圍 ({{ activeVocabularyData.length }})
                                         </button>
                                         <button @click="startSession('bookmarks'); showDeckMenu = false" :disabled="bookmarks.length === 0" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 hover:border-indigo-200 hover:bg-indigo-50 transition-all disabled:opacity-50" :class="currentSessionType === 'bookmarks' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100'">
                                             <icon-star size="20" class="text-yellow-400" filled="true"></icon-star> 收藏縣名
@@ -372,7 +395,7 @@
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
                             <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6 text-pink-600 mx-auto"><icon-puzzle size="32"></icon-puzzle></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">翻讀音對對樂</h2>
-                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出縣名與讀音的配對</p>
+                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出縣名與讀音的配對<br>(已自動濾除不考項目)</p>
                             
                             <div class="space-y-6">
                                 <div>
@@ -446,7 +469,7 @@
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
                             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600 mx-auto"><icon-zap size="32"></icon-zap></div>
                             <h2 class="text-xl font-bold text-slate-800 mb-2">讀音配對消除</h2>
-                            <p class="text-slate-400 text-sm mb-6">點擊成對的縣名與讀音來消除它們</p>
+                            <p class="text-slate-400 text-sm mb-6">點擊成對的縣名與讀音來消除它們<br>(已自動濾除不考項目)</p>
                             
                             <div class="space-y-6">
                                 <div>
@@ -521,7 +544,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題庫來源</label>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <button @click="quizConfig.source = 'all'" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">全部</button>
+                                        <button @click="quizConfig.source = 'all'" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors" :class="quizConfig.source === 'all' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">全部 (考試範圍)</button>
                                         <button @click="quizConfig.source = 'bookmarks'" :disabled="bookmarks.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'bookmarks' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">收藏</button>
                                         <button @click="quizConfig.source = 'missed'" :disabled="missedIds.length === 0" class="py-2 rounded-lg font-bold border-2 text-sm transition-colors disabled:opacity-50" :class="quizConfig.source === 'missed' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 text-slate-500'">錯題</button>
                                     </div>
@@ -596,7 +619,9 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
-        const vocabularyData = [
+        const excludedIds = [1, 8, 9, 15, 21, 24, 28, 31, 38, 44, 45];
+
+        const rawData = [
             // 北海道
             { id: 1, kana: 'ほっかいどう', word: '北海道', kanji: '札幌', romaji: 'Hokkaido', meaning: 'ほっかいどう', row: '北海道・東北' },
             // 東北
@@ -653,6 +678,11 @@
             { id: 46, kana: 'かごしま', word: '鹿児島', kanji: '鹿児島', romaji: 'Kagoshima', meaning: 'かごしま', row: '九州・沖縄' },
             { id: 47, kana: 'おきなわ', word: '沖縄', kanji: '那覇', romaji: 'Okinawa', meaning: 'おきなわ', row: '九州・沖縄' }
         ];
+
+        const vocabularyData = rawData.map(item => ({
+            ...item,
+            excluded: excludedIds.includes(item.id)
+        }));
 
         const Icon = {
             props: ['name', 'size', 'filled'],
@@ -740,10 +770,15 @@
                 const speedMatchState = ref({ cards: [], selectedId: null, time: 0, timerId: null });
 
                 // Computed
+                const activeVocabularyData = computed(() => vocabularyData.filter(i => !i.excluded));
+                const excludedCount = computed(() => vocabularyData.filter(i => i.excluded).length);
+
                 const groupedData = computed(() => {
                     let data = vocabularyData;
                     if (listFilterMode.value === 'bookmarks') data = data.filter(item => bookmarks.value.includes(item.id));
                     else if (listFilterMode.value === 'missed') data = data.filter(item => missedIds.value.includes(item.id));
+                    else if (listFilterMode.value === 'excluded') data = data.filter(item => item.excluded);
+                    // 'all' includes everyone, but visually distinguished
 
                     return data.reduce((acc, item) => {
                         if (!acc[item.row]) acc[item.row] = [];
@@ -844,12 +879,18 @@
                 };
 
                 const startSession = (type) => {
+                    // Filter excluded items for ALL study sessions
                     let deck = [];
-                    if (type === 'all') deck = [...vocabularyData];
-                    else if (type === 'bookmarks') deck = vocabularyData.filter(item => bookmarks.value.includes(item.id));
-                    else if (type === 'missed') deck = vocabularyData.filter(item => missedIds.value.includes(item.id));
+                    const pool = vocabularyData.filter(i => !i.excluded);
 
-                    if (deck.length === 0) return;
+                    if (type === 'all') deck = [...pool];
+                    else if (type === 'bookmarks') deck = pool.filter(item => bookmarks.value.includes(item.id));
+                    else if (type === 'missed') deck = pool.filter(item => missedIds.value.includes(item.id));
+
+                    if (deck.length === 0) {
+                        if(type === 'bookmarks' && bookmarks.value.length > 0) alert('收藏的項目都在不考範圍內！');
+                        return;
+                    }
 
                     currentSessionType.value = type;
                     currentDeck.value = deck;
@@ -967,19 +1008,25 @@
                 };
 
                 const startQuiz = () => {
+                    // Filter excluded items
                     let pool = [];
-                    if (quizConfig.value.source === 'bookmarks') pool = vocabularyData.filter(item => bookmarks.value.includes(item.id));
-                    else if (quizConfig.value.source === 'missed') pool = vocabularyData.filter(item => missedIds.value.includes(item.id));
-                    else pool = [...vocabularyData];
+                    const basePool = vocabularyData.filter(i => !i.excluded);
+
+                    if (quizConfig.value.source === 'bookmarks') pool = basePool.filter(item => bookmarks.value.includes(item.id));
+                    else if (quizConfig.value.source === 'missed') pool = basePool.filter(item => missedIds.value.includes(item.id));
+                    else pool = [...basePool];
+
                     pool = pool.sort(() => 0.5 - Math.random());
                     if (quizConfig.value.count !== 'all') pool = pool.slice(0, quizConfig.value.count);
-                    if (pool.length === 0) { alert('選定的範圍沒有題目！'); return; }
+                    
+                    if (pool.length === 0) { alert('選定的範圍沒有題目 (可能都在不考範圍內)！'); return; }
                     quizState.value = { questions: pool, currentQIndex: 0, score: 0, lastCorrect: null, options: generateOptions(pool[0]) };
                     quizPhase.value = 'playing';
                 };
 
                 const generateOptions = (correctItem) => {
-                    const incorrect = vocabularyData.filter(item => item.id !== correctItem.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+                    // Options should also not contain excluded items
+                    const incorrect = vocabularyData.filter(item => item.id !== correctItem.id && !item.excluded).sort(() => 0.5 - Math.random()).slice(0, 3);
                     return [correctItem, ...incorrect].sort(() => 0.5 - Math.random());
                 };
 
@@ -1018,12 +1065,13 @@
 
                 const startGame = () => {
                     const pairCount = gameConfig.value.difficulty === 'easy' ? 6 : (gameConfig.value.difficulty === 'normal' ? 8 : 12);
-                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    // Filter excluded items
+                    let pool = vocabularyData.filter(i => !i.excluded).sort(() => 0.5 - Math.random()).slice(0, pairCount);
                     
                     let cards = [];
                     pool.forEach(item => {
                         cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isFlipped: false, isMatched: false });
-                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(讀音)', type: 'meaning', isFlipped: false, isMatched: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '', type: 'meaning', isFlipped: false, isMatched: false });
                     });
 
                     gameState.value = {
@@ -1081,12 +1129,13 @@
 
                 const startSpeedMatch = () => {
                     const pairCount = speedMatchConfig.value.difficulty === 'easy' ? 6 : (speedMatchConfig.value.difficulty === 'normal' ? 8 : 12);
-                    let pool = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, pairCount);
+                    // Filter excluded items
+                    let pool = vocabularyData.filter(i => !i.excluded).sort(() => 0.5 - Math.random()).slice(0, pairCount);
                     
                     let cards = [];
                     pool.forEach(item => {
                         cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isMatched: false, isError: false });
-                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(讀音)', type: 'meaning', isMatched: false, isError: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '', type: 'meaning', isMatched: false, isError: false });
                     });
 
                     speedMatchState.value = {
@@ -1149,7 +1198,7 @@
                 };
 
                 return {
-                    vocabularyData, activeTab, setActiveTab,
+                    vocabularyData, activeVocabularyData, excludedCount, activeTab, setActiveTab,
                     listFilterMode, mobileControlMode, 
                     currentDeck, currentIndex, isFlipped, flashcardMode, currentItem, 
                     memorizedIds, missedIds, bookmarks, roundComplete, sessionLearnedCount,
