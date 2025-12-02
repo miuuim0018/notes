@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>日本都道府縣記憶神器 (含縣廳所在地)</title>
+    <title>日本都道府縣記憶神器 (含讀音)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
@@ -82,14 +82,14 @@
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full shadow-sm z-20 shrink-0">
             <div class="p-6 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">JP</div>
-                <h1 class="font-bold text-xl text-slate-800">都道府縣記憶</h1>
+                <h1 class="font-bold text-xl text-slate-800">都道府縣讀音</h1>
             </div>
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <button @click="setActiveTab('list')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'list' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-book size="20"></icon-book> 縣名列表
                 </button>
                 <button @click="setActiveTab('flashcards')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'flashcards' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
-                    <icon-layers size="20"></icon-layers> 背縣名卡
+                    <icon-layers size="20"></icon-layers> 背讀音卡
                 </button>
                 <button @click="setActiveTab('game')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all" :class="activeTab === 'game' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'">
                     <icon-puzzle size="20"></icon-puzzle> 翻翻對對樂
@@ -176,7 +176,7 @@
                                             </div>
                                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                                                 <span class="text-xs text-slate-400 font-mono">{{ item.romaji }}</span>
-                                                <span class="text-sm text-slate-500 w-full sm:w-auto mt-0.5 sm:mt-0">首府: {{ item.meaning }}</span>
+                                                <span class="text-sm text-slate-500 w-full sm:w-auto mt-0.5 sm:mt-0 ml-2 font-bold text-indigo-500">讀音: {{ item.meaning }}</span>
                                             </div>
                                         </div>
 
@@ -194,7 +194,7 @@
                     <div v-if="!currentDeck || currentDeck.length === 0 || !currentDeck[currentIndex]" class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center max-w-sm w-full">
                             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600 mx-auto"><icon-layers size="40"></icon-layers></div>
-                            <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背縣名了嗎？</h2>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">準備好背讀音了嗎？</h2>
                             <div class="space-y-3 mt-6">
                                 <button @click="startSession('all')" class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><icon-layers></icon-layers> 全部縣名 ({{ vocabularyData.length }})</button>
                                 <button @click="startSession('bookmarks')" :disabled="bookmarks.length === 0" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 text-slate-700 px-6 py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"><icon-star class="text-yellow-400" filled="true"></icon-star> 收藏縣名 ({{ bookmarks.length }})</button>
@@ -219,7 +219,7 @@
                     <div v-else class="flex-1 flex flex-col h-full">
                         <div class="h-14 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
                             <button @click="toggleFlashcardMode" class="bg-white px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 shadow-sm flex items-center gap-2">
-                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 中' : '中 ⮕ 日' }}
+                                <icon-arrow-left-right size="14"></icon-arrow-left-right> {{ flashcardMode === 'jp-zh' ? '日 ⮕ 讀音' : '讀音 ⮕ 日' }}
                             </button>
                             <span class="font-mono font-bold text-slate-400 text-xs">{{ currentIndex + 1 }} / {{ currentDeck.length }}</span>
                             <div class="flex gap-2">
@@ -259,7 +259,7 @@
                                                     <icon-volume-2 size="32"></icon-volume-2>
                                                 </button>
                                             </h2>
-                                            <span v-if="flashcardMode !== 'jp-zh'" class="text-sm text-slate-400 mt-2">首府在哪個縣？</span>
+                                            <span v-if="flashcardMode !== 'jp-zh'" class="text-sm text-slate-400 mt-2">這個縣怎麼唸？</span>
 
                                             <p class="mt-8 text-slate-300 text-xs font-bold animate-pulse">輕點翻面 / 滑動評分</p>
                                         </div>
@@ -278,7 +278,7 @@
 
                                             <div class="z-10 text-center w-full">
                                                 <template v-if="flashcardMode === 'jp-zh'">
-                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">首府</div>
+                                                    <div class="text-xs opacity-60 mb-4 font-bold tracking-widest">讀音 (假名)</div>
                                                     <div class="text-4xl font-bold mb-4">{{ currentItem.meaning }}</div>
                                                     <div class="text-lg opacity-60 font-mono mt-2">{{ currentItem.romaji }}</div>
                                                 </template>
@@ -289,7 +289,7 @@
                                                             <icon-volume-2 size="32"></icon-volume-2>
                                                         </button>
                                                     </div>
-                                                    <div class="text-xl opacity-80">{{ currentItem.kana }}</div>
+                                                    <div class="text-xl opacity-80">漢字</div>
                                                 </template>
                                             </div>
                                         </div>
@@ -371,8 +371,8 @@
                     <div v-if="gamePhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
                             <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6 text-pink-600 mx-auto"><icon-puzzle size="32"></icon-puzzle></div>
-                            <h2 class="text-xl font-bold text-slate-800 mb-2">翻縣名對對樂</h2>
-                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出縣名與首府的配對</p>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">翻讀音對對樂</h2>
+                            <p class="text-slate-400 text-sm mb-6">翻開卡片，找出縣名與讀音的配對</p>
                             
                             <div class="space-y-6">
                                 <div>
@@ -445,8 +445,8 @@
                     <div v-if="speedMatchPhase === 'setup'" class="flex flex-col items-center justify-center min-h-full p-6 animate-fade-in">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-sm text-center">
                             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600 mx-auto"><icon-zap size="32"></icon-zap></div>
-                            <h2 class="text-xl font-bold text-slate-800 mb-2">配對消除</h2>
-                            <p class="text-slate-400 text-sm mb-6">點擊成對的縣名與首府來消除它們</p>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">讀音配對消除</h2>
+                            <p class="text-slate-400 text-sm mb-6">點擊成對的縣名與讀音來消除它們</p>
                             
                             <div class="space-y-6">
                                 <div>
@@ -580,7 +580,7 @@
             </button>
             <button @click="setActiveTab('flashcards')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'flashcards' ? 'text-indigo-600' : 'text-slate-400'">
                 <icon-layers size="24"></icon-layers>
-                <span class="text-[10px] font-bold mt-1">背縣名</span>
+                <span class="text-[10px] font-bold mt-1">背讀音</span>
             </button>
             <button @click="setActiveTab('speedmatch')" class="w-16 flex flex-col items-center justify-center rounded-xl transition-colors" :class="activeTab === 'speedmatch' ? 'text-amber-600' : 'text-slate-400'">
                 <icon-zap size="24"></icon-zap>
@@ -598,60 +598,60 @@
 
         const vocabularyData = [
             // 北海道
-            { id: 1, kana: 'ほっかいどう', word: '北海道', kanji: '札幌', romaji: 'Hokkaido', meaning: '札幌', row: '北海道・東北' },
+            { id: 1, kana: 'ほっかいどう', word: '北海道', kanji: '札幌', romaji: 'Hokkaido', meaning: 'ほっかいどう', row: '北海道・東北' },
             // 東北
-            { id: 2, kana: 'あおもり', word: '青森', kanji: '青森', romaji: 'Aomori', meaning: '青森', row: '北海道・東北' },
-            { id: 3, kana: 'いわて', word: '岩手', kanji: '盛岡', romaji: 'Iwate', meaning: '盛岡', row: '北海道・東北' },
-            { id: 4, kana: 'みやぎ', word: '宮城', kanji: '仙台', romaji: 'Miyagi', meaning: '仙台', row: '北海道・東北' },
-            { id: 5, kana: 'あきた', word: '秋田', kanji: '秋田', romaji: 'Akita', meaning: '秋田', row: '北海道・東北' },
-            { id: 6, kana: 'やまがた', word: '山形', kanji: '山形', romaji: 'Yamagata', meaning: '山形', row: '北海道・東北' },
-            { id: 7, kana: 'ふくしま', word: '福島', kanji: '福島', romaji: 'Fukushima', meaning: '福島', row: '北海道・東北' },
+            { id: 2, kana: 'あおもり', word: '青森', kanji: '青森', romaji: 'Aomori', meaning: 'あおもり', row: '北海道・東北' },
+            { id: 3, kana: 'いわて', word: '岩手', kanji: '盛岡', romaji: 'Iwate', meaning: 'いわて', row: '北海道・東北' },
+            { id: 4, kana: 'みやぎ', word: '宮城', kanji: '仙台', romaji: 'Miyagi', meaning: 'みやぎ', row: '北海道・東北' },
+            { id: 5, kana: 'あきた', word: '秋田', kanji: '秋田', romaji: 'Akita', meaning: 'あきた', row: '北海道・東北' },
+            { id: 6, kana: 'やまがた', word: '山形', kanji: '山形', romaji: 'Yamagata', meaning: 'やまがた', row: '北海道・東北' },
+            { id: 7, kana: 'ふくしま', word: '福島', kanji: '福島', romaji: 'Fukushima', meaning: 'ふくしま', row: '北海道・東北' },
             // 關東
-            { id: 8, kana: 'いばらき', word: '茨城', kanji: '水戸', romaji: 'Ibaraki', meaning: '水戸', row: '関東' },
-            { id: 9, kana: 'とちぎ', word: '栃木', kanji: '宇都宮', romaji: 'Tochigi', meaning: '宇都宮', row: '関東' },
-            { id: 10, kana: 'ぐんま', word: '群馬', kanji: '前橋', romaji: 'Gunma', meaning: '前橋', row: '関東' },
-            { id: 11, kana: 'さいたま', word: '埼玉', kanji: 'さいたま', romaji: 'Saitama', meaning: '埼玉 (浦和)', row: '関東' },
-            { id: 12, kana: 'ちば', word: '千葉', kanji: '千葉', romaji: 'Chiba', meaning: '千葉', row: '関東' },
-            { id: 13, kana: 'とうきょう', word: '東京', kanji: '東京', romaji: 'Tokyo', meaning: '東京 (新宿)', row: '関東' },
-            { id: 14, kana: 'かながわ', word: '神奈川', kanji: '横浜', romaji: 'Kanagawa', meaning: '横浜', row: '関東' },
+            { id: 8, kana: 'いばらき', word: '茨城', kanji: '水戸', romaji: 'Ibaraki', meaning: 'いばらき', row: '関東' },
+            { id: 9, kana: 'とちぎ', word: '栃木', kanji: '宇都宮', romaji: 'Tochigi', meaning: 'とちぎ', row: '関東' },
+            { id: 10, kana: 'ぐんま', word: '群馬', kanji: '前橋', romaji: 'Gunma', meaning: 'ぐんま', row: '関東' },
+            { id: 11, kana: 'さいたま', word: '埼玉', kanji: 'さいたま', romaji: 'Saitama', meaning: 'さいたま', row: '関東' },
+            { id: 12, kana: 'ちば', word: '千葉', kanji: '千葉', romaji: 'Chiba', meaning: 'ちば', row: '関東' },
+            { id: 13, kana: 'とうきょう', word: '東京', kanji: '東京', romaji: 'Tokyo', meaning: 'とうきょう', row: '関東' },
+            { id: 14, kana: 'かながわ', word: '神奈川', kanji: '横浜', romaji: 'Kanagawa', meaning: 'かながわ', row: '関東' },
             // 中部
-            { id: 15, kana: 'にいがた', word: '新潟', kanji: '新潟', romaji: 'Niigata', meaning: '新潟', row: '中部' },
-            { id: 16, kana: 'とやま', word: '富山', kanji: '富山', romaji: 'Toyama', meaning: '富山', row: '中部' },
-            { id: 17, kana: 'いしかわ', word: '石川', kanji: '金沢', romaji: 'Ishikawa', meaning: '金沢', row: '中部' },
-            { id: 18, kana: 'ふくい', word: '福井', kanji: '福井', romaji: 'Fukui', meaning: '福井', row: '中部' },
-            { id: 19, kana: 'やまなし', word: '山梨', kanji: '甲府', romaji: 'Yamanashi', meaning: '甲府', row: '中部' },
-            { id: 20, kana: 'ながの', word: '長野', kanji: '長野', romaji: 'Nagano', meaning: '長野', row: '中部' },
-            { id: 21, kana: 'ぎふ', word: '岐阜', kanji: '岐阜', romaji: 'Gifu', meaning: '岐阜', row: '中部' },
-            { id: 22, kana: 'しずおか', word: '静岡', kanji: '静岡', romaji: 'Shizuoka', meaning: '静岡', row: '中部' },
-            { id: 23, kana: 'あいち', word: '愛知', kanji: '名古屋', romaji: 'Aichi', meaning: '名古屋', row: '中部' },
+            { id: 15, kana: 'にいがた', word: '新潟', kanji: '新潟', romaji: 'Niigata', meaning: 'にいがた', row: '中部' },
+            { id: 16, kana: 'とやま', word: '富山', kanji: '富山', romaji: 'Toyama', meaning: 'とやま', row: '中部' },
+            { id: 17, kana: 'いしかわ', word: '石川', kanji: '金沢', romaji: 'Ishikawa', meaning: 'いしかわ', row: '中部' },
+            { id: 18, kana: 'ふくい', word: '福井', kanji: '福井', romaji: 'Fukui', meaning: 'ふくい', row: '中部' },
+            { id: 19, kana: 'やまなし', word: '山梨', kanji: '甲府', romaji: 'Yamanashi', meaning: 'やまなし', row: '中部' },
+            { id: 20, kana: 'ながの', word: '長野', kanji: '長野', romaji: 'Nagano', meaning: 'ながの', row: '中部' },
+            { id: 21, kana: 'ぎふ', word: '岐阜', kanji: '岐阜', romaji: 'Gifu', meaning: 'ぎふ', row: '中部' },
+            { id: 22, kana: 'しずおか', word: '静岡', kanji: '静岡', romaji: 'Shizuoka', meaning: 'しずおか', row: '中部' },
+            { id: 23, kana: 'あいち', word: '愛知', kanji: '名古屋', romaji: 'Aichi', meaning: 'あいち', row: '中部' },
             // 近畿
-            { id: 24, kana: 'みえ', word: '三重', kanji: '津', romaji: 'Mie', meaning: '津', row: '近畿' },
-            { id: 25, kana: 'しが', word: '滋賀', kanji: '大津', romaji: 'Shiga', meaning: '大津', row: '近畿' },
-            { id: 26, kana: 'きょうと', word: '京都', kanji: '京都', romaji: 'Kyoto', meaning: '京都', row: '近畿' },
-            { id: 27, kana: 'おおさか', word: '大阪', kanji: '大阪', romaji: 'Osaka', meaning: '大阪', row: '近畿' },
-            { id: 28, kana: 'ひょうご', word: '兵庫', kanji: '神戸', romaji: 'Hyogo', meaning: '神戸', row: '近畿' },
-            { id: 29, kana: 'なら', word: '奈良', kanji: '奈良', romaji: 'Nara', meaning: '奈良', row: '近畿' },
-            { id: 30, kana: 'わかやま', word: '和歌山', kanji: '和歌山', romaji: 'Wakayama', meaning: '和歌山', row: '近畿' },
+            { id: 24, kana: 'みえ', word: '三重', kanji: '津', romaji: 'Mie', meaning: 'みえ', row: '近畿' },
+            { id: 25, kana: 'しが', word: '滋賀', kanji: '大津', romaji: 'Shiga', meaning: 'しが', row: '近畿' },
+            { id: 26, kana: 'きょうと', word: '京都', kanji: '京都', romaji: 'Kyoto', meaning: 'きょうと', row: '近畿' },
+            { id: 27, kana: 'おおさか', word: '大阪', kanji: '大阪', romaji: 'Osaka', meaning: 'おおさか', row: '近畿' },
+            { id: 28, kana: 'ひょうご', word: '兵庫', kanji: '神戸', romaji: 'Hyogo', meaning: 'ひょうご', row: '近畿' },
+            { id: 29, kana: 'なら', word: '奈良', kanji: '奈良', romaji: 'Nara', meaning: 'なら', row: '近畿' },
+            { id: 30, kana: 'わかやま', word: '和歌山', kanji: '和歌山', romaji: 'Wakayama', meaning: 'わかやま', row: '近畿' },
             // 中国
-            { id: 31, kana: 'とっとり', word: '鳥取', kanji: '鳥取', romaji: 'Tottori', meaning: '鳥取', row: '中国・四国' },
-            { id: 32, kana: 'しまね', word: '島根', kanji: '松江', romaji: 'Shimane', meaning: '松江', row: '中国・四国' },
-            { id: 33, kana: 'おかやま', word: '岡山', kanji: '岡山', romaji: 'Okayama', meaning: '岡山', row: '中国・四国' },
-            { id: 34, kana: 'ひろしま', word: '広島', kanji: '広島', romaji: 'Hiroshima', meaning: '広島', row: '中国・四国' },
-            { id: 35, kana: 'やまぐち', word: '山口', kanji: '山口', romaji: 'Yamaguchi', meaning: '山口', row: '中国・四国' },
+            { id: 31, kana: 'とっとり', word: '鳥取', kanji: '鳥取', romaji: 'Tottori', meaning: 'とっとり', row: '中国・四国' },
+            { id: 32, kana: 'しまね', word: '島根', kanji: '松江', romaji: 'Shimane', meaning: 'しまね', row: '中国・四国' },
+            { id: 33, kana: 'おかやま', word: '岡山', kanji: '岡山', romaji: 'Okayama', meaning: 'おかやま', row: '中国・四国' },
+            { id: 34, kana: 'ひろしま', word: '広島', kanji: '広島', romaji: 'Hiroshima', meaning: 'ひろしま', row: '中国・四国' },
+            { id: 35, kana: 'やまぐち', word: '山口', kanji: '山口', romaji: 'Yamaguchi', meaning: 'やまぐち', row: '中国・四国' },
             // 四国
-            { id: 36, kana: 'かがわ', word: '香川', kanji: '高松', romaji: 'Kagawa', meaning: '高松', row: '中国・四国' },
-            { id: 37, kana: 'とくしま', word: '徳島', kanji: '徳島', romaji: 'Tokushima', meaning: '徳島', row: '中国・四国' },
-            { id: 38, kana: 'えひめ', word: '愛媛', kanji: '松山', romaji: 'Ehime', meaning: '松山', row: '中国・四国' },
-            { id: 39, kana: 'こうち', word: '高知', kanji: '高知', romaji: 'Kochi', meaning: '高知', row: '中国・四国' },
+            { id: 36, kana: 'かがわ', word: '香川', kanji: '高松', romaji: 'Kagawa', meaning: 'かがわ', row: '中国・四国' },
+            { id: 37, kana: 'とくしま', word: '徳島', kanji: '徳島', romaji: 'Tokushima', meaning: 'とくしま', row: '中国・四国' },
+            { id: 38, kana: 'えひめ', word: '愛媛', kanji: '松山', romaji: 'Ehime', meaning: 'えひめ', row: '中国・四国' },
+            { id: 39, kana: 'こうち', word: '高知', kanji: '高知', romaji: 'Kochi', meaning: 'こうち', row: '中国・四国' },
             // 九州
-            { id: 40, kana: 'ふくおか', word: '福岡', kanji: '福岡', romaji: 'Fukuoka', meaning: '福岡', row: '九州・沖縄' },
-            { id: 41, kana: 'さが', word: '佐賀', kanji: '佐賀', romaji: 'Saga', meaning: '佐賀', row: '九州・沖縄' },
-            { id: 42, kana: 'ながさき', word: '長崎', kanji: '長崎', romaji: 'Nagasaki', meaning: '長崎', row: '九州・沖縄' },
-            { id: 43, kana: 'くまもと', word: '熊本', kanji: '熊本', romaji: 'Kumamoto', meaning: '熊本', row: '九州・沖縄' },
-            { id: 44, kana: 'おおいた', word: '大分', kanji: '大分', romaji: 'Oita', meaning: '大分', row: '九州・沖縄' },
-            { id: 45, kana: 'みやざき', word: '宮崎', kanji: '宮崎', romaji: 'Miyazaki', meaning: '宮崎', row: '九州・沖縄' },
-            { id: 46, kana: 'かごしま', word: '鹿児島', kanji: '鹿児島', romaji: 'Kagoshima', meaning: '鹿児島', row: '九州・沖縄' },
-            { id: 47, kana: 'おきなわ', word: '沖縄', kanji: '那覇', romaji: 'Okinawa', meaning: '那覇', row: '九州・沖縄' }
+            { id: 40, kana: 'ふくおか', word: '福岡', kanji: '福岡', romaji: 'Fukuoka', meaning: 'ふくおか', row: '九州・沖縄' },
+            { id: 41, kana: 'さが', word: '佐賀', kanji: '佐賀', romaji: 'Saga', meaning: 'さが', row: '九州・沖縄' },
+            { id: 42, kana: 'ながさき', word: '長崎', kanji: '長崎', romaji: 'Nagasaki', meaning: 'ながさき', row: '九州・沖縄' },
+            { id: 43, kana: 'くまもと', word: '熊本', kanji: '熊本', romaji: 'Kumamoto', meaning: 'くまもと', row: '九州・沖縄' },
+            { id: 44, kana: 'おおいた', word: '大分', kanji: '大分', romaji: 'Oita', meaning: 'おおいた', row: '九州・沖縄' },
+            { id: 45, kana: 'みやざき', word: '宮崎', kanji: '宮崎', romaji: 'Miyazaki', meaning: 'みやざき', row: '九州・沖縄' },
+            { id: 46, kana: 'かごしま', word: '鹿児島', kanji: '鹿児島', romaji: 'Kagoshima', meaning: 'かごしま', row: '九州・沖縄' },
+            { id: 47, kana: 'おきなわ', word: '沖縄', kanji: '那覇', romaji: 'Okinawa', meaning: 'おきなわ', row: '九州・沖縄' }
         ];
 
         const Icon = {
@@ -1023,7 +1023,7 @@
                     let cards = [];
                     pool.forEach(item => {
                         cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isFlipped: false, isMatched: false });
-                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(首府)', type: 'meaning', isFlipped: false, isMatched: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(讀音)', type: 'meaning', isFlipped: false, isMatched: false });
                     });
 
                     gameState.value = {
@@ -1086,7 +1086,7 @@
                     let cards = [];
                     pool.forEach(item => {
                         cards.push({ id: item.id + '-jp', vocabId: item.id, content: item.word, sub: '', type: 'word', isMatched: false, isError: false });
-                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(首府)', type: 'meaning', isMatched: false, isError: false });
+                        cards.push({ id: item.id + '-zh', vocabId: item.id, content: item.meaning, sub: '(讀音)', type: 'meaning', isMatched: false, isError: false });
                     });
 
                     speedMatchState.value = {
