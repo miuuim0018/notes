@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡️ MINXIONG DRINKS CYBER-MAP V2 ⚡️</title>
+    <title>⚡️ CHIAYI REGION DRINKS CYBER-MAP V4 ⚡️</title>
     
-    <!-- 引入 Google Fonts 讓字體變潮 -->
+    <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
     
     <!-- Leaflet CSS -->
@@ -16,7 +16,7 @@
             --neon-blue: #00f3ff;
             --neon-pink: #bc13fe;
             --neon-green: #0aff0a;
-            --glass-bg: rgba(16, 20, 30, 0.85); /* 稍微調深一點增加可讀性 */
+            --glass-bg: rgba(16, 20, 30, 0.85);
             --border-color: rgba(0, 243, 255, 0.3);
         }
 
@@ -27,10 +27,9 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #0b0c10;
             color: #fff;
-            overflow: hidden; /* 防止整個頁面滾動 */
+            overflow: hidden;
         }
 
-        /* 全螢幕地圖 */
         #map {
             height: 100vh; 
             width: 100%;
@@ -38,7 +37,7 @@
             background: #0b0c10;
         }
 
-        /* --- 炫泡 UI 區塊設計 (毛玻璃特效) --- */
+        /* --- UI 通用樣式 (毛玻璃) --- */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -49,17 +48,16 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 左上標題區 */
+        /* --- 1. 左上標題區 --- */
         .title-box {
             position: absolute;
             top: 20px;
-            left: 60px;
+            left: 20px;
             z-index: 1000;
             padding: 15px 25px;
             border-left: 4px solid var(--neon-blue);
-            pointer-events: none; /* 讓點擊穿透標題區塊，避免擋住地圖操作 */
+            pointer-events: none;
         }
-        /* 讓文字恢復可選取/點擊 */
         .title-box * { pointer-events: auto; }
 
         .title-box h1 {
@@ -80,19 +78,50 @@
             letter-spacing: 1px;
         }
 
-        /* --- 右下圖表區 (改良版) --- */
+        /* --- 2. 頂部搜尋列 --- */
+        .search-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 300px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            color: #fff;
+            font-family: 'Orbitron', 'Noto Sans TC';
+            font-size: 1rem;
+            outline: none;
+            letter-spacing: 1px;
+        }
+        
+        .search-box input::placeholder { color: rgba(0, 243, 255, 0.5); }
+        
+        .search-icon {
+            padding-right: 15px;
+            color: var(--neon-blue);
+            font-size: 1.2rem;
+        }
+
+        /* --- 3. 右下控制面板 --- */
         .chart-panel {
             position: absolute;
             bottom: 30px;
             right: 30px;
             z-index: 1000;
             width: 340px;
-            /* 移除原本的 overflow，改由內部 content 控制 */
             display: flex;
             flex-direction: column;
+            max-height: 80vh;
         }
 
-        /* 收合按鈕 */
         #toggleBtn {
             width: 100%;
             background: rgba(0, 0, 0, 0.3);
@@ -106,47 +135,19 @@
             font-size: 0.9rem;
             letter-spacing: 2px;
             outline: none;
-            text-transform: uppercase;
             border-radius: 12px 12px 0 0;
             transition: background 0.3s;
         }
-        #toggleBtn:hover {
-            background: rgba(0, 243, 255, 0.1);
-            color: #fff;
-        }
+        #toggleBtn:hover { background: rgba(0, 243, 255, 0.1); }
 
-        /* 內容容器 */
         .chart-content {
             padding: 20px;
-            max-height: 60vh; /* 展開時的最大高度 */
             overflow-y: auto;
-            opacity: 1;
-            transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s;
-            
-            /* 自訂捲軸 */
             scrollbar-width: thin;
             scrollbar-color: var(--neon-blue) transparent;
         }
-        
         .chart-content::-webkit-scrollbar { width: 6px; }
         .chart-content::-webkit-scrollbar-thumb { background-color: var(--neon-blue); border-radius: 3px; }
-
-        /* 收合狀態 (由 JS 切換) */
-        .panel-collapsed .chart-content {
-            max-height: 0;
-            opacity: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            overflow: hidden;
-        }
-        .panel-collapsed #toggleBtn {
-            border-bottom: none; /* 收合時隱藏分隔線 */
-            border-radius: 12px;
-        }
-        .panel-collapsed {
-            width: auto; /* 收合時自動縮小寬度 */
-            min-width: 150px;
-        }
 
         .chart-panel h3 {
             margin-top: 20px;
@@ -154,14 +155,58 @@
             color: var(--neon-pink);
             text-align: center;
             font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 8px;
-            letter-spacing: 1px;
         }
         .chart-panel h3:first-child { margin-top: 0; }
 
-        /* --- 呼吸燈標記 (Pulsing Marker) --- */
+        /* 系統日誌 */
+        .system-log {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(10, 255, 10, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+            height: 100px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 5px rgba(10, 255, 10, 0.5);
+            scrollbar-width: none;
+        }
+        .log-entry { margin-bottom: 4px; opacity: 0.8; }
+        .log-entry::before { content: '> '; opacity: 0.5; }
+
+        .panel-collapsed .chart-content { display: none; }
+        .panel-collapsed #toggleBtn { border-bottom: none; border-radius: 12px; }
+        .panel-collapsed { width: auto; min-width: 150px; }
+
+        /* --- 4. 定位按鈕 --- */
+        .locate-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 30px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--neon-blue);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        .locate-btn:hover {
+            box-shadow: 0 0 20px var(--neon-blue);
+            transform: scale(1.1);
+            background: rgba(0, 243, 255, 0.2);
+        }
+        .locate-btn:active { transform: scale(0.95); }
+
+        /* --- 呼吸燈標記 --- */
         .glowing-dot {
             width: 14px;
             height: 14px;
@@ -170,7 +215,6 @@
             box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
             position: relative;
         }
-        
         .glowing-dot::after {
             content: '';
             position: absolute;
@@ -181,84 +225,56 @@
             border: 2px solid currentColor;
             animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         }
-
         @keyframes pulse-ring {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
             50% { opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
 
-        /* --- 自訂 Popup 與介面修正 --- */
+        /* Leaflet Popup */
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: rgba(16, 20, 30, 0.95) !important;
             color: #fff !important;
             border: 1px solid var(--neon-blue);
             box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
             backdrop-filter: blur(5px);
-            border-radius: 8px !important;
         }
-        .leaflet-popup-content { margin: 12px 16px; line-height: 1.6; }
-        .leaflet-popup-content b { color: var(--neon-blue); font-size: 1.1em; font-family: 'Noto Sans TC'; }
-        
-        /* 修正：美化 Popup 關閉按鈕 */
-        .leaflet-container a.leaflet-popup-close-button {
-            color: var(--neon-blue) !important;
-            font-size: 20px !important;
-            padding: 8px !important;
-            top: 0;
-            right: 0;
-            text-decoration: none;
-        }
-        .leaflet-container a.leaflet-popup-close-button:hover {
-            color: var(--neon-pink) !important;
-        }
+        .leaflet-popup-content b { color: var(--neon-blue); font-family: 'Noto Sans TC'; font-size: 1.1em;}
+        .leaflet-container a.leaflet-popup-close-button { color: var(--neon-blue) !important; }
 
-        /* 修正：圖層控制選單太長時的處理 */
-        .leaflet-control-layers-expanded .leaflet-control-layers-list {
-            max-height: 60vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-        }
-        .leaflet-control-layers {
-            background: rgba(16, 20, 30, 0.9) !important;
-            border: 1px solid var(--neon-blue) !important;
-            color: #fff !important;
-            border-radius: 8px !important;
-        }
-
-        /* RWD 手機版調整 */
+        /* RWD */
         @media (max-width: 600px) {
-            .title-box { top: 10px; left: 50px; right: 10px; padding: 12px; }
-            .title-box h1 { font-size: 1.3rem; }
-            
-            /* 手機版圖表區預設會靠右下，寬度調整 */
-            .chart-panel { 
-                width: 90%; /* 展開時寬一點 */
-                right: 5%; 
-                bottom: 25px; 
-            }
-            .panel-collapsed {
-                width: auto !important;
-                right: 20px; /* 收合時靠右一點 */
-            }
-            .chart-content { max-height: 45vh; } /* 手機版圖表高度矮一點以免擋住太多 */
+            .title-box { display: none; }
+            .search-box { width: 80%; top: 15px; }
+            .chart-panel { width: 85%; right: 7.5%; bottom: 90px; }
+            .locate-btn { bottom: 25px; left: 25px; }
+            .panel-collapsed { right: 20px; bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 標題區塊 -->
+    <!-- 左上標題 -->
     <div class="title-box glass-panel">
-        <h1>MINXIONG<br>DRINKS MAP</h1>
-        <p>民雄戰區 // 飲料店數據監控中...</p>
+        <h1>CHIAYI REGION<br>DRINKS MAP</h1>
+        <p>嘉義縣市全區 // 飲料店數據監控中...</p>
     </div>
 
-    <!-- 圖表區塊 (新增 ID 與內部結構) -->
+    <!-- 頂部搜尋列 -->
+    <div class="search-box glass-panel">
+        <input type="text" id="searchInput" placeholder="SEARCH TARGET..." onkeyup="filterMarkers()">
+        <div class="search-icon">🔍</div>
+    </div>
+
+    <!-- 左下定位按鈕 -->
+    <div class="locate-btn glass-panel" onclick="locateUser()" title="Locate Me">
+        ⊕
+    </div>
+
+    <!-- 右下控制面板 -->
     <div class="chart-panel glass-panel" id="statsPanel">
-        <!-- 收合按鈕 -->
         <button id="toggleBtn" onclick="togglePanel()">▼ DATA MONITOR</button>
         
-        <!-- 內容容器 -->
         <div class="chart-content">
             <h3>Brand Distribution</h3>
             <canvas id="brandChart"></canvas>
@@ -266,184 +282,216 @@
             <h3>Market Share</h3>
             <canvas id="shareChart"></canvas>
             
-            <div style="margin-top: 15px; font-size: 0.75rem; color: #666; text-align: center;">
-                SYSTEM STATUS: ONLINE<br>
-                LAST UPDATE: 2025.02.13
+            <h3>System Log</h3>
+            <div class="system-log" id="systemLog">
+                <div class="log-entry">System initialized...</div>
+                <div class="log-entry">Loading map data...</div>
+                <div class="log-entry">Waiting for input...</div>
+            </div>
+
+            <div style="margin-top: 10px; font-size: 0.7rem; color: #666; text-align: center;">
+                SECURE CONNECTION ESTABLISHED
             </div>
         </div>
     </div>
 
-    <!-- 地圖容器 -->
     <div id="map"></div>
 
-    <!-- 引入 Libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- 鎖定 Chart.js 版本以確保穩定性 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
-        // --- 1. 資料區 (Data) ---
+        // --- 1. 資料與設定 ---
         const brandColors = {
-            "50嵐": "#ffe600",
-            "迷客夏": "#00ff88",
+            "50嵐": "#ffe600", 
+            "迷客夏": "#00ff88", 
             "可不可": "#ff4d4d",
-            "清心福全": "#00d2ff",
-            "麻古茶坊": "#ff00dd",
+            "清心福全": "#00d2ff", 
+            "麻古茶坊": "#ff00dd", 
             "大苑子": "#55ff00",
+            "御香屋": "#ffcc00", // 嘉義傳奇色 (金黃)
             "其他": "#ffffff"
         };
 
         const shopsData = [
-            { name: "50嵐 建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "人潮密集區" },
-            { name: "50嵐 頭橋店", brand: "50嵐", lat: 23.5410, lng: 120.4380, note: "工業區" },
-            { name: "清心福全 保生店", brand: "清心福全", lat: 23.5525, lng: 120.4305, note: "轉角" },
-            { name: "清心福全 建國店", brand: "清心福全", lat: 23.5550, lng: 120.4285, note: "" },
-            { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "推薦：芝芝葡萄" },
-            { name: "可不可熟成紅茶", brand: "可不可", lat: 23.5518, lng: 120.4320, note: "英倫風裝潢" },
-            { name: "迷客夏 民雄店", brand: "迷客夏", lat: 23.5522, lng: 120.4298, note: "牧場直送" },
-            { name: "大苑子 民雄店", brand: "大苑子", lat: 23.5535, lng: 120.4290, note: "季節鮮果" },
-            { name: "茶湯會", brand: "其他", lat: 23.5515, lng: 120.4325, note: "" },
-            { name: "鮮茶道", brand: "其他", lat: 23.5540, lng: 120.4280, note: "" },
-            { name: "CoCo都可", brand: "其他", lat: 23.5512, lng: 120.4330, note: "" },
-            { name: "民雄在地紅茶冰", brand: "其他", lat: 23.5505, lng: 120.4340, note: "俗擱大碗 CP值高" }
+            // --- 民雄區 (原本的資料) ---
+            { name: "50嵐 民雄建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "民雄 - 人潮密集區" },
+            { name: "50嵐 民雄頭橋店", brand: "50嵐", lat: 23.5410, lng: 120.4380, note: "民雄 - 工業區" },
+            { name: "清心福全 民雄保生店", brand: "清心福全", lat: 23.5525, lng: 120.4305, note: "民雄" },
+            { name: "清心福全 民雄建國店", brand: "清心福全", lat: 23.5550, lng: 120.4285, note: "民雄" },
+            { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "民雄 - 芝芝葡萄" },
+            { name: "可不可熟成紅茶 民雄店", brand: "可不可", lat: 23.5518, lng: 120.4320, note: "民雄" },
+            { name: "迷客夏 民雄店", brand: "迷客夏", lat: 23.5522, lng: 120.4298, note: "民雄 - 牧場直送" },
+            { name: "大苑子 民雄店", brand: "大苑子", lat: 23.5535, lng: 120.4290, note: "民雄 - 季節鮮果" },
+            { name: "民雄在地紅茶冰", brand: "其他", lat: 23.5505, lng: 120.4340, note: "民雄 - 俗擱大碗" },
+
+            // --- 嘉義市區 (新資料) ---
+            { name: "源興御香屋", brand: "御香屋", lat: 23.4800, lng: 120.4490, note: "嘉義市 - 排隊傳奇! 葡萄柚綠茶" },
+            { name: "源興御香屋 中正二店", brand: "御香屋", lat: 23.4795, lng: 120.4505, note: "嘉義市 - 傳奇二店" },
+            { name: "50嵐 嘉義中山店", brand: "50嵐", lat: 23.4788, lng: 120.4455, note: "嘉義市 - 車站商圈" },
+            { name: "50嵐 嘉義文化店", brand: "50嵐", lat: 23.4805, lng: 120.4495, note: "嘉義市 - 夜市旁" },
+            { name: "迷客夏 嘉義林森店", brand: "迷客夏", lat: 23.4845, lng: 120.4480, note: "嘉義市 - 檜意森活村附近" },
+            { name: "可不可 嘉義民族店", brand: "可不可", lat: 23.4760, lng: 120.4485, note: "嘉義市 - 民族商圈" },
+            { name: "麻古茶坊 嘉義興業店", brand: "麻古茶坊", lat: 23.4720, lng: 120.4470, note: "嘉義市 - 南區熱點" },
+            { name: "清心福全 嘉義仁愛店", brand: "清心福全", lat: 23.4770, lng: 120.4440, note: "嘉義市 - 電影院對面" },
+            { name: "知更鳥巢鮮果茶飲", brand: "其他", lat: 23.4820, lng: 120.4490, note: "嘉義市 - 在地隱藏版好店" },
+
+            // --- 嘉義縣 (朴子/太保) (新資料) ---
+            { name: "50嵐 朴子店", brand: "50嵐", lat: 23.4680, lng: 120.2450, note: "朴子 - 配天宮附近" },
+            { name: "大苑子 嘉義太保店", brand: "大苑子", lat: 23.4580, lng: 120.2930, note: "太保 - 縣政府特區" },
+            { name: "迷客夏 嘉義長庚店", brand: "迷客夏", lat: 23.4605, lng: 120.2905, note: "太保 - 長庚醫院" }
         ];
 
+        let allMarkers = [];
+        let userMarker = null;
+
         // --- 2. 初始化地圖 ---
-        const map = L.map('map', {
-            zoomControl: false 
-        }).setView([23.5525, 120.4310], 15);
-        
+        // 調整中心點到嘉義市與民雄中間，並將縮放層級設為 13 以涵蓋更大範圍
+        const map = L.map('map', { zoomControl: false }).setView([23.5150, 120.4400], 13);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CARTO',
-            maxZoom: 20
+            attribution: '&copy; CARTO', maxZoom: 20
         }).addTo(map);
 
         const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri',
-            maxZoom: 17
+            attribution: 'Tiles &copy; Esri', maxZoom: 17
         });
 
-        // --- 3. 建立發光圖標 & 統計 ---
+        // --- 3. 建立標記 ---
         const layers = {};
         const brandCounts = {};
 
         shopsData.forEach(shop => {
             let bName = shop.brand;
             if(!brandColors[bName]) bName = "其他";
-            
             brandCounts[shop.brand] = (brandCounts[shop.brand] || 0) + 1;
             const myColor = brandColors[bName] || brandColors["其他"];
 
+            // 針對御香屋做特效：更大顆、更亮
+            const isLegendary = shop.brand === "御香屋";
+            const scale = isLegendary ? 1.5 : 1.0;
+            const zIndexOffset = isLegendary ? 1000 : 0;
+
             const glowingIcon = L.divIcon({
-                className: 'custom-pin', 
-                html: `<div class="glowing-dot" style="color: ${myColor};"></div>`,
-                iconSize: [20, 20],
-                iconAnchor: [10, 10],
-                popupAnchor: [0, -10]
+                className: 'custom-pin',
+                html: `<div class="glowing-dot" style="color: ${myColor}; transform: scale(${scale});"></div>`,
+                iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
             });
 
-            const marker = L.marker([shop.lat, shop.lng], { icon: glowingIcon })
+            const marker = L.marker([shop.lat, shop.lng], { icon: glowingIcon, zIndexOffset: zIndexOffset })
                 .bindPopup(`
-                    <div style="font-family:'Orbitron'; font-size:0.8em; color:#888;">TARGET DETECTED</div>
-                    <b>${shop.name}</b><br>
-                    <span style="color:#aaa; display:block; margin-top:4px; border-top:1px solid #333; padding-top:4px;">
-                        ${shop.note || "NO DATA"}
-                    </span>
+                    <div style="font-family:'Orbitron'; font-size:0.8em; color:#888;">TARGET ACQUIRED</div>
+                    <b style="color: ${myColor}">${shop.name}</b><br>
+                    <span style="color:#aaa; border-top:1px solid #444; display:block; margin-top:4px; padding-top:4px;">${shop.note || "NO DATA"}</span>
                 `);
+            
+            marker.on('click', () => logAction(`Selected: ${shop.name}`));
 
             if (!layers[shop.brand]) layers[shop.brand] = L.layerGroup();
             layers[shop.brand].addLayer(marker);
+            allMarkers.push({ marker: marker, data: shop });
         });
 
         for (let key in layers) layers[key].addTo(map);
+        L.control.layers({ "Cyber Mode": darkLayer, "Real World": satelliteLayer }, layers, { collapsed: true }).addTo(map);
 
-        L.control.layers({
-            "Cyber Mode": darkLayer,
-            "Real World": satelliteLayer
-        }, layers, { collapsed: true }).addTo(map); // 手機上 collapsed: true 比較好
+        // --- 4. 功能邏輯 (搜尋/定位/日誌) ---
 
-        // --- 4. 處理圖表與互動 (優化重點) ---
+        function filterMarkers() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            let count = 0;
+            allMarkers.forEach(item => {
+                const text = (item.data.name + item.data.brand + item.data.note).toLowerCase();
+                if (text.includes(input)) {
+                    item.marker.addTo(map);
+                    count++;
+                } else {
+                    item.marker.remove();
+                }
+            });
+            if(input.length > 0) logAction(`Search: "${input}" found ${count} targets`);
+        }
 
-        // 4.1 防止滾動事件傳遞給地圖 (Critical Fix)
-        const panelElement = document.getElementById('statsPanel');
-        L.DomEvent.disableScrollPropagation(panelElement);
-        L.DomEvent.disableClickPropagation(panelElement);
+        function locateUser() {
+            logAction("Initiating GPS sequence...");
+            map.locate({setView: true, maxZoom: 16});
+            map.on('locationfound', function(e) {
+                logAction(`User location locked at [${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}]`);
+                if (userMarker) userMarker.remove();
+                const userIcon = L.divIcon({
+                    className: 'user-pin',
+                    html: `<div class="glowing-dot" style="color: #00f3ff; transform: scale(1.5);"></div>`,
+                    iconSize: [20, 20], iconAnchor: [10, 10]
+                });
+                userMarker = L.marker(e.latlng, {icon: userIcon}).addTo(map)
+                    .bindPopup("<b>AGENT LOCATION</b><br>Current Status: Active").openPopup();
+                L.circle(e.latlng, { radius: e.accuracy, color: '#00f3ff', weight: 1, fillOpacity: 0.1 }).addTo(map);
+            });
+            map.on('locationerror', function(e) {
+                logAction("GPS Signal Lost: " + e.message);
+                alert("無法獲取位置，請確認瀏覽器權限。");
+            });
+        }
 
-        // 4.2 收合功能邏輯
+        function logAction(msg) {
+            const logBox = document.getElementById('systemLog');
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerText = `[${time}] ${msg}`;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // --- 5. 圖表繪製 ---
+        
+        ['statsPanel', 'searchInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                L.DomEvent.disableScrollPropagation(el);
+                L.DomEvent.disableClickPropagation(el);
+            }
+        });
+
         function togglePanel() {
             const panel = document.getElementById('statsPanel');
             const btn = document.getElementById('toggleBtn');
             const isCollapsed = panel.classList.toggle('panel-collapsed');
-            
-            // 更新按鈕文字
             btn.innerHTML = isCollapsed ? '▲ DATA MONITOR' : '▼ DATA MONITOR';
         }
 
-        // 4.3 產生圖表
         Chart.defaults.color = '#aaaaaa';
         Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
-        Chart.defaults.font.family = "'Orbitron', 'Noto Sans TC', sans-serif";
-
+        Chart.defaults.font.family = "'Orbitron', sans-serif";
+        
         const labels = Object.keys(brandCounts);
         const dataValues = Object.values(brandCounts);
-        const bgColors = labels.map(label => brandColors[label] || brandColors["其他"]);
+        const bgColors = labels.map(l => brandColors[l] || brandColors["其他"]);
 
         new Chart(document.getElementById('brandChart'), {
             type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Count',
-                    data: dataValues,
-                    backgroundColor: bgColors,
-                    borderRadius: 3,
-                    barThickness: 12
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // 讓它可以自適應高度
-                aspectRatio: 2,
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                    x: { grid: { display: false } }
-                },
+            data: { labels, datasets: [{ data: dataValues, backgroundColor: bgColors, borderRadius: 3 }] },
+            options: { 
+                responsive: true, maintainAspectRatio: false, aspectRatio: 2,
+                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } },
                 plugins: { legend: { display: false } }
             }
         });
 
         new Chart(document.getElementById('shareChart'), {
             type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: dataValues,
-                    backgroundColor: bgColors,
-                    borderColor: '#10141e',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                aspectRatio: 2,
-                cutout: '65%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: { boxWidth: 8, usePointStyle: true, font: { size: 10 } }
-                    }
-                }
+            data: { labels, datasets: [{ data: dataValues, backgroundColor: bgColors, borderColor: '#10141e', borderWidth: 2 }] },
+            options: { 
+                responsive: true, maintainAspectRatio: false, aspectRatio: 2, cutout: '65%',
+                plugins: { legend: { position: 'right', labels: { boxWidth: 8, usePointStyle: true, font: { size: 10 } } } }
             }
         });
 
-        // --- 5. 自動判斷手機版 ---
-        // 如果螢幕寬度小於 600px，預設收合面板，把地圖視野留給使用者
-        if (window.innerWidth < 600) {
-            togglePanel();
-        }
+        if (window.innerWidth < 600) togglePanel();
+
+        logAction("Regional Map systems online.");
+        logAction(`Loaded ${shopsData.length} targets across Chiayi.`);
 
     </script>
 </body>
