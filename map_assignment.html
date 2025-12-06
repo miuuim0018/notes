@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡️ CHIAYI TACTICAL MAP V13.0 ⚡️</title>
+    <title>⚡️ CHIAYI MAP V14.0 RWD ⚡️</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     
     <style>
+        /* --- 全域設定 --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --neon-cyan: #00f3ff;
             --neon-pink: #ff0055;
@@ -23,12 +25,12 @@
             font-family: 'Share Tech Mono', 'Noto Sans TC', monospace;
             background-color: var(--bg-dark);
             color: #e0e0e0;
-            overflow: hidden;
+            overflow: hidden; /* 禁止網頁捲動 */
         }
 
         #map { height: 100vh; width: 100%; z-index: 1; background: #000; }
 
-        /* --- 賽博龐克 UI --- */
+        /* --- 賽博龐克風格元件 --- */
         .cyber-panel {
             background: var(--panel-bg);
             border: 1px solid var(--neon-cyan);
@@ -36,29 +38,25 @@
             position: relative;
             backdrop-filter: blur(5px);
         }
-        
-        .cyber-panel::before, .cyber-panel::after {
-            content: ''; position: absolute; width: 8px; height: 8px;
-            border: 2px solid var(--neon-cyan); transition: all 0.3s;
-        }
-        .cyber-panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-        .cyber-panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-        /* --- 頂部標題 --- */
+        /* --- 1. 頂部標題 (Top Bar) --- */
         .top-bar {
-            position: absolute; top: 20px; left: 20px; z-index: 1000;
-            pointer-events: none;
+            position: absolute; 
+            top: 20px; left: 20px; 
+            z-index: 1000;
+            pointer-events: none; /* 讓點擊穿透到地圖 */
         }
         .main-title {
             font-family: 'Orbitron', sans-serif; font-size: 1.8rem;
             color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);
             margin: 0; padding: 10px 20px; background: rgba(0,0,0,0.8);
-            border-left: 4px solid var(--neon-cyan); pointer-events: auto;
-            white-space: nowrap;
+            border-left: 4px solid var(--neon-cyan); 
+            pointer-events: auto; /* 標題本身可點(如果需要) */
+            display: inline-block;
         }
-        .sub-status { font-size: 0.8rem; color: var(--neon-green); margin-top: 5px; padding-left: 5px; }
+        .sub-status { font-size: 0.8rem; color: var(--neon-green); margin-top: 5px; padding-left: 5px; background: rgba(0,0,0,0.5); display: inline-block;}
 
-        /* --- 搜尋模組 --- */
+        /* --- 2. 搜尋框 (Search) - 預設電腦版在上方 --- */
         .search-module {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 300px; display: flex; align-items: center;
@@ -71,14 +69,13 @@
         }
         .search-blink { color: var(--neon-cyan); padding-right: 10px; animation: blink 1s infinite; }
 
-        /* --- 右側戰術面板 --- */
+        /* --- 3. 資訊面板 (Panel) - 預設電腦版在右側 --- */
         .tactical-panel {
             position: absolute; top: 80px; right: 20px; bottom: 30px;
             width: 380px; z-index: 2000;
             display: flex; flex-direction: column;
             transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-
         .panel-header {
             padding: 12px; background: rgba(0, 243, 255, 0.15);
             border-bottom: 1px solid var(--neon-cyan);
@@ -86,81 +83,13 @@
             font-family: 'Orbitron'; font-weight: bold; color: var(--neon-cyan);
             user-select: none;
         }
-        
         .panel-body {
             flex: 1; overflow-y: auto; padding: 15px;
             background: rgba(5, 10, 16, 0.98);
             scrollbar-width: thin; scrollbar-color: var(--neon-cyan) #000;
         }
 
-        /* --- 關鍵修復：RWD 手機版面 --- */
-        @media (max-width: 768px) {
-            /* 1. 標題與圖層選單分開 */
-            .top-bar { 
-                top: 10px; left: 10px; 
-                max-width: 55%; /* 限制寬度，讓出右邊給圖層選單 */
-            }
-            .main-title { 
-                font-size: 1rem; 
-                padding: 8px 10px;
-                border-left: 2px solid var(--neon-cyan);
-            }
-            .sub-status { display: none; }
-
-            /* Leaflet 圖層選單樣式微調 */
-            .leaflet-top { top: 10px; }
-            .leaflet-right { right: 10px; }
-            .leaflet-control-layers { margin: 0 !important; }
-
-            /* 2. 搜尋框移到底部 (關鍵修復) */
-            .search-module { 
-                top: auto;          
-                bottom: 80px;       /* 位於底部面板上方 */
-                left: 50%;
-                transform: translateX(-50%);
-                width: 92%;         
-                z-index: 3000;      
-                background: rgba(5, 10, 16, 0.95);
-                border: 1px solid var(--neon-cyan);
-                box-shadow: 0 0 15px rgba(0,0,0,0.8);
-            }
-
-            /* 3. 面板變成底部抽屜 */
-            .tactical-panel {
-                top: auto; bottom: 0; right: 0; left: 0;
-                width: 100%; height: 60vh;
-                border: none; border-top: 1px solid var(--neon-cyan);
-                transform: translateY(0);
-                z-index: 2500;
-            }
-            .panel-collapsed {
-                transform: translateY(calc(100% - 60px)) !important; /* 收合時露出標題 */
-            }
-            
-            /* 4. GPS 按鈕位置 */
-            .gps-btn { 
-                bottom: 140px; /* 位於搜尋框上方 */
-                left: 15px; 
-                width: 40px; height: 40px; 
-            }
-        }
-
-        @media (min-width: 769px) {
-            .panel-collapsed { transform: translateX(110%); }
-        }
-
-        /* --- 圖表與表格 --- */
-        .chart-wrapper { height: 200px; width: 100%; margin-bottom: 20px; position: relative; }
-        .section-header {
-            color: var(--neon-pink); border-bottom: 1px dashed var(--neon-pink);
-            margin-bottom: 10px; padding-bottom: 5px; font-size: 0.9rem;
-        }
-        .cyber-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8rem; }
-        .cyber-table th { text-align: left; padding: 8px; color: var(--neon-cyan); border-bottom: 1px solid var(--neon-cyan); }
-        .cyber-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; vertical-align: middle; }
-        .brand-icon-sm { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--neon-cyan); background: #fff; object-fit: cover; vertical-align: middle; margin-right: 8px; }
-        .reset-btn { width: 100%; padding: 8px; margin-bottom: 15px; background: rgba(255, 0, 85, 0.2); border: 1px solid var(--neon-pink); color: var(--neon-pink); cursor: pointer; font-family: 'Orbitron'; display: none; }
-
+        /* --- 4. GPS 按鈕 --- */
         .gps-btn {
             position: absolute; bottom: 30px; left: 20px; z-index: 1000;
             width: 50px; height: 50px; border-radius: 50%;
@@ -168,8 +97,85 @@
             display: flex; align-items: center; justify-content: center;
             background: rgba(0,0,0,0.8); cursor: pointer;
             box-shadow: 0 0 15px rgba(0,243,255,0.2);
+            transition: bottom 0.3s;
         }
         .gps-icon { width: 24px; height: 24px; fill: var(--neon-cyan); }
+
+
+        /* =========================================
+           🔥🔥 終極 RWD 自適應核心代碼 (Mobile) 🔥🔥
+           ========================================= */
+        @media (max-width: 768px) {
+            
+            /* A. 頂部標題：大幅縮小並靠左，讓出空間給右上角的圖層按鈕 */
+            .top-bar { top: 10px; left: 10px; max-width: 60%; }
+            .main-title { 
+                font-size: 0.9rem; /* 強制縮小 */
+                padding: 5px 8px; 
+                border-left: 2px solid var(--neon-cyan);
+            }
+            .sub-status { display: none; } /* 手機版不顯示副標題 */
+
+            /* B. Leaflet 圖層控制器 (右上角)：確保不被遮擋 */
+            .leaflet-top { top: 10px; }
+            .leaflet-right { right: 10px; }
+            .leaflet-control-layers { margin: 0 !important; border: 1px solid var(--neon-cyan) !important; }
+
+            /* C. 搜尋框：強制移到底部 (Bottom Float) */
+            .search-module {
+                top: auto !important; /* 取消上方定位 */
+                bottom: 70px;         /* 定位在底部面板把手上方 */
+                left: 50%;
+                width: 92%;           /* 幾乎滿寬 */
+                background: rgba(5, 10, 16, 0.95);
+                border: 1px solid var(--neon-cyan); /* 全框 */
+                border-radius: 4px;
+                z-index: 3000; /* 保證在最上層 */
+            }
+
+            /* D. 資訊面板：底部抽屜 (Bottom Sheet) */
+            .tactical-panel {
+                top: auto; bottom: 0; right: 0; left: 0;
+                width: 100%; 
+                height: 60vh; /* 展開高度 */
+                border: none; border-top: 2px solid var(--neon-cyan);
+                z-index: 4000; /* 最高層級 */
+                transform: translateY(0);
+            }
+            .panel-collapsed {
+                /* 收合時只露出 Header (約50px) */
+                transform: translateY(calc(100% - 50px)) !important;
+            }
+            .panel-header {
+                justify-content: center; /* 手機版標題置中 */
+                padding: 15px;
+            }
+
+            /* E. GPS 按鈕：上移避開搜尋框 */
+            .gps-btn {
+                bottom: 130px; /* 搜尋框高度 + 間距 */
+                left: 15px;
+                width: 40px; height: 40px;
+            }
+            
+            /* F. Leaflet Zoom Controls (左上角)：隱藏或下移 */
+            .leaflet-control-zoom { display: none; } /* 手機可以用手勢縮放，隱藏按鈕省空間 */
+        }
+
+        /* 電腦版收合邏輯 */
+        @media (min-width: 769px) {
+            .panel-collapsed { transform: translateX(110%); }
+        }
+
+        /* --- 其他樣式 --- */
+        .chart-wrapper { height: 180px; width: 100%; margin-bottom: 20px; position: relative; }
+        .section-header { color: var(--neon-pink); border-bottom: 1px dashed var(--neon-pink); margin-bottom: 10px; padding-bottom: 5px; font-size: 0.9rem; }
+        
+        .cyber-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8rem; }
+        .cyber-table th { text-align: left; padding: 8px; color: var(--neon-cyan); border-bottom: 1px solid var(--neon-cyan); }
+        .cyber-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; vertical-align: middle; }
+        .brand-icon-sm { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--neon-cyan); background: #fff; object-fit: cover; vertical-align: middle; margin-right: 8px; }
+        .reset-btn { width: 100%; padding: 8px; margin-bottom: 15px; background: rgba(255, 0, 85, 0.2); border: 1px solid var(--neon-pink); color: var(--neon-pink); cursor: pointer; font-family: 'Orbitron'; display: none; }
 
         .leaflet-popup-content-wrapper { background: rgba(10, 15, 20, 0.95) !important; border: 1px solid var(--neon-cyan); border-radius: 0 !important; color: #fff !important; min-width: 220px; }
         .leaflet-popup-tip { background: var(--neon-cyan) !important; }
@@ -197,7 +203,7 @@
 
     <div class="top-bar">
         <h1 class="main-title cyber-panel">CHIAYI OPS</h1>
-        <div class="sub-status">SYS: V13.0 FINAL | MODE: RWD</div>
+        <div class="sub-status">SYS: V14.0 FINAL | ADAPTIVE</div>
     </div>
 
     <div class="search-module cyber-panel">
@@ -211,7 +217,7 @@
 
     <div class="tactical-panel cyber-panel" id="rightPanel">
         <div class="panel-header" onclick="togglePanel()">
-            <span>/// INTELLIGENCE_GRID</span>
+            <span id="panelTitle">/// INTELLIGENCE</span>
             <span id="toggleState">[-]</span>
         </div>
         
@@ -220,9 +226,7 @@
 
             <div class="section-header"><span>TOP BRANDS RANKING</span></div>
             <table class="cyber-table">
-                <thead>
-                    <tr><th class="rank-col">#</th><th>BRAND</th><th class="count-col">QTY</th><th class="count-col">%</th></tr>
-                </thead>
+                <thead><tr><th class="rank-col">#</th><th>BRAND</th><th class="count-col">QTY</th><th class="count-col">%</th></tr></thead>
                 <tbody id="brandTableBody"></tbody>
             </table>
 
@@ -233,8 +237,8 @@
             <div class="chart-wrapper"><canvas id="radarChart"></canvas></div>
 
             <div style="margin-top:20px; padding:10px; background:#000; color:var(--neon-green); font-size:0.7rem; border:1px solid #333; height:80px; overflow-y:auto;" id="sysLog">
-                > System V13.0 Loaded...<br>
-                > Mobile UI Optimized.<br>
+                > System V14.0 Booted.<br>
+                > Mobile/Desktop Adaptive Mode.<br>
             </div>
         </div>
     </div>
@@ -245,7 +249,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
-        // --- 0. 設定與資產 ---
+        // --- 設定與資產 ---
         const brandLogos = {
             "50嵐": "https://upload.wikimedia.org/wikipedia/zh/7/7a/50_Lan_logo.png",
             "迷客夏": "https://www.milksha.com/images/logo_w.png",
@@ -269,7 +273,7 @@
             "茶湯會": "#d2b48c", "八曜和茶": "#ccff00", "御香屋": "#ffcc00", "其他": "#ffffff"
         };
 
-        // --- 1. 資料處理 (OSM Mock Data) ---
+        // --- Mock Data ---
         const osmRaw = {
           "elements": [
             { "type": "node", "lat": 23.3788733, "lon": 120.1607136, "tags": { "brand": "茶的魔手", "name": "茶的魔手" } },
@@ -309,6 +313,7 @@
             { name: "源興御香屋 中正二店", brand: "御香屋", lat: 23.4795, lng: 120.4505, note: "嘉義市" }
         ];
 
+        // 資料解析
         osmRaw.elements.forEach(el => {
             let lat = el.lat || el.center?.lat;
             let lng = el.lon || el.center?.lon;
@@ -339,16 +344,17 @@
             shopsData.push({ name, brand, lat, lng, note });
         });
 
-        // --- 2. 初始化地圖與歷史圖層 (V11+ Fix) ---
+        // --- 初始化地圖 ---
         const map = L.map('map', { zoomControl: false }).setView([23.4800, 120.4490], 14);
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        
+        // 只有在電腦版加入 Zoom Control
+        if(window.innerWidth > 768) {
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+        }
 
         const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CARTO', maxZoom: 20 });
-        // 1904 堡圖
         const layer1904 = L.tileLayer('https://gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-{z}-{x}-{y}', { attribution: '© 中研院 GIS', maxZoom: 20, maxNativeZoom: 14 });
-        // 1921 日治地形 (修復美軍地圖問題)
         const layer1921 = L.tileLayer('https://gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1921-jpg-{z}-{x}-{y}', { attribution: '© 中研院 GIS', maxZoom: 20, maxNativeZoom: 14 });
-        // 1993 經建版 (修復 1989 問題)
         const layer1993 = L.tileLayer('https://gis.sinica.edu.tw/tileserver/file-exists.php?img=TM25K_1993-jpg-{z}-{x}-{y}', { attribution: '© 中研院 GIS', maxZoom: 20, maxNativeZoom: 15 });
 
         darkLayer.addTo(map);
@@ -361,7 +367,7 @@
         };
         L.control.layers(baseMaps).addTo(map);
 
-        // --- 3. 標記與互動 ---
+        // --- 標記與互動 ---
         const layers = {};
         const brandCounts = {};
         const allMarkers = [];
@@ -401,9 +407,8 @@
         });
 
         for (let k in layers) layers[k].addTo(map);
-        document.getElementById('brandTableBody').innerHTML = ""; 
 
-        // --- 4. 數據視覺化 ---
+        // --- 圖表 ---
         Chart.defaults.color = '#888';
         Chart.defaults.borderColor = 'rgba(0, 243, 255, 0.1)';
         Chart.defaults.font.family = "'Orbitron', sans-serif";
@@ -417,16 +422,8 @@
             const count = brandCounts[label];
             const percent = ((count / shopsData.length) * 100).toFixed(1);
             const logoUrl = brandLogos[label] || brandLogos["其他"];
-            
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="rank-col">#${idx+1}</td>
-                <td style="color:${brandColors[label]||'#fff'}">
-                    <img src="${logoUrl}" class="brand-icon-sm"> ${label}
-                </td>
-                <td class="count-col">${count}</td>
-                <td class="count-col">${percent}%</td>
-            `;
+            tr.innerHTML = `<td class="rank-col">#${idx+1}</td><td style="color:${brandColors[label]||'#fff'}"><img src="${logoUrl}" class="brand-icon-sm">${label}</td><td class="count-col">${count}</td><td class="count-col">${percent}%</td>`;
             tr.onclick = () => filterMap(label);
             tbody.appendChild(tr);
         });
@@ -451,7 +448,7 @@
             options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#aaa', font: { size: 9 } } } }, plugins: { legend: { labels: { color: '#fff', font: { size: 9 }, boxWidth: 8 } } } }
         });
 
-        // --- 5. 核心邏輯 ---
+        // --- 功能函數 ---
         function log(msg) {
             const el = document.getElementById('sysLog');
             el.innerHTML += `> ${msg}<br>`;
@@ -478,8 +475,6 @@
                 if(target) map.flyTo(target.marker.getLatLng(), 13);
             }
             log(`FILTER ACTIVE: ${brand}`);
-            
-            // 手機版自動收合面板
             if(window.innerWidth < 768) {
                 document.getElementById('rightPanel').classList.add('panel-collapsed');
                 document.getElementById('toggleState').innerText = '[+]';
@@ -518,7 +513,6 @@
             if(el) { L.DomEvent.disableScrollPropagation(el); L.DomEvent.disableClickPropagation(el); }
         });
 
-        // 預設收合面板 (手機版)
         if(window.innerWidth < 768) togglePanel();
         
         log(`SYSTEM READY. ${shopsData.length} TARGETS.`);
