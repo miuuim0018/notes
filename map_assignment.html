@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡️ CHIAYI REGION DRINKS CYBER-MAP V4 ⚡️</title>
+    <title>⚡️ CHIAYI REGION DRINKS CYBER-MAP V5 ⚡️</title>
     
     <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
             --neon-blue: #00f3ff;
             --neon-pink: #bc13fe;
             --neon-green: #0aff0a;
+            --neon-yellow: #ffe600;
             --glass-bg: rgba(16, 20, 30, 0.85);
             --border-color: rgba(0, 243, 255, 0.3);
         }
@@ -231,7 +232,7 @@
             100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
 
-        /* Leaflet Popup */
+        /* Leaflet Popup (資訊視窗) */
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: rgba(16, 20, 30, 0.95) !important;
             color: #fff !important;
@@ -241,6 +242,35 @@
         }
         .leaflet-popup-content b { color: var(--neon-blue); font-family: 'Noto Sans TC'; font-size: 1.1em;}
         .leaflet-container a.leaflet-popup-close-button { color: var(--neon-blue) !important; }
+
+        /* 導航按鈕樣式 */
+        .nav-btn {
+            display: block;
+            margin-top: 10px;
+            background: linear-gradient(45deg, var(--neon-blue), #2196F3);
+            color: #000;
+            text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .nav-btn:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        .dist-info {
+            color: var(--neon-yellow);
+            font-family: 'Orbitron';
+            font-size: 0.85rem;
+            margin-top: 5px;
+            border-top: 1px dashed rgba(255,255,255,0.2);
+            padding-top: 5px;
+        }
 
         /* RWD */
         @media (max-width: 600px) {
@@ -257,7 +287,7 @@
     <!-- 左上標題 -->
     <div class="title-box glass-panel">
         <h1>CHIAYI REGION<br>DRINKS MAP</h1>
-        <p>嘉義縣市全區 // 飲料店數據監控中...</p>
+        <p>嘉義縣市全區 // V5.0 戰術導航版</p>
     </div>
 
     <!-- 頂部搜尋列 -->
@@ -285,8 +315,8 @@
             <h3>System Log</h3>
             <div class="system-log" id="systemLog">
                 <div class="log-entry">System initialized...</div>
-                <div class="log-entry">Loading map data...</div>
-                <div class="log-entry">Waiting for input...</div>
+                <div class="log-entry">Loading expanded database...</div>
+                <div class="log-entry">Waiting for GPS lock...</div>
             </div>
 
             <div style="margin-top: 10px; font-size: 0.7rem; color: #666; text-align: center;">
@@ -318,6 +348,7 @@
             "其他": "#ffffff"
         };
 
+        // V5: 大量擴充資料點 (模擬真實分佈)
         const shopsData = [
             // --- 民雄區 ---
             { name: "50嵐 民雄建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "民雄 - 人潮密集區" },
@@ -332,45 +363,60 @@
             { name: "Mr.Wish 民雄店", brand: "其他", lat: 23.5530, lng: 120.4300, note: "民雄" },
             { name: "民雄在地紅茶冰", brand: "其他", lat: 23.5505, lng: 120.4340, note: "民雄 - 俗擱大碗" },
             { name: "茶之魔手 民雄建國店", brand: "茶之魔手", lat: 23.5538, lng: 120.4292, note: "民雄 - 南霸天" },
+            { name: "鮮茶道 民雄店", brand: "其他", lat: 23.5560, lng: 120.4280, note: "民雄" },
+            { name: "MACU 麻古茶坊 民雄頭橋店", brand: "麻古茶坊", lat: 23.5395, lng: 120.4385, note: "民雄頭橋" },
 
-            // --- 嘉義市區 (核心戰區) ---
+            // --- 嘉義市區 (核心戰區 - 大幅擴充) ---
             { name: "源興御香屋", brand: "御香屋", lat: 23.4800, lng: 120.4490, note: "嘉義市 - 排隊傳奇! 葡萄柚綠茶" },
             { name: "源興御香屋 中正二店", brand: "御香屋", lat: 23.4795, lng: 120.4505, note: "嘉義市 - 傳奇二店" },
             { name: "50嵐 嘉義中山店", brand: "50嵐", lat: 23.4788, lng: 120.4455, note: "嘉義市 - 車站商圈" },
             { name: "50嵐 嘉義文化店", brand: "50嵐", lat: 23.4805, lng: 120.4495, note: "嘉義市 - 夜市旁" },
+            { name: "50嵐 嘉義興業店", brand: "50嵐", lat: 23.4725, lng: 120.4460, note: "嘉義市" },
+            { name: "50嵐 嘉義垂楊店", brand: "50嵐", lat: 23.4745, lng: 120.4480, note: "嘉義市" },
             { name: "迷客夏 嘉義林森店", brand: "迷客夏", lat: 23.4845, lng: 120.4480, note: "嘉義市 - 檜意森活村附近" },
             { name: "迷客夏 嘉義民族店", brand: "迷客夏", lat: 23.4765, lng: 120.4490, note: "嘉義市" },
+            { name: "迷客夏 嘉義民生店", brand: "迷客夏", lat: 23.4740, lng: 120.4420, note: "嘉義市" },
             { name: "可不可 嘉義民族店", brand: "可不可", lat: 23.4760, lng: 120.4485, note: "嘉義市 - 民族商圈" },
+            { name: "可不可 嘉義中山店", brand: "可不可", lat: 23.4795, lng: 120.4440, note: "嘉義市" },
             { name: "麻古茶坊 嘉義興業店", brand: "麻古茶坊", lat: 23.4720, lng: 120.4470, note: "嘉義市 - 南區熱點" },
             { name: "麻古茶坊 嘉義中山店", brand: "麻古茶坊", lat: 23.4792, lng: 120.4465, note: "嘉義市 - 噴水池圓環" },
+            { name: "麻古茶坊 嘉義友愛店", brand: "麻古茶坊", lat: 23.4825, lng: 120.4350, note: "嘉義市 - 西區" },
             { name: "清心福全 嘉義仁愛店", brand: "清心福全", lat: 23.4770, lng: 120.4440, note: "嘉義市 - 電影院對面" },
+            { name: "清心福全 嘉義新民店", brand: "清心福全", lat: 23.4700, lng: 120.4410, note: "嘉義市" },
             
             // --- 嘉義市區 (新銳網紅品牌) ---
             { name: "五桐號 嘉義中山店", brand: "五桐號", lat: 23.4790, lng: 120.4460, note: "嘉義市 - 杏仁凍好喝" },
             { name: "得正 嘉義中山計畫", brand: "得正", lat: 23.4793, lng: 120.4458, note: "嘉義市 - 檸檬春烏龍" },
+            { name: "得正 嘉義垂楊計畫", brand: "得正", lat: 23.4742, lng: 120.4485, note: "嘉義市" },
             { name: "龜記茗品 嘉義文化店", brand: "龜記", lat: 23.4802, lng: 120.4488, note: "嘉義市 - 紅柚翡翠" },
+            { name: "龜記茗品 嘉義中山店", brand: "龜記", lat: 23.4798, lng: 120.4450, note: "嘉義市" },
             { name: "八曜和茶 嘉義中山店", brand: "八曜和茶", lat: 23.4789, lng: 120.4462, note: "嘉義市 - 日系和風茶" },
+            { name: "八曜和茶 嘉義仁愛店", brand: "八曜和茶", lat: 23.4765, lng: 120.4438, note: "嘉義市" },
             { name: "老賴茶棧 嘉義文化店", brand: "其他", lat: 23.4808, lng: 120.4492, note: "嘉義市 - 豆香紅茶" },
             { name: "一沐日 嘉義中山店", brand: "其他", lat: 23.4791, lng: 120.4452, note: "嘉義市 - 粉粿奶茶" },
             { name: "知更鳥巢鮮果茶飲", brand: "其他", lat: 23.4820, lng: 120.4490, note: "嘉義市 - 在地隱藏版好店" },
             { name: "樺達奶茶 嘉義秀泰店", brand: "其他", lat: 23.4850, lng: 120.4445, note: "嘉義市 - 秀泰廣場" },
+            { name: "茶之魔手 嘉義吳鳳南店", brand: "茶之魔手", lat: 23.4680, lng: 120.4520, note: "嘉義市 - 南區" },
 
-            // --- 嘉義縣 (朴子/太保) ---
+            // --- 嘉義縣 (朴子/太保/水上) ---
             { name: "50嵐 朴子店", brand: "50嵐", lat: 23.4680, lng: 120.2450, note: "朴子 - 配天宮附近" },
             { name: "大苑子 嘉義太保店", brand: "大苑子", lat: 23.4580, lng: 120.2930, note: "太保 - 縣政府特區" },
             { name: "迷客夏 嘉義長庚店", brand: "迷客夏", lat: 23.4605, lng: 120.2905, note: "太保 - 長庚醫院" },
             { name: "茶之魔手 朴子山通店", brand: "茶之魔手", lat: 23.4670, lng: 120.2460, note: "朴子 - 南霸天" },
             { name: "清心福全 朴子店", brand: "清心福全", lat: 23.4665, lng: 120.2440, note: "朴子" },
             { name: "Tea Top 朴子店", brand: "其他", lat: 23.4675, lng: 120.2455, note: "朴子" },
-            { name: "五桐號 嘉義朴子店", brand: "五桐號", lat: 23.4678, lng: 120.2448, note: "朴子" }
+            { name: "五桐號 嘉義朴子店", brand: "五桐號", lat: 23.4678, lng: 120.2448, note: "朴子" },
+            { name: "麻古茶坊 朴子店", brand: "麻古茶坊", lat: 23.4660, lng: 120.2450, note: "朴子" },
+            { name: "清心福全 水上店", brand: "清心福全", lat: 23.4300, lng: 120.3980, note: "水上鄉" },
+            { name: "茶之魔手 水上中興店", brand: "茶之魔手", lat: 23.4310, lng: 120.3990, note: "水上鄉" }
         ];
 
         let allMarkers = [];
         let userMarker = null;
+        let userLatLng = null;
 
         // --- 2. 初始化地圖 ---
-        // 調整中心點到嘉義市與民雄中間，並將縮放層級設為 13 以涵蓋更大範圍
-        const map = L.map('map', { zoomControl: false }).setView([23.5150, 120.4400], 13);
+        const map = L.map('map', { zoomControl: false }).setView([23.4800, 120.4490], 13);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -381,9 +427,41 @@
             attribution: 'Tiles &copy; Esri', maxZoom: 17
         });
 
-        // --- 3. 建立標記 ---
+        // --- 3. 建立標記 (改寫bindPopup邏輯以支援動態距離) ---
         const layers = {};
         const brandCounts = {};
+
+        // 定義 Popup 內容生成函式
+        function getPopupContent(shop) {
+            let distInfo = "";
+            let navUrl = `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`;
+            
+            if (userLatLng) {
+                // 計算距離 (公尺)
+                const distMeters = map.distance(userLatLng, [shop.lat, shop.lng]);
+                const distKm = (distMeters / 1000).toFixed(1);
+                
+                // 估算時間 (開車均速 40km/h => 666 m/min)
+                const etaMins = Math.ceil(distMeters / 666); 
+                
+                distInfo = `<div class="dist-info">
+                                RANGE: ${distKm} KM<br>
+                                ETA: ~${etaMins} MINS (DRIVE)
+                            </div>`;
+            } else {
+                distInfo = `<div class="dist-info" style="color:#666;">
+                                GPS SIGNAL LOST<br>CLICK [⊕] TO CALC DISTANCE
+                            </div>`;
+            }
+
+            return `
+                <div style="font-family:'Orbitron'; font-size:0.8em; color:#888;">TARGET ACQUIRED</div>
+                <b style="color: ${brandColors[shop.brand] || '#fff'}">${shop.name}</b><br>
+                <span style="color:#aaa; border-top:1px solid #444; display:block; margin-top:4px; padding-top:4px;">${shop.note || "NO DATA"}</span>
+                ${distInfo}
+                <a href="${navUrl}" target="_blank" class="nav-btn">➤ INITIATE ROUTE</a>
+            `;
+        }
 
         shopsData.forEach(shop => {
             let bName = shop.brand;
@@ -391,7 +469,6 @@
             brandCounts[shop.brand] = (brandCounts[shop.brand] || 0) + 1;
             const myColor = brandColors[bName] || brandColors["其他"];
 
-            // 針對御香屋做特效：更大顆、更亮
             const isLegendary = shop.brand === "御香屋";
             const scale = isLegendary ? 1.5 : 1.0;
             const zIndexOffset = isLegendary ? 1000 : 0;
@@ -402,14 +479,18 @@
                 iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
             });
 
-            const marker = L.marker([shop.lat, shop.lng], { icon: glowingIcon, zIndexOffset: zIndexOffset })
-                .bindPopup(`
-                    <div style="font-family:'Orbitron'; font-size:0.8em; color:#888;">TARGET ACQUIRED</div>
-                    <b style="color: ${myColor}">${shop.name}</b><br>
-                    <span style="color:#aaa; border-top:1px solid #444; display:block; margin-top:4px; padding-top:4px;">${shop.note || "NO DATA"}</span>
-                `);
+            const marker = L.marker([shop.lat, shop.lng], { icon: glowingIcon, zIndexOffset: zIndexOffset });
             
-            marker.on('click', () => logAction(`Selected: ${shop.name}`));
+            // 綁定動態 Popup
+            marker.bindPopup(() => getPopupContent(shop));
+            
+            marker.on('click', () => {
+                logAction(`Target Locked: ${shop.name}`);
+                if(userLatLng) {
+                    const d = map.distance(userLatLng, [shop.lat, shop.lng]);
+                    logAction(`Distance: ${(d/1000).toFixed(2)}km`);
+                }
+            });
 
             if (!layers[shop.brand]) layers[shop.brand] = L.layerGroup();
             layers[shop.brand].addLayer(marker);
@@ -419,7 +500,7 @@
         for (let key in layers) layers[key].addTo(map);
         L.control.layers({ "Cyber Mode": darkLayer, "Real World": satelliteLayer }, layers, { collapsed: true }).addTo(map);
 
-        // --- 4. 功能邏輯 (搜尋/定位/日誌) ---
+        // --- 4. 功能邏輯 ---
 
         function filterMarkers() {
             const input = document.getElementById('searchInput').value.toLowerCase();
@@ -438,21 +519,31 @@
 
         function locateUser() {
             logAction("Initiating GPS sequence...");
-            map.locate({setView: true, maxZoom: 16});
+            map.locate({setView: true, maxZoom: 15});
+            
             map.on('locationfound', function(e) {
-                logAction(`User location locked at [${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}]`);
+                userLatLng = e.latlng;
+                logAction(`GPS Locked: [${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}]`);
+                
                 if (userMarker) userMarker.remove();
+                
                 const userIcon = L.divIcon({
                     className: 'user-pin',
-                    html: `<div class="glowing-dot" style="color: #00f3ff; transform: scale(1.5);"></div>`,
+                    html: `<div class="glowing-dot" style="color: #00f3ff; transform: scale(1.5); box-shadow: 0 0 30px #00f3ff;"></div>`,
                     iconSize: [20, 20], iconAnchor: [10, 10]
                 });
+                
                 userMarker = L.marker(e.latlng, {icon: userIcon}).addTo(map)
-                    .bindPopup("<b>AGENT LOCATION</b><br>Current Status: Active").openPopup();
+                    .bindPopup("<b>AGENT LOCATION</b><br>Tactical Support: Online").openPopup();
+                
                 L.circle(e.latlng, { radius: e.accuracy, color: '#00f3ff', weight: 1, fillOpacity: 0.1 }).addTo(map);
+
+                // 更新日誌
+                logAction("System ready for distance calc.");
             });
+
             map.on('locationerror', function(e) {
-                logAction("GPS Signal Lost: " + e.message);
+                logAction("GPS Error: " + e.message);
                 alert("無法獲取位置，請確認瀏覽器權限。");
             });
         }
@@ -513,8 +604,8 @@
 
         if (window.innerWidth < 600) togglePanel();
 
-        logAction("Regional Map systems online.");
-        logAction(`Loaded ${shopsData.length} targets across Chiayi.`);
+        logAction("Full Scale Map systems online.");
+        logAction(`Loaded ${shopsData.length} strategic targets.`);
 
     </script>
 </body>
