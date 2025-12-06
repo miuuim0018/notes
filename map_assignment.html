@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡️ MINXIONG DRINKS CYBER-MAP ⚡️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡️ MINXIONG DRINKS CYBER-MAP V2 ⚡️</title>
     
     <!-- 引入 Google Fonts 讓字體變潮 -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
             --neon-blue: #00f3ff;
             --neon-pink: #bc13fe;
             --neon-green: #0aff0a;
-            --glass-bg: rgba(16, 20, 30, 0.75);
-            --border-color: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(16, 20, 30, 0.85); /* 稍微調深一點增加可讀性 */
+            --border-color: rgba(0, 243, 255, 0.3);
         }
 
         body, html {
@@ -27,7 +27,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #0b0c10;
             color: #fff;
-            overflow: hidden;
+            overflow: hidden; /* 防止整個頁面滾動 */
         }
 
         /* 全螢幕地圖 */
@@ -35,22 +35,18 @@
             height: 100vh; 
             width: 100%;
             z-index: 1;
+            background: #0b0c10;
         }
 
         /* --- 炫泡 UI 區塊設計 (毛玻璃特效) --- */
         .glass-panel {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px); /* 模糊背景 */
+            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
-        }
-
-        .glass-panel:hover {
-            box-shadow: 0 8px 32px 0 rgba(0, 243, 255, 0.2); /* 滑鼠移過去會有藍色微光 */
-            border-color: rgba(0, 243, 255, 0.4);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* 左上標題區 */
@@ -59,13 +55,16 @@
             top: 20px;
             left: 60px;
             z-index: 1000;
-            padding: 20px 25px;
+            padding: 15px 25px;
             border-left: 4px solid var(--neon-blue);
+            pointer-events: none; /* 讓點擊穿透標題區塊，避免擋住地圖操作 */
         }
+        /* 讓文字恢復可選取/點擊 */
+        .title-box * { pointer-events: auto; }
 
         .title-box h1 {
             margin: 0;
-            font-family: 'Orbitron', sans-serif; /* 科技感字體 */
+            font-family: 'Orbitron', sans-serif;
             font-size: 1.8rem;
             letter-spacing: 2px;
             background: linear-gradient(90deg, #fff, var(--neon-blue));
@@ -75,70 +74,112 @@
         }
 
         .title-box p {
-            margin: 8px 0 0 0;
+            margin: 5px 0 0 0;
             font-size: 0.85rem;
             color: #aaa;
             letter-spacing: 1px;
         }
 
-        /* 右下圖表區 */
+        /* --- 右下圖表區 (改良版) --- */
         .chart-panel {
             position: absolute;
             bottom: 30px;
             right: 30px;
             z-index: 1000;
-            padding: 20px;
             width: 340px;
-            max-height: 65vh;
-            overflow-y: auto;
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: var(--neon-blue) transparent;
+            /* 移除原本的 overflow，改由內部 content 控制 */
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 自訂捲軸樣式 (Chrome/Safari) */
-        .chart-panel::-webkit-scrollbar {
-            width: 6px;
+        /* 收合按鈕 */
+        #toggleBtn {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            outline: none;
+            text-transform: uppercase;
+            border-radius: 12px 12px 0 0;
+            transition: background 0.3s;
         }
-        .chart-panel::-webkit-scrollbar-thumb {
-            background-color: var(--neon-blue);
-            border-radius: 3px;
+        #toggleBtn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            color: #fff;
+        }
+
+        /* 內容容器 */
+        .chart-content {
+            padding: 20px;
+            max-height: 60vh; /* 展開時的最大高度 */
+            overflow-y: auto;
+            opacity: 1;
+            transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s;
+            
+            /* 自訂捲軸 */
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-blue) transparent;
+        }
+        
+        .chart-content::-webkit-scrollbar { width: 6px; }
+        .chart-content::-webkit-scrollbar-thumb { background-color: var(--neon-blue); border-radius: 3px; }
+
+        /* 收合狀態 (由 JS 切換) */
+        .panel-collapsed .chart-content {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+        .panel-collapsed #toggleBtn {
+            border-bottom: none; /* 收合時隱藏分隔線 */
+            border-radius: 12px;
+        }
+        .panel-collapsed {
+            width: auto; /* 收合時自動縮小寬度 */
+            min-width: 150px;
         }
 
         .chart-panel h3 {
             margin-top: 20px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: var(--neon-pink);
             text-align: center;
             font-family: 'Orbitron', sans-serif;
             text-transform: uppercase;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
             letter-spacing: 1px;
         }
         .chart-panel h3:first-child { margin-top: 0; }
 
-        /* --- 呼吸燈標記 (Pulsing Marker) CSS 動畫 --- */
+        /* --- 呼吸燈標記 (Pulsing Marker) --- */
         .glowing-dot {
-            width: 16px;
-            height: 16px;
-            background-color: currentColor; /* 會繼承設定的顏色 */
+            width: 14px;
+            height: 14px;
+            background-color: currentColor;
             border-radius: 50%;
             box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
             position: relative;
         }
         
-        /* 擴散波紋動畫 */
         .glowing-dot::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             border-radius: 50%;
             border: 2px solid currentColor;
-            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         }
 
         @keyframes pulse-ring {
@@ -147,24 +188,60 @@
             100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
 
-        /* --- 自訂 Popup 樣式 (暗黑版) --- */
+        /* --- 自訂 Popup 與介面修正 --- */
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-            background: rgba(20, 20, 25, 0.95) !important;
+            background: rgba(16, 20, 30, 0.95) !important;
             color: #fff !important;
             border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            backdrop-filter: blur(5px);
             border-radius: 8px !important;
         }
-        .leaflet-popup-content b {
-            color: var(--neon-blue);
-            font-size: 1.1em;
+        .leaflet-popup-content { margin: 12px 16px; line-height: 1.6; }
+        .leaflet-popup-content b { color: var(--neon-blue); font-size: 1.1em; font-family: 'Noto Sans TC'; }
+        
+        /* 修正：美化 Popup 關閉按鈕 */
+        .leaflet-container a.leaflet-popup-close-button {
+            color: var(--neon-blue) !important;
+            font-size: 20px !important;
+            padding: 8px !important;
+            top: 0;
+            right: 0;
+            text-decoration: none;
+        }
+        .leaflet-container a.leaflet-popup-close-button:hover {
+            color: var(--neon-pink) !important;
         }
 
-        /* 手機 RWD */
+        /* 修正：圖層控制選單太長時的處理 */
+        .leaflet-control-layers-expanded .leaflet-control-layers-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .leaflet-control-layers {
+            background: rgba(16, 20, 30, 0.9) !important;
+            border: 1px solid var(--neon-blue) !important;
+            color: #fff !important;
+            border-radius: 8px !important;
+        }
+
+        /* RWD 手機版調整 */
         @media (max-width: 600px) {
-            .chart-panel { width: 85%; right: 7.5%; bottom: 20px; max-height: 45vh; }
-            .title-box { top: 10px; left: 50px; right: 10px; padding: 15px; }
-            .title-box h1 { font-size: 1.4rem; }
+            .title-box { top: 10px; left: 50px; right: 10px; padding: 12px; }
+            .title-box h1 { font-size: 1.3rem; }
+            
+            /* 手機版圖表區預設會靠右下，寬度調整 */
+            .chart-panel { 
+                width: 90%; /* 展開時寬一點 */
+                right: 5%; 
+                bottom: 25px; 
+            }
+            .panel-collapsed {
+                width: auto !important;
+                right: 20px; /* 收合時靠右一點 */
+            }
+            .chart-content { max-height: 45vh; } /* 手機版圖表高度矮一點以免擋住太多 */
         }
     </style>
 </head>
@@ -176,61 +253,70 @@
         <p>民雄戰區 // 飲料店數據監控中...</p>
     </div>
 
-    <!-- 圖表區塊 -->
-    <div class="chart-panel glass-panel">
-        <h3>Brand Distribution</h3>
-        <canvas id="brandChart"></canvas>
+    <!-- 圖表區塊 (新增 ID 與內部結構) -->
+    <div class="chart-panel glass-panel" id="statsPanel">
+        <!-- 收合按鈕 -->
+        <button id="toggleBtn" onclick="togglePanel()">▼ DATA MONITOR</button>
         
-        <h3>Market Share</h3>
-        <canvas id="shareChart"></canvas>
+        <!-- 內容容器 -->
+        <div class="chart-content">
+            <h3>Brand Distribution</h3>
+            <canvas id="brandChart"></canvas>
+            
+            <h3>Market Share</h3>
+            <canvas id="shareChart"></canvas>
+            
+            <div style="margin-top: 15px; font-size: 0.75rem; color: #666; text-align: center;">
+                SYSTEM STATUS: ONLINE<br>
+                LAST UPDATE: 2025.02.13
+            </div>
+        </div>
     </div>
 
-    <!-- 地圖 -->
+    <!-- 地圖容器 -->
     <div id="map"></div>
 
     <!-- 引入 Libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 鎖定 Chart.js 版本以確保穩定性 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
         // --- 1. 資料區 (Data) ---
-        // 定義品牌對應的「霓虹顏色」
         const brandColors = {
-            "50嵐": "#ffe600",    // 亮黃
-            "迷客夏": "#00ff88",  // 螢光綠
-            "可不可": "#ff4d4d",  // 紅
-            "清心福全": "#00d2ff", // 藍綠
-            "麻古茶坊": "#ff00dd", // 桃紅
-            "大苑子": "#55ff00",   // 青綠
-            "其他": "#ffffff"      // 白
+            "50嵐": "#ffe600",
+            "迷客夏": "#00ff88",
+            "可不可": "#ff4d4d",
+            "清心福全": "#00d2ff",
+            "麻古茶坊": "#ff00dd",
+            "大苑子": "#55ff00",
+            "其他": "#ffffff"
         };
 
         const shopsData = [
             { name: "50嵐 建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "人潮密集區" },
             { name: "50嵐 頭橋店", brand: "50嵐", lat: 23.5410, lng: 120.4380, note: "工業區" },
-            { name: "清心福全 保生店", brand: "清心福全", lat: 23.5525, lng: 120.4305, note: "" },
+            { name: "清心福全 保生店", brand: "清心福全", lat: 23.5525, lng: 120.4305, note: "轉角" },
             { name: "清心福全 建國店", brand: "清心福全", lat: 23.5550, lng: 120.4285, note: "" },
-            { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "芝芝葡萄" },
-            { name: "可不可熟成紅茶", brand: "可不可", lat: 23.5518, lng: 120.4320, note: "英倫風" },
-            { name: "迷客夏 民雄店", brand: "迷客夏", lat: 23.5522, lng: 120.4298, note: "綠光牧場" },
-            { name: "大苑子 民雄店", brand: "大苑子", lat: 23.5535, lng: 120.4290, note: "鮮果茶" },
+            { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "推薦：芝芝葡萄" },
+            { name: "可不可熟成紅茶", brand: "可不可", lat: 23.5518, lng: 120.4320, note: "英倫風裝潢" },
+            { name: "迷客夏 民雄店", brand: "迷客夏", lat: 23.5522, lng: 120.4298, note: "牧場直送" },
+            { name: "大苑子 民雄店", brand: "大苑子", lat: 23.5535, lng: 120.4290, note: "季節鮮果" },
             { name: "茶湯會", brand: "其他", lat: 23.5515, lng: 120.4325, note: "" },
             { name: "鮮茶道", brand: "其他", lat: 23.5540, lng: 120.4280, note: "" },
             { name: "CoCo都可", brand: "其他", lat: 23.5512, lng: 120.4330, note: "" },
-            { name: "民雄在地紅茶冰", brand: "其他", lat: 23.5505, lng: 120.4340, note: "俗擱大碗" }
+            { name: "民雄在地紅茶冰", brand: "其他", lat: 23.5505, lng: 120.4340, note: "俗擱大碗 CP值高" }
         ];
 
         // --- 2. 初始化地圖 ---
         const map = L.map('map', {
-            zoomControl: false // 先隱藏預設縮放鈕，改成自己想要的位置或單純為了美觀
+            zoomControl: false 
         }).setView([23.5525, 120.4310], 15);
         
-        // 把縮放鈕加回右上方，避開標題
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        // 使用 CartoDB Dark Matter (深色底圖) - 這是炫泡的關鍵
         const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            attribution: '&copy; CARTO',
             maxZoom: 20
         }).addTo(map);
 
@@ -239,112 +325,125 @@
             maxZoom: 17
         });
 
-        // --- 3. 建立發光圖標 (Custom Icons) ---
+        // --- 3. 建立發光圖標 & 統計 ---
         const layers = {};
         const brandCounts = {};
 
         shopsData.forEach(shop => {
-            // 3.1 統計
             let bName = shop.brand;
-            if(!brandColors[bName]) bName = "其他"; // 如果沒定義顏色就歸類其他
+            if(!brandColors[bName]) bName = "其他";
             
             brandCounts[shop.brand] = (brandCounts[shop.brand] || 0) + 1;
-
-            // 3.2 取得對應顏色
             const myColor = brandColors[bName] || brandColors["其他"];
 
-            // 3.3 製作 CSS DivIcon (重點！)
-            // 我們不放圖片，而是放一個 div，然後用 CSS 畫圓跟陰影
             const glowingIcon = L.divIcon({
-                className: 'custom-pin', // 這裡不重要，主要看 html 內容
+                className: 'custom-pin', 
                 html: `<div class="glowing-dot" style="color: ${myColor};"></div>`,
                 iconSize: [20, 20],
-                iconAnchor: [10, 10], // 讓中心點對準座標
+                iconAnchor: [10, 10],
                 popupAnchor: [0, -10]
             });
 
             const marker = L.marker([shop.lat, shop.lng], { icon: glowingIcon })
-                .bindPopup(`<b>${shop.name}</b><br><span style="color:#aaa">${shop.note || "尚無備註"}</span>`);
+                .bindPopup(`
+                    <div style="font-family:'Orbitron'; font-size:0.8em; color:#888;">TARGET DETECTED</div>
+                    <b>${shop.name}</b><br>
+                    <span style="color:#aaa; display:block; margin-top:4px; border-top:1px solid #333; padding-top:4px;">
+                        ${shop.note || "NO DATA"}
+                    </span>
+                `);
 
-            // 3.4 加入圖層
             if (!layers[shop.brand]) layers[shop.brand] = L.layerGroup();
             layers[shop.brand].addLayer(marker);
         });
 
-        // 加入圖層
         for (let key in layers) layers[key].addTo(map);
 
-        // 圖層控制項 (客製化一下讓它不突兀，雖然 Leaflet 原生樣式較難改，但在深色模式下還算清楚)
         L.control.layers({
-            "Cyber Dark": darkLayer,
-            "Satellite": satelliteLayer
-        }, layers).addTo(map);
+            "Cyber Mode": darkLayer,
+            "Real World": satelliteLayer
+        }, layers, { collapsed: true }).addTo(map); // 手機上 collapsed: true 比較好
 
+        // --- 4. 處理圖表與互動 (優化重點) ---
 
-        // --- 4. 炫泡圖表 (Chart.js Config) ---
-        
-        // 全域設定：文字改成白色系
+        // 4.1 防止滾動事件傳遞給地圖 (Critical Fix)
+        const panelElement = document.getElementById('statsPanel');
+        L.DomEvent.disableScrollPropagation(panelElement);
+        L.DomEvent.disableClickPropagation(panelElement);
+
+        // 4.2 收合功能邏輯
+        function togglePanel() {
+            const panel = document.getElementById('statsPanel');
+            const btn = document.getElementById('toggleBtn');
+            const isCollapsed = panel.classList.toggle('panel-collapsed');
+            
+            // 更新按鈕文字
+            btn.innerHTML = isCollapsed ? '▲ DATA MONITOR' : '▼ DATA MONITOR';
+        }
+
+        // 4.3 產生圖表
         Chart.defaults.color = '#aaaaaa';
         Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
         Chart.defaults.font.family = "'Orbitron', 'Noto Sans TC', sans-serif";
 
         const labels = Object.keys(brandCounts);
-        const data = Object.values(brandCounts);
-        // 產生對應的顏色陣列
-        const bgColors = labels.map(label => {
-            // 簡單處理：找出對應品牌顏色，若無則用白色
-            return Object.keys(brandColors).includes(label) ? brandColors[label] : brandColors["其他"];
-        });
+        const dataValues = Object.values(brandCounts);
+        const bgColors = labels.map(label => brandColors[label] || brandColors["其他"]);
 
-        // 4.1 長條圖
         new Chart(document.getElementById('brandChart'), {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '店家數',
-                    data: data,
+                    label: 'Count',
+                    data: dataValues,
                     backgroundColor: bgColors,
-                    borderWidth: 0,
-                    borderRadius: 4,
-                    barThickness: 15
+                    borderRadius: 3,
+                    barThickness: 12
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // 讓它可以自適應高度
+                aspectRatio: 2,
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
                     x: { grid: { display: false } }
                 },
-                plugins: { legend: { display: false } },
-                animation: { duration: 2000, easing: 'easeOutQuart' } // 進場動畫慢一點比較優雅
+                plugins: { legend: { display: false } }
             }
         });
 
-        // 4.2 圓餅圖 (使用 Doughnut 甜甜圈圖 + 霓虹邊框)
         new Chart(document.getElementById('shareChart'), {
             type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
-                    data: data,
+                    data: dataValues,
                     backgroundColor: bgColors,
-                    borderColor: '#10141e', // 邊框跟背景色一樣，製造鏤空感
-                    borderWidth: 2,
-                    hoverOffset: 10
+                    borderColor: '#10141e',
+                    borderWidth: 2
                 }]
             },
             options: {
-                cutout: '60%', // 讓甜甜圈中間空洞大一點
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 2,
+                cutout: '65%',
                 plugins: {
                     legend: {
                         position: 'right',
-                        labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' }
+                        labels: { boxWidth: 8, usePointStyle: true, font: { size: 10 } }
                     }
-                },
-                layout: { padding: 10 }
+                }
             }
         });
+
+        // --- 5. 自動判斷手機版 ---
+        // 如果螢幕寬度小於 600px，預設收合面板，把地圖視野留給使用者
+        if (window.innerWidth < 600) {
+            togglePanel();
+        }
 
     </script>
 </body>
