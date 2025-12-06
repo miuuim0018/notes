@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡️ CHIAYI TACTICAL MAP V12.0 RWD ⚡️</title>
+    <title>⚡️ CHIAYI TACTICAL MAP V12.1 FIXED ⚡️</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -23,7 +23,7 @@
             font-family: 'Share Tech Mono', 'Noto Sans TC', monospace;
             background-color: var(--bg-dark);
             color: #e0e0e0;
-            overflow: hidden; /* 防止手機下拉重整 */
+            overflow: hidden;
         }
 
         #map { height: 100vh; width: 100%; z-index: 1; background: #000; }
@@ -44,7 +44,7 @@
         .cyber-panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
         .cyber-panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-        /* --- 1. 標題與頂部 RWD --- */
+        /* --- 1. 標題與頂部 (預設電腦版) --- */
         .top-bar {
             position: absolute; top: 20px; left: 20px; z-index: 1000;
             pointer-events: none;
@@ -58,7 +58,7 @@
         }
         .sub-status { font-size: 0.8rem; color: var(--neon-green); margin-top: 5px; padding-left: 5px; text-shadow: 1px 1px 2px #000; }
 
-        /* --- 2. 搜尋模組 RWD --- */
+        /* --- 2. 搜尋模組 (預設電腦版) --- */
         .search-module {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 300px; display: flex; align-items: center;
@@ -67,14 +67,14 @@
         }
         .search-module input {
             width: 100%; background: transparent; border: none; padding: 10px;
-            color: #fff; font-family: 'Orbitron', monospace; outline: none; font-size: 16px; /* 防止 iOS 縮放 */
+            color: #fff; font-family: 'Orbitron', monospace; outline: none; font-size: 16px;
         }
         .search-blink { color: var(--neon-cyan); padding-right: 10px; animation: blink 1s infinite; }
 
-        /* --- 3. 戰術面板 (電腦版靠右，手機版靠下) --- */
+        /* --- 3. 戰術面板 --- */
         .tactical-panel {
             position: absolute; top: 80px; right: 20px; bottom: 30px;
-            width: 380px; z-index: 2000; /* 層級最高 */
+            width: 380px; z-index: 2000;
             display: flex; flex-direction: column;
             transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
@@ -93,36 +93,47 @@
             scrollbar-width: thin; scrollbar-color: var(--neon-cyan) #000;
         }
 
-        /* --- 響應式佈局設定 (關鍵) --- */
+        /* --- 🔥 關鍵修正：手機版 RWD --- */
         @media (max-width: 768px) {
-            /* 標題變小 */
-            .main-title { font-size: 1.2rem; padding: 8px 12px; }
-            .top-bar { top: 10px; left: 10px; }
-            
-            /* 搜尋框下移並滿版 */
+            /* 1. 標題縮小並往左上角靠，讓出空間給右邊的圖層選單 */
+            .top-bar { 
+                top: 5px; left: 5px; 
+                max-width: 55%; /* 限制寬度 */
+            }
+            .main-title { 
+                font-size: 1rem; 
+                padding: 6px 10px; 
+                border-left: 3px solid var(--neon-cyan);
+            }
+            .sub-status { display: none; } /* 手機隱藏副標題 */
+
+            /* 2. 搜尋框強制下移 (第二排) */
             .search-module { 
-                top: 70px; width: 90%; 
+                top: 65px; /* 往下推，避開標題 */
+                width: 94%; 
+                left: 50%;
+                transform: translateX(-50%);
                 background: rgba(5, 10, 16, 0.95);
             }
 
-            /* 面板變為底部抽屜 */
+            /* 3. 面板改為底部抽屜 */
             .tactical-panel {
                 top: auto; bottom: 0; right: 0; left: 0;
-                width: 100%; height: 60vh; /* 打開時的高度 */
+                width: 100%; height: 60vh;
                 border-left: none; border-right: none;
-                transform: translateY(0); /* 預設打開 */
+                transform: translateY(0);
             }
-
-            /* 收合狀態：只露出標題 */
             .panel-collapsed {
-                transform: translateY(calc(100% - 50px)) !important; /* 50px 是 header 高度 */
+                transform: translateY(calc(100% - 50px)) !important;
             }
 
-            /* GPS 按鈕位置調整 */
+            /* 4. GPS 按鈕位置 */
             .gps-btn { bottom: 120px; left: 10px; width: 45px; height: 45px; }
-
-            /* 隱藏部分電腦版細節以節省空間 */
-            .sub-status { display: none; } 
+            
+            /* 5. 修正 Leaflet 圖層選單位置 (右上角) */
+            .leaflet-top { top: 5px; }
+            .leaflet-right { right: 5px; }
+            .leaflet-control-layers { margin: 0 !important; }
         }
 
         /* 電腦版收合狀態 */
@@ -143,7 +154,6 @@
 
         .reset-btn { width: 100%; padding: 8px; margin-bottom: 15px; background: rgba(255, 0, 85, 0.2); border: 1px solid var(--neon-pink); color: var(--neon-pink); cursor: pointer; font-family: 'Orbitron'; display: none; }
 
-        /* GPS 按鈕 */
         .gps-btn {
             position: absolute; bottom: 30px; left: 20px; z-index: 1000;
             width: 50px; height: 50px; border-radius: 50%;
@@ -155,7 +165,6 @@
         }
         .gps-icon { width: 24px; height: 24px; fill: var(--neon-cyan); }
 
-        /* Leaflet Popup RWD */
         .leaflet-popup-content-wrapper { background: rgba(10, 15, 20, 0.95) !important; border: 1px solid var(--neon-cyan); border-radius: 0 !important; color: #fff !important; min-width: 220px; }
         .leaflet-popup-tip { background: var(--neon-cyan) !important; }
         .pop-header-flex { display: flex; align-items: center; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
@@ -165,7 +174,6 @@
 
         .glowing-dot { width: 12px; height: 12px; background: currentColor; border-radius: 50%; box-shadow: 0 0 8px currentColor; position: relative; }
 
-        /* 圖層控制器樣式 */
         .leaflet-control-layers {
             background: rgba(5, 10, 16, 0.95) !important;
             border: 1px solid var(--neon-cyan) !important;
@@ -184,7 +192,7 @@
 
     <div class="top-bar">
         <h1 class="main-title cyber-panel">CHIAYI OPS</h1>
-        <div class="sub-status">SYS: V12.0 RWD | MODE: MOBILE_READY</div>
+        <div class="sub-status">SYS: V12.1 FIXED | MODE: MOBILE_READY</div>
     </div>
 
     <div class="search-module cyber-panel">
@@ -220,8 +228,8 @@
             <div class="chart-wrapper"><canvas id="radarChart"></canvas></div>
 
             <div style="margin-top:20px; padding:10px; background:#000; color:var(--neon-green); font-size:0.7rem; border:1px solid #333; height:80px; overflow-y:auto;" id="sysLog">
-                > System V12.0 RWD Loaded...<br>
-                > Mobile/Desktop Mode detected.<br>
+                > System V12.1 Layout Fixed...<br>
+                > UI Overlap Resolved.<br>
             </div>
         </div>
     </div>
