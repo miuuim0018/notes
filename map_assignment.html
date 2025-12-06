@@ -3,347 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡️ CHIAYI REGION DRINKS CYBER-MAP V6.0 ⚡️</title>
+    <title>⚡️ CHIAYI TACTICAL MAP V8.0 ⚡️</title>
     
-    <!-- 引入 Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #bc13fe;
-            --neon-green: #0aff0a;
-            --neon-yellow: #ffe600;
-            --neon-magenta: #ff00ff;
-            --neon-orange: #ffa500;
-            --glass-bg: rgba(10, 15, 25, 0.9);
-            --border-color: rgba(0, 243, 255, 0.4);
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ff41;
+            --neon-yellow: #ffee00;
+            --bg-dark: #050a10;
+            --panel-bg: rgba(5, 10, 16, 0.95);
+            --grid-line: rgba(0, 243, 255, 0.15);
         }
 
         body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            background-color: #0b0c10;
-            color: #fff;
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Share Tech Mono', 'Noto Sans TC', monospace;
+            background-color: var(--bg-dark);
+            color: #e0e0e0;
             overflow: hidden;
         }
 
-        #map {
-            height: 100vh; 
-            width: 100%;
-            z-index: 1;
-            background: #0b0c10;
-        }
+        #map { height: 100vh; width: 100%; z-index: 1; background: #000; }
 
-        /* --- UI 通用樣式 (毛玻璃 + 掃描線) --- */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 4px; /* 改成更方正的科技感 */
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* --- 賽博龐克 UI --- */
+        .cyber-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
             position: relative;
-            overflow: hidden;
+            backdrop-filter: blur(5px);
         }
+        
+        .cyber-panel::before, .cyber-panel::after {
+            content: ''; position: absolute; width: 8px; height: 8px;
+            border: 2px solid var(--neon-cyan); transition: all 0.3s;
+        }
+        .cyber-panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .cyber-panel::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-        /* 掃描線特效 */
-        .glass-panel::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
+        /* 標題 */
+        .top-bar {
+            position: absolute; top: 20px; left: 20px; z-index: 1000;
             pointer-events: none;
         }
-
-        /* --- 1. 左上標題區 --- */
-        .title-box {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            padding: 15px 25px;
-            border-left: 4px solid var(--neon-blue);
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 90% 100%, 0 100%); /* 切角設計 */
-            pointer-events: none;
+        .main-title {
+            font-family: 'Orbitron', sans-serif; font-size: 1.8rem;
+            color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);
+            margin: 0; padding: 10px 20px; background: rgba(0,0,0,0.8);
+            border-left: 4px solid var(--neon-cyan); pointer-events: auto;
         }
-        .title-box * { pointer-events: auto; }
+        .sub-status { font-size: 0.8rem; color: var(--neon-green); margin-top: 5px; padding-left: 5px; }
 
-        .title-box h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        /* 搜尋 */
+        .search-module {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; width: 300px; display: flex; align-items: center;
+            background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--neon-cyan);
         }
+        .search-module input {
+            width: 100%; background: transparent; border: none; padding: 10px;
+            color: #fff; font-family: 'Orbitron', monospace; outline: none;
+        }
+        .search-blink { color: var(--neon-cyan); padding-right: 10px; animation: blink 1s infinite; }
 
-        .title-box p {
-            margin: 5px 0 0 0;
-            font-size: 0.8rem;
-            color: #aaa;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        /* --- 右側面板 --- */
+        .tactical-panel {
+            position: absolute; top: 80px; right: 20px; bottom: 30px;
+            width: 400px; z-index: 1000;
+            display: flex; flex-direction: column;
+            transition: transform 0.3s ease;
         }
 
-        /* --- 2. 頂部搜尋列 --- */
-        .search-box {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            width: 320px;
-            display: flex;
-            align-items: center;
-            border-bottom: 2px solid var(--neon-blue);
+        .panel-header {
+            padding: 12px; background: rgba(0, 243, 255, 0.1);
+            border-bottom: 1px solid var(--neon-cyan);
+            display: flex; justify-content: space-between; cursor: pointer;
+            font-family: 'Orbitron'; font-weight: bold; color: var(--neon-cyan);
+        }
+        
+        .panel-body {
+            flex: 1; overflow-y: auto; padding: 15px;
+            background: rgba(5, 10, 16, 0.98);
+            scrollbar-width: thin; scrollbar-color: var(--neon-cyan) #000;
         }
 
-        .search-box input {
+        .chart-wrapper {
+            position: relative;
+            height: 220px; /* 固定高度防止跑版 */
             width: 100%;
-            background: transparent;
-            border: none;
-            padding: 12px 20px;
-            color: #fff;
-            font-family: 'Orbitron', 'Noto Sans TC';
-            font-size: 1rem;
-            outline: none;
-            letter-spacing: 1px;
-        }
-        .search-icon {
-            padding-right: 15px;
-            color: var(--neon-blue);
-            font-size: 1.2rem;
-            animation: blink 2s infinite;
+            margin-bottom: 20px;
         }
 
-        /* --- 3. 右下控制面板 (戰術中心) --- */
-        .chart-panel {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            width: 360px; /* 加寬一點 */
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh;
+        .section-header {
+            color: var(--neon-pink); border-bottom: 1px dashed var(--neon-pink);
+            margin-bottom: 10px; padding-bottom: 5px; font-size: 0.9rem;
+            display: flex; justify-content: space-between;
         }
 
-        /* 面板標頭與按鈕 */
-        #toggleBtn {
-            width: 100%;
-            background: rgba(0, 243, 255, 0.1);
-            border: none;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 12px;
-            font-size: 0.9rem;
-            letter-spacing: 3px;
-            outline: none;
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #toggleBtn:hover { background: rgba(0, 243, 255, 0.2); }
-        .status-light {
-            width: 8px; height: 8px; background: var(--neon-green);
-            border-radius: 50%; box-shadow: 0 0 5px var(--neon-green);
-            display: inline-block; margin-right: 10px;
-        }
-
-        /* HUD 數據顯示 */
-        .hud-stats {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.3);
+        /* --- 新增：實體表格 (Data Grid) --- */
+        .cyber-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px;
             font-size: 0.8rem;
         }
-        .hud-item { text-align: center; }
-        .hud-val { display: block; font-size: 1.2rem; color: var(--neon-yellow); font-weight: bold; }
-        .hud-label { color: #888; font-size: 0.6rem; }
-
-        .chart-content {
-            padding: 15px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-blue) transparent;
+        .cyber-table th {
+            text-align: left; padding: 8px; color: var(--neon-cyan);
+            border-bottom: 1px solid var(--neon-cyan);
         }
-        .chart-content::-webkit-scrollbar { width: 4px; }
-        .chart-content::-webkit-scrollbar-thumb { background-color: var(--neon-blue); }
-
-        .chart-panel h3 {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: var(--neon-pink);
-            text-align: left;
-            padding-left: 10px;
-            border-left: 3px solid var(--neon-pink);
-            background: linear-gradient(90deg, rgba(188, 19, 254, 0.1), transparent);
-            padding-top: 5px; padding-bottom: 5px;
-            margin-bottom: 10px;
+        .cyber-table td {
+            padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: 0.2s;
         }
-        .chart-panel h3:first-child { margin-top: 0; }
-
-        /* 系統日誌 - 終端機風格 */
-        .system-log {
-            margin-top: 15px;
-            background: #000;
-            border: 1px solid #333;
-            padding: 10px;
-            height: 120px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.7rem;
-            color: var(--neon-green);
+        .cyber-table tr:hover td {
+            background: rgba(0, 243, 255, 0.15); color: #fff;
         }
-        .log-entry { margin-bottom: 2px; }
-        .log-entry::before { content: '> '; color: #555; }
+        .rank-col { color: var(--neon-yellow); font-weight: bold; width: 30px; }
+        .count-col { text-align: right; color: var(--neon-green); }
 
-        /* 面板收合 */
-        .panel-collapsed .chart-content, .panel-collapsed .hud-stats { display: none; }
-        .panel-collapsed { width: auto; min-width: 200px; }
+        /* 重置按鈕 */
+        .reset-btn {
+            width: 100%; padding: 8px; margin-bottom: 15px;
+            background: rgba(255, 0, 85, 0.2); border: 1px solid var(--neon-pink);
+            color: var(--neon-pink); cursor: pointer; font-family: 'Orbitron';
+            transition: 0.3s; display: none; /* 預設隱藏 */
+        }
+        .reset-btn:hover { background: var(--neon-pink); color: #000; }
 
-        /* --- 4. 定位按鈕 --- */
-        .locate-btn {
-            position: absolute;
-            bottom: 40px; left: 30px;
-            z-index: 1000;
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            border: 2px solid var(--neon-blue);
+        /* GPS 按鈕 */
+        .gps-btn {
+            position: absolute; bottom: 30px; left: 20px; z-index: 1000;
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid var(--neon-cyan);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: var(--neon-blue); font-size: 2rem;
-            background: rgba(0,0,0,0.6);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
-            transition: 0.3s;
+            background: rgba(0,0,0,0.8); cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,243,255,0.2);
         }
-        .locate-btn:hover { box-shadow: 0 0 30px var(--neon-blue); transform: rotate(90deg); }
+        .gps-icon { width: 24px; height: 24px; fill: var(--neon-cyan); }
 
-        /* --- 呼吸燈標記 --- */
+        /* Popup */
+        .leaflet-popup-content-wrapper {
+            background: rgba(10, 15, 20, 0.95) !important;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 0 !important; color: #fff !important;
+        }
+        .leaflet-popup-tip { background: var(--neon-cyan) !important; }
+        .pop-btn {
+            display: block; margin-top: 8px; padding: 5px;
+            background: rgba(0, 243, 255, 0.2); color: var(--neon-cyan);
+            text-align: center; text-decoration: none; border: 1px solid var(--neon-cyan);
+        }
+
+        /* 標記光點 */
         .glowing-dot {
-            width: 14px; height: 14px;
-            background-color: currentColor;
-            border-radius: 50%;
-            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-            position: relative;
+            width: 12px; height: 12px; background: currentColor; border-radius: 50%;
+            box-shadow: 0 0 8px currentColor; position: relative;
         }
-        .glowing-dot::after {
-            content: ''; position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 100%; height: 100%; border-radius: 50%;
-            border: 2px solid currentColor;
-            animation: pulse-ring 2s ease-out infinite;
-        }
-        @keyframes pulse-ring {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
-        }
+
+        .panel-collapsed { transform: translateX(110%); }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* Popup 優化 */
-        .leaflet-popup-content-wrapper {
-            background: rgba(10, 15, 25, 0.95) !important;
-            border: 1px solid var(--neon-blue);
-            border-radius: 0 !important;
-            color: #fff !important;
-        }
-        .leaflet-popup-tip { background: var(--neon-blue) !important; }
-        .nav-btn {
-            display: block; margin-top: 10px;
-            background: var(--neon-blue); color: #000;
-            text-align: center; padding: 8px;
-            font-weight: bold; text-decoration: none;
-            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
-        }
-        .nav-btn:hover { background: #fff; }
-
-        /* RWD */
         @media (max-width: 600px) {
-            .title-box { display: none; }
-            .search-box { width: 85%; top: 15px; }
-            .chart-panel { width: 90%; right: 5%; bottom: 100px; max-height: 50vh; }
-            .locate-btn { bottom: 20px; left: 20px; }
-            .panel-collapsed { bottom: 20px; right: 20px; width: auto; }
+            .tactical-panel { width: 90%; top: auto; bottom: 100px; height: 60vh; right: 5%; }
+            .panel-collapsed { transform: translateY(110%); }
         }
     </style>
 </head>
 <body>
 
-    <!-- 標題 -->
-    <div class="title-box glass-panel">
-        <h1>CHIAYI REGION<br>TACTICAL MAP</h1>
-        <p>V6.0 // 戰術指揮系統 // 連線中</p>
+    <div class="top-bar">
+        <h1 class="main-title cyber-panel">CHIAYI OPS</h1>
+        <div class="sub-status">SYS: V8.0 STABLE | TGT: <span id="tgt-count">0</span></div>
     </div>
 
-    <!-- 搜尋 -->
-    <div class="search-box glass-panel">
-        <input type="text" id="searchInput" placeholder="SEARCH TARGET..." onkeyup="filterMarkers()">
-        <div class="search-icon">⌖</div>
+    <div class="search-module cyber-panel">
+        <div class="search-blink">█</div>
+        <input type="text" id="searchInput" placeholder="SEARCH TARGET..." onkeyup="filterSystem()">
     </div>
 
-    <!-- 定位 -->
-    <div class="locate-btn" onclick="locateUser()" title="GPS Sync">⊕</div>
+    <div class="gps-btn" onclick="activateGPS()" title="SYNC LOC">
+        <svg class="gps-icon" viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+    </div>
 
-    <!-- 戰術控制面板 -->
-    <div class="chart-panel glass-panel" id="statsPanel">
-        <button id="toggleBtn" onclick="togglePanel()">
-            <span><span class="status-light"></span>TACTICAL HUD</span>
-            <span id="toggleIcon">▼</span>
-        </button>
-        
-        <!-- HUD 數據 -->
-        <div class="hud-stats">
-            <div class="hud-item">
-                <span class="hud-val" id="totalTargets">0</span>
-                <span class="hud-label">TARGETS</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-val" id="activeBrands">0</span>
-                <span class="hud-label">BRANDS</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-val" style="color:var(--neon-pink)">LIVE</span>
-                <span class="hud-label">STATUS</span>
-            </div>
+    <!-- 右側面板 -->
+    <div class="tactical-panel cyber-panel" id="rightPanel">
+        <div class="panel-header" onclick="togglePanel()">
+            <span>/// DATA_INTELLIGENCE</span>
+            <span id="toggleState">[-]</span>
         </div>
+        
+        <div class="panel-body">
+            <button id="resetBtn" class="reset-btn" onclick="resetFilter()">⚠ RESET FILTER ⚠</button>
 
-        <div class="chart-content">
-            <!-- 互動說明 -->
-            <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; border: 1px solid #333; padding: 5px;">
-                ⓘ TIP: CLICK BARS TO FILTER MAP
+            <!-- 1. 實體表格區 -->
+            <div class="section-header"><span>TOP BRANDS DATA GRID</span></div>
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th class="rank-col">#</th>
+                        <th>BRAND</th>
+                        <th class="count-col">COUNT</th>
+                        <th class="count-col">%</th>
+                    </tr>
+                </thead>
+                <tbody id="brandTableBody">
+                    <!-- JS 自動生成 -->
+                </tbody>
+            </table>
+
+            <!-- 2. 圖表區：市佔率 (水平 Bar) -->
+            <div class="section-header"><span>MARKET DISTRIBUTION</span></div>
+            <div class="chart-wrapper">
+                <canvas id="barChart"></canvas>
             </div>
 
-            <h3>Distribution Analysis</h3>
-            <canvas id="brandChart"></canvas>
-            
-            <h3>Strategic Radar</h3>
-            <canvas id="radarChart"></canvas>
-            
-            <h3>Market Dominance</h3>
-            <canvas id="shareChart"></canvas>
-            
-            <h3>System Terminal</h3>
-            <div class="system-log" id="systemLog">
-                <div class="log-entry">Initializing V6.0 Core...</div>
-                <div class="log-entry">Loading topographic data...</div>
+            <!-- 3. 圖表區：戰術雷達 -->
+            <div class="section-header"><span>STRATEGIC RADAR (TOP 5)</span></div>
+            <div class="chart-wrapper">
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <!-- 系統日誌 -->
+            <div style="margin-top:20px; padding:10px; background:#000; color:var(--neon-green); font-size:0.7rem; border:1px solid #333; height:80px; overflow-y:auto;" id="sysLog">
+                > System V8.0 Initialized...<br>
             </div>
         </div>
     </div>
@@ -354,308 +241,330 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
-        // --- 設定與資料 ---
+        // --- 1. 資料處理核心 ---
+        
+        // 原始 OSM JSON (保持不變)
+        const osmRaw = {
+          "elements": [
+            { "type": "node", "lat": 23.3789281, "lon": 120.1597254, "tags": { "name": "涔苑冷飲" } },
+            { "type": "node", "lat": 23.3788733, "lon": 120.1607136, "tags": { "brand": "茶的魔手", "name": "茶的魔手" } },
+            { "type": "node", "lat": 23.3788624, "lon": 120.1603330, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4687985, "lon": 120.4430873, "tags": { "brand": "麻古茶坊", "name": "麻古茶坊" } },
+            { "type": "node", "lat": 23.4549948, "lon": 120.2950259, "tags": { "brand": "鮮茶道", "name": "鮮茶道", "addr:district": "太保市" } },
+            { "type": "node", "lat": 23.4581763, "lon": 120.4434482, "tags": { "brand": "鮮茶道", "name": "鮮茶道", "addr:street": "民生南路" } },
+            { "type": "node", "lat": 23.4733369, "lon": 120.4467844, "tags": { "brand": "茶湯會", "name": "茶湯會" } },
+            { "type": "node", "lat": 23.4720331, "lon": 120.4424876, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4752538, "lon": 120.4424574, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.4885137, "lon": 120.4301848, "tags": { "brand": "迷客夏", "name": "迷客夏" } },
+            { "type": "node", "lat": 23.4739623, "lon": 120.4488383, "tags": { "brand": "清心福全", "name": "清心福全", "addr:street": "垂楊路" } },
+            { "type": "node", "lat": 23.4765376, "lon": 120.4466494, "tags": { "brand": "茶的魔手", "name": "茶的魔手" } },
+            { "type": "node", "lat": 23.4675845, "lon": 120.4376656, "tags": { "brand": "清心福全", "name": "清心福全" } },
+            { "type": "node", "lat": 23.4675690, "lon": 120.4374327, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4247620, "lon": 120.5233964, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4836878, "lon": 120.4597618, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4710021, "lon": 120.4399223, "tags": { "brand": "迷客夏", "name": "迷客夏" } },
+            { "type": "node", "lat": 23.4761335, "lon": 120.4347360, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4688681, "lon": 120.4430558, "tags": { "brand": "大苑子", "name": "大苑子", "addr:street": "仁愛路" } },
+            { "type": "node", "lat": 23.4638350, "lon": 120.2442200, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.6040911, "lon": 120.4546392, "tags": { "brand": "50嵐", "name": "50嵐", "branch": "大林店" } },
+            { "type": "node", "lat": 23.4945428, "lon": 120.4439215, "tags": { "brand": "清心福全", "name": "清心福全" } },
+            { "type": "node", "lat": 23.4890968, "lon": 120.4462934, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4562308, "lon": 120.4590389, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.4807843, "lon": 120.4494542, "tags": { "name": "提米可可" } },
+            { "type": "node", "lat": 23.4776981, "lon": 120.4420335, "tags": { "brand": "大苑子", "name": "大苑子", "branch": "嘉義站前店" } },
+            { "type": "node", "lat": 23.4954015, "lon": 120.4550269, "tags": { "brand": "茶湯會", "name": "茶湯會" } },
+            { "type": "node", "lat": 23.4952699, "lon": 120.4557699, "tags": { "brand": "50嵐", "name": "50嵐", "addr:street": "新生路" } },
+            { "type": "node", "lat": 23.4529318, "lon": 120.4600292, "tags": { "name": "Tea's 原味" } },
+            { "type": "node", "lat": 23.4523634, "lon": 120.4604490, "tags": { "brand": "清心福全", "name": "清心福全" } },
+            { "type": "node", "lat": 23.4675882, "lon": 120.4376208, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.5231750, "lon": 120.4397759, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.5234148, "lon": 120.4397196, "tags": { "brand": "可不可熟成紅茶", "name": "可不可熟成紅茶" } },
+            { "type": "node", "lat": 23.5362960, "lon": 120.4365626, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4849702, "lon": 120.4481511, "tags": { "brand": "麻古茶坊", "name": "麻古茶坊" } },
+            { "type": "node", "lat": 23.4770659, "lon": 120.4604584, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4688252, "lon": 120.4430545, "tags": { "name": "一手私藏世界紅茶" } },
+            { "type": "node", "lat": 23.4897887, "lon": 120.4656780, "tags": { "name": "Tea's 原味" } },
+            { "type": "node", "lat": 23.5565500, "lon": 120.4714563, "tags": { "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.5566162, "lon": 120.4714601, "tags": { "name": "Tea's原味" } },
+            { "type": "node", "lat": 23.4557369, "lon": 120.4592031, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "node", "lat": 23.4557000, "lon": 120.4589644, "tags": { "brand": "可不可熟成紅茶", "name": "可不可熟成紅茶" } },
+            { "type": "node", "lat": 23.4532123, "lon": 120.4598871, "tags": { "brand": "迷客夏", "name": "迷客夏" } },
+            { "type": "node", "lat": 23.4385378, "lon": 120.6068509, "tags": { "name": "TEA'S原味", "branch": "番路觸口店", "addr:district": "番路鄉" } },
+            { "type": "node", "lat": 23.5849343, "lon": 120.5557505, "tags": { "brand": "清心福全", "name": "清心福全", "addr:district": "梅山鄉" } },
+            { "type": "node", "lat": 23.5848943, "lon": 120.5554599, "tags": { "name": "紅茶幫", "addr:district": "梅山鄉" } },
+            { "type": "node", "lat": 23.5823817, "lon": 120.5588006, "tags": { "brand": "鮮茶道", "name": "鮮茶道", "addr:district": "梅山鄉" } },
+            { "type": "node", "lat": 23.4786717, "lon": 120.4419774, "tags": { "brand": "八曜和茶", "name": "八曜和茶" } },
+            { "type": "node", "lat": 23.5180647, "lon": 120.8100896, "tags": { "name": "長青特產行" } },
+            { "type": "node", "lat": 23.4581911, "lon": 120.4436250, "tags": { "brand": "50嵐", "name": "50嵐" } },
+            { "type": "node", "lat": 23.4932701, "lon": 120.4385288, "tags": { "brand": "茶的魔手", "name": "茶的魔手" } },
+            { "type": "node", "lat": 23.4918913, "lon": 120.4386983, "tags": { "name": "Tea's原味" } },
+            { "type": "way", "center": { "lat": 23.4640894, "lon": 120.5548749 }, "tags": { "brand": "鮮茶道", "name": "鮮茶道" } },
+            { "type": "way", "center": { "lat": 23.5198156, "lon": 120.5496863 }, "tags": { "name": "Tea's原味", "branch": "竹崎中山店", "addr:place": "竹崎" } }
+          ]
+        };
+
         const brandColors = {
             "50嵐": "#ffe600", "迷客夏": "#00ff88", "可不可": "#ff4d4d",
             "清心福全": "#00d2ff", "麻古茶坊": "#ff00dd", "大苑子": "#55ff00",
-            "五桐號": "#ffaa00", "得正": "#00aaff", "龜記": "#ff5500",
-            "八曜和茶": "#ccff00", "茶之魔手": "#ff0000", "御香屋": "#ffcc00",
-            "鮮茶道": "#ff00ff", "Tea's 原味": "#ffa500", "茶湯會": "#d2b48c",
+            "鮮茶道": "#ff00ff", "Tea's 原味": "#ffa500", "茶之魔手": "#ff0000",
+            "茶湯會": "#d2b48c", "八曜和茶": "#ccff00", "御香屋": "#ffcc00",
             "其他": "#ffffff"
         };
 
-        // 模擬與真實混合資料
+        // 合併 OSM 與 傳奇資料
         let shopsData = [
             { name: "源興御香屋", brand: "御香屋", lat: 23.4800, lng: 120.4490, note: "嘉義市 - 傳奇" },
-            { name: "源興御香屋 中正二店", brand: "御香屋", lat: 23.4795, lng: 120.4505, note: "嘉義市" },
-            // ... (為節省長度，這裡應包含之前的完整資料，實際執行時請使用V5的完整陣列)
+            { name: "源興御香屋 中正二店", brand: "御香屋", lat: 23.4795, lng: 120.4505, note: "嘉義市" }
         ];
-        
-        // 為了確保範例完整，這裡補回部分 V5 的資料作為演示 (實際使用時請保留 V5 完整資料)
-        const demoData = [
-             { name: "50嵐 民雄建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "民雄" },
-             { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "民雄" },
-             { name: "迷客夏 嘉義林森店", brand: "迷客夏", lat: 23.4845, lng: 120.4480, note: "嘉義市" },
-             { name: "茶之魔手 朴子店", brand: "茶之魔手", lat: 23.4670, lng: 120.2460, note: "朴子" },
-             { name: "得正 嘉義中山店", brand: "得正", lat: 23.4793, lng: 120.4458, note: "嘉義市" },
-             { name: "八曜和茶 嘉義店", brand: "八曜和茶", lat: 23.4789, lng: 120.4462, note: "嘉義市" },
-             { name: "鮮茶道 太保店", brand: "鮮茶道", lat: 23.4549, lng: 120.2950, note: "太保" }
-        ];
-        // 簡單合併演示用，實際上請保留 V5 的完整 shopsData + osmData
-        shopsData = shopsData.concat(demoData);
 
+        // 解析 OSM 資料 (加入智慧分類)
+        osmRaw.elements.forEach(el => {
+            let lat = el.lat || el.center?.lat;
+            let lng = el.lon || el.center?.lon;
+            if(!lat || !lng) return;
 
-        let allMarkers = [];
-        let userMarker = null;
-        let userLatLng = null;
-        let currentFilterBrand = null; // 用於儲存當前過濾狀態
+            let name = el.tags.name || "未知店家";
+            let rawBrand = el.tags.brand || name;
+            let note = "";
 
-        // --- 初始化地圖 ---
-        const map = L.map('map', { zoomControl: false }).setView([23.4800, 120.4490], 13);
-        L.control.zoom({ position: 'topright' }).addTo(map);
+            if(el.tags["addr:district"]) note += el.tags["addr:district"] + " ";
+            if(el.tags["addr:street"]) note += el.tags["addr:street"] + " ";
+            if(el.tags.branch) note += el.tags.branch;
+            if(note === "") note = "OSM Data";
+
+            let brand = "其他";
+            if (rawBrand.includes("50嵐")) brand = "50嵐";
+            else if (rawBrand.includes("迷客夏")) brand = "迷客夏";
+            else if (rawBrand.includes("可不可")) brand = "可不可";
+            else if (rawBrand.includes("清心")) brand = "清心福全";
+            else if (rawBrand.includes("麻古")) brand = "麻古茶坊";
+            else if (rawBrand.includes("大苑子")) brand = "大苑子";
+            else if (rawBrand.includes("鮮茶道")) brand = "鮮茶道";
+            else if (rawBrand.includes("Tea's") || rawBrand.includes("TEA'S")) brand = "Tea's 原味";
+            else if (rawBrand.includes("茶的魔手") || rawBrand.includes("茶之魔手")) brand = "茶之魔手";
+            else if (rawBrand.includes("茶湯會")) brand = "茶湯會";
+            else if (rawBrand.includes("八曜")) brand = "八曜和茶";
+
+            shopsData.push({ name, brand, lat, lng, note });
+        });
+
+        // --- 2. 初始化地圖 ---
+        const map = L.map('map', { zoomControl: false }).setView([23.4800, 120.4490], 12);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; CARTO', maxZoom: 20
         }).addTo(map);
 
-        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri', maxZoom: 17
-        });
-
-        // --- 建立標記 ---
         const layers = {};
         const brandCounts = {};
+        const allMarkers = [];
+        let currentFilter = null;
+        let userLatLng = null;
+        let userMarker = null;
 
-        function getPopupContent(shop) {
-            let distInfo = userLatLng 
-                ? `<div style="color:var(--neon-yellow); margin-top:5px;">RANGE: ${(map.distance(userLatLng, [shop.lat, shop.lng])/1000).toFixed(1)} KM</div>`
-                : `<div style="color:#666; margin-top:5px;">NO GPS SIGNAL</div>`;
-            
-            return `
-                <div style="font-family:'Orbitron'; font-size:0.7rem; color:#888;">TARGET ID: ${Math.floor(Math.random()*9999)}</div>
-                <b style="color: ${brandColors[shop.brand] || '#fff'}; font-size:1.1rem;">${shop.name}</b><br>
-                <span style="font-size:0.8rem; color:#aaa;">${shop.note || "NO INTEL"}</span>
-                ${distInfo}
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}" target="_blank" class="nav-btn">INITIATE ROUTE</a>
-            `;
-        }
-
+        // 繪製地標與數據計算
         shopsData.forEach(shop => {
-            let bName = shop.brand.includes("Tea's") ? "Tea's 原味" : shop.brand;
-            if(!brandColors[bName]) bName = "其他";
-            shop.brand = bName;
-
-            brandCounts[bName] = (brandCounts[bName] || 0) + 1;
-            const myColor = brandColors[bName] || "#fff";
-
+            brandCounts[shop.brand] = (brandCounts[shop.brand] || 0) + 1;
+            const color = brandColors[shop.brand] || "#fff";
+            
             const icon = L.divIcon({
                 className: 'custom-pin',
-                html: `<div class="glowing-dot" style="color: ${myColor}; transform: scale(${bName === "御香屋" ? 1.5 : 1});"></div>`,
+                html: `<div class="glowing-dot" style="color: ${color}; transform: scale(${shop.brand==="御香屋"?1.5:1})"></div>`,
                 iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
             });
 
-            const marker = L.marker([shop.lat, shop.lng], { icon: icon }).bindPopup(() => getPopupContent(shop));
+            const marker = L.marker([shop.lat, shop.lng], { icon: icon });
             
-            marker.on('click', () => logAction(`Target selected: ${shop.name}`));
+            marker.bindPopup(() => {
+                const dist = userLatLng ? (map.distance(userLatLng, [shop.lat, shop.lng])/1000).toFixed(1) + " KM" : "NO GPS";
+                return `
+                    <div style="font-size:1.1rem; color:${color}; font-weight:bold;">${shop.name}</div>
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:5px;">${shop.note}</div>
+                    <div style="border-top:1px dashed #555; padding-top:5px; color:var(--neon-yellow);">DIST: ${dist}</div>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}" target="_blank" class="pop-btn">>> ROUTE <<</a>
+                `;
+            });
 
-            if (!layers[bName]) layers[bName] = L.layerGroup();
-            layers[bName].addLayer(marker);
-            allMarkers.push({ marker: marker, data: shop });
+            if (!layers[shop.brand]) layers[shop.brand] = L.layerGroup();
+            layers[shop.brand].addLayer(marker);
+            allMarkers.push({ marker, data: shop });
         });
 
-        for (let key in layers) layers[key].addTo(map);
-        L.control.layers({ "Cyber Mode": darkLayer, "Satellite": satelliteLayer }, layers, { collapsed: true }).addTo(map);
+        for (let k in layers) layers[k].addTo(map);
+        document.getElementById('tgt-count').innerText = shopsData.length;
 
-        // --- HUD 數據更新特效 ---
-        function animateValue(id, start, end, duration) {
-            let obj = document.getElementById(id);
-            let range = end - start;
-            let minTimer = 50;
-            let stepTime = Math.abs(Math.floor(duration / range));
-            stepTime = Math.max(stepTime, minTimer);
-            let startTime = new Date().getTime();
-            let endTime = startTime + duration;
-            let timer;
-            function run() {
-                let now = new Date().getTime();
-                let remaining = Math.max((endTime - now) / duration, 0);
-                let value = Math.round(end - (remaining * range));
-                obj.innerHTML = value;
-                if (value == end) clearInterval(timer);
-            }
-            timer = setInterval(run, stepTime);
-            run();
-        }
-
-        // --- 圖表設定 ---
+        // --- 3. 數據與圖表 (修復版) ---
         Chart.defaults.color = '#888';
         Chart.defaults.borderColor = 'rgba(0, 243, 255, 0.1)';
         Chart.defaults.font.family = "'Orbitron', sans-serif";
 
-        const labels = Object.keys(brandCounts);
-        const dataValues = Object.values(brandCounts);
+        const labels = Object.keys(brandCounts).sort((a,b) => brandCounts[b] - brandCounts[a]); // 排序
+        const dataVals = labels.map(l => brandCounts[l]);
         const bgColors = labels.map(l => brandColors[l] || '#fff');
 
-        // 1. 長條圖 (Distribution) - 含點擊互動
-        const ctxBar = document.getElementById('brandChart').getContext('2d');
-        const brandChart = new Chart(ctxBar, {
-            type: 'bar',
-            data: { 
-                labels: labels, 
-                datasets: [{ 
-                    label: 'Count', 
-                    data: dataValues, 
-                    backgroundColor: bgColors,
-                    borderRadius: 2,
-                    barPercentage: 0.6
-                }] 
-            },
-            options: {
-                responsive: true,
-                onClick: (e, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        const selectedBrand = labels[index];
-                        toggleMapFilter(selectedBrand);
-                    } else {
-                        // 點擊空白處重置
-                        resetMapFilter();
-                    }
-                },
-                scales: { 
-                    x: { ticks: { display: false } }, // 隱藏 X 軸標籤避免擁擠
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } 
-                },
-                plugins: { legend: { display: false } }
-            }
+        // 生成實體表格
+        const tbody = document.getElementById('brandTableBody');
+        labels.forEach((label, idx) => {
+            const count = brandCounts[label];
+            const percent = ((count / shopsData.length) * 100).toFixed(1);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="rank-col">#${idx+1}</td>
+                <td style="color:${brandColors[label]||'#fff'}">${label}</td>
+                <td class="count-col">${count}</td>
+                <td class="count-col">${percent}%</td>
+            `;
+            tr.onclick = () => filterMap(label);
+            tbody.appendChild(tr);
         });
 
-        // 2. 雷達圖 (Radar) - 模擬戰術屬性
-        // 我們隨機產生一些 "戰術數據" 讓圖表看起來很酷
-        const ctxRadar = document.getElementById('radarChart').getContext('2d');
-        new Chart(ctxRadar, {
-            type: 'radar',
+        // 圖表 1: 水平條形圖 (Bar)
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
             data: {
-                labels: ['Density', 'Price', 'Sugar', 'Queue', 'Hype'],
-                datasets: [{
-                    label: 'Area Avg',
-                    data: [80, 65, 90, 50, 70],
-                    borderColor: 'rgba(0, 243, 255, 0.8)',
-                    backgroundColor: 'rgba(0, 243, 255, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#fff'
-                }, {
-                    label: 'Target Max',
-                    data: [100, 90, 100, 100, 95],
-                    borderColor: 'rgba(188, 19, 254, 0.6)',
-                    backgroundColor: 'transparent',
-                    borderDash: [5, 5],
-                    pointRadius: 0
+                labels: labels,
+                datasets: [{ 
+                    data: dataVals, 
+                    backgroundColor: bgColors,
+                    borderRadius: 3,
+                    barThickness: 12
                 }]
             },
             options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false, // 關鍵修正：防止圖表變形
                 scales: {
-                    r: {
-                        angleLines: { color: 'rgba(255,255,255,0.1)' },
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        pointLabels: { color: '#aaa', font: { size: 10 } },
-                        ticks: { display: false }
-                    }
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9 } } }
                 },
-                plugins: { legend: { display: false } }
+                plugins: { legend: { display: false } },
+                onClick: (e, els) => {
+                    if(els.length > 0) filterMap(labels[els[0].index]);
+                }
             }
         });
 
-        // 3. 圓餅圖 (Dominance)
-        const ctxPie = document.getElementById('shareChart').getContext('2d');
-        new Chart(ctxPie, {
-            type: 'doughnut',
-            data: { 
-                labels: labels, 
-                datasets: [{ 
-                    data: dataValues, 
-                    backgroundColor: bgColors, 
-                    borderColor: '#10141e', 
-                    borderWidth: 2 
-                }] 
+        // 圖表 2: 戰術雷達 (Radar - 正規化數據)
+        const top5 = labels.slice(0, 5);
+        // 計算最大值以正規化 (避免某個數據太小看起來像壞掉)
+        const maxCount = Math.max(...dataVals);
+        
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['DENSITY', 'SPEED', 'PRICE', 'RANGE', 'HYPE'],
+                datasets: top5.map((brand, i) => {
+                    const normalizedDensity = (brandCounts[brand] / maxCount) * 100;
+                    return {
+                        label: brand,
+                        data: [
+                            normalizedDensity,
+                            Math.random() * 30 + 70, // 模擬數據
+                            Math.random() * 30 + 70,
+                            Math.random() * 30 + 70,
+                            Math.random() * 30 + 70
+                        ],
+                        borderColor: brandColors[brand],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0
+                    };
+                })
             },
-            options: { 
-                cutout: '70%', 
-                plugins: { legend: { position: 'right', labels: { boxWidth: 8, font: { size: 9 }, color: '#aaa' } } } 
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    r: { 
+                        min: 0, max: 100, // 固定量尺
+                        ticks: { display: false }, 
+                        grid: { color: 'rgba(255,255,255,0.1)' }, 
+                        angleLines: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { color: '#aaa', font: { size: 9 } }
+                    } 
+                },
+                plugins: { legend: { labels: { color: '#fff', font: { size: 9 }, boxWidth: 8 } } }
             }
         });
 
-        // --- 核心功能 ---
+        // --- 4. 核心功能 ---
+        function log(msg) {
+            const el = document.getElementById('sysLog');
+            el.innerHTML += `> ${msg}<br>`;
+            el.scrollTop = el.scrollHeight;
+        }
 
-        function toggleMapFilter(brand) {
-            if (currentFilterBrand === brand) {
-                resetMapFilter();
-                return;
-            }
-            currentFilterBrand = brand;
+        function filterSystem() {
+            const txt = document.getElementById('searchInput').value.toLowerCase();
+            allMarkers.forEach(m => {
+                const visible = m.data.name.toLowerCase().includes(txt) || m.data.brand.toLowerCase().includes(txt);
+                visible ? m.marker.addTo(map) : m.marker.remove();
+            });
+        }
+
+        function filterMap(brand) {
+            const btn = document.getElementById('resetBtn');
+            if(currentFilter === brand) return resetFilter();
             
-            // 隱藏所有圖層
-            for (let key in layers) {
-                map.removeLayer(layers[key]);
-            }
-            // 只加入選中的
-            if (layers[brand]) {
+            currentFilter = brand;
+            btn.style.display = 'block';
+            
+            for(let k in layers) map.removeLayer(layers[k]);
+            if(layers[brand]) {
                 map.addLayer(layers[brand]);
-                // 飛到該品牌第一個點的附近
-                const firstMarker = allMarkers.find(m => m.data.brand === brand);
-                if(firstMarker) {
-                    map.flyTo(firstMarker.marker.getLatLng(), 14);
-                }
+                // 飛到該品牌第一個點
+                const target = allMarkers.find(m => m.data.brand === brand);
+                if(target) map.flyTo(target.marker.getLatLng(), 13);
             }
-            logAction(`FILTER APPLIED: ${brand}`);
+            log(`FILTER ACTIVE: ${brand}`);
         }
 
-        function resetMapFilter() {
-            currentFilterBrand = null;
-            for (let key in layers) {
-                if (!map.hasLayer(layers[key])) {
-                    map.addLayer(layers[key]);
-                }
-            }
-            logAction(`FILTER RESET: SHOW ALL`);
-        }
-
-        function filterMarkers() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            allMarkers.forEach(item => {
-                const text = (item.data.name + item.data.brand + item.data.note).toLowerCase();
-                // 如果目前有品牌過濾，這裡要配合邏輯 (暫時簡單處理：搜尋優先)
-                if (text.includes(input)) {
-                    item.marker.addTo(map);
-                } else {
-                    item.marker.remove();
-                }
-            });
-        }
-
-        function locateUser() {
-            logAction("GPS SATELLITE SYNC...");
-            map.locate({setView: true, maxZoom: 15});
-            map.on('locationfound', e => {
-                userLatLng = e.latlng;
-                if(userMarker) userMarker.remove();
-                userMarker = L.marker(e.latlng).addTo(map).bindPopup("YOU ARE HERE").openPopup();
-                L.circle(e.latlng, {radius: e.accuracy, color: '#00f3ff'}).addTo(map);
-                logAction("LOCATION CONFIRMED");
-            });
-        }
-
-        function logAction(msg) {
-            const logBox = document.getElementById('systemLog');
-            const time = new Date().toLocaleTimeString('en-GB'); // 24h format
-            logBox.innerHTML += `<div class="log-entry">[${time}] ${msg}</div>`;
-            logBox.scrollTop = logBox.scrollHeight;
+        function resetFilter() {
+            const btn = document.getElementById('resetBtn');
+            currentFilter = null;
+            btn.style.display = 'none';
+            for(let k in layers) if(!map.hasLayer(layers[k])) map.addLayer(layers[k]);
+            log("FILTER RESET");
         }
 
         function togglePanel() {
-            const panel = document.getElementById('statsPanel');
-            const btn = document.getElementById('toggleIcon');
-            const isCollapsed = panel.classList.toggle('panel-collapsed');
-            btn.innerHTML = isCollapsed ? '▲' : '▼';
-            if(!isCollapsed) {
-                // 重新開啟時跑動畫
-                animateValue("totalTargets", 0, allMarkers.length, 1000);
-                animateValue("activeBrands", 0, labels.length, 1000);
-            }
+            const p = document.getElementById('rightPanel');
+            const s = document.getElementById('toggleState');
+            p.classList.toggle('panel-collapsed');
+            s.innerText = p.classList.contains('panel-collapsed') ? '[+]' : '[-]';
         }
 
-        // 防止地圖穿透
-        ['statsPanel', 'searchInput'].forEach(id => {
+        function activateGPS() {
+            log("SCANNING GPS...");
+            map.locate({ setView: true, maxZoom: 14 });
+            map.on('locationfound', e => {
+                userLatLng = e.latlng;
+                if(userMarker) userMarker.remove();
+                
+                const gpsIcon = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<div style="width:16px;height:16px;background:#00f3ff;border-radius:50%;box-shadow:0 0 20px #00f3ff;border:2px solid #fff;"></div>`,
+                    iconSize: [20, 20]
+                });
+                
+                userMarker = L.marker(e.latlng, {icon: gpsIcon}).addTo(map)
+                    .bindPopup("OPERATOR LOCATION").openPopup();
+                
+                log("LOCATION LOCKED.");
+            });
+        }
+
+        ['rightPanel', 'searchInput'].forEach(id => {
             const el = document.getElementById(id);
             if(el) { L.DomEvent.disableScrollPropagation(el); L.DomEvent.disableClickPropagation(el); }
         });
 
-        // 初始化動畫
-        animateValue("totalTargets", 0, allMarkers.length, 1500);
-        animateValue("activeBrands", 0, labels.length, 1500);
         if(window.innerWidth < 600) togglePanel();
+        
+        log(`SYSTEM READY. ${shopsData.length} TARGETS.`);
 
-        logAction("TACTICAL MAP V6.0 READY.");
     </script>
 </body>
 </html>
