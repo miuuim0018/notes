@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民雄手搖杯一級戰區地圖</title>
+    
+    <!-- 1. 引入 Leaflet 地圖套件 CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            overflow: hidden; /* 防止捲軸出現 */
+        }
+
+        /* 地圖滿版 */
+        #map {
+            height: 100%; 
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* 左上角標題區塊 */
+        .title-box {
+            position: absolute;
+            top: 20px;
+            left: 60px; /* 避開縮放按鈕 */
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-left: 5px solid #FF9800; /* 橘色裝飾線 */
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .title-box p {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* 右下角統計圖表區塊 */
+        .chart-panel {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 320px;
+            max-height: 40vh;
+        }
+
+        .chart-panel h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        /* 讓圖表在手機上可以收合 (選用) */
+        @media (max-width: 600px) {
+            .chart-panel {
+                width: 90%;
+                right: 5%;
+                bottom: 10px;
+            }
+            .title-box {
+                left: 50px;
+                right: 10px;
+                top: 10px;
+                padding: 10px;
+            }
+            .title-box h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 標題 -->
+    <div class="title-box">
+        <h1>🥤 民雄手搖杯戰區</h1>
+        <p>民雄市區飲料店分佈與品牌市佔率分析</p>
+    </div>
+
+    <!-- 統計圖表 -->
+    <div class="chart-panel">
+        <h3>品牌數量統計</h3>
+        <canvas id="brandChart"></canvas>
+    </div>
+
+    <!-- 地圖本體 -->
+    <div id="map"></div>
+
+    <!-- 2. 引入 Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- 3. 引入 Chart.js (做圖表用的) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // --- 設定資料：民雄手搖杯假資料 (模擬真實分佈) ---
+        // 你可以自己在這裡新增或修改座標
+        const shopsData = [
+            { name: "50嵐 民雄建國店", brand: "50嵐", lat: 23.5532, lng: 120.4295, note: "排隊名店" },
+            { name: "50嵐 民雄頭橋店", brand: "50嵐", lat: 23.5410, lng: 120.4380, note: "工業區附近" },
+            { name: "清心福全 民雄保生店", brand: "清心福全", lat: 23.5525, lng: 120.4305, note: "烏龍綠好喝" },
+            { name: "清心福全 民雄建國店", brand: "清心福全", lat: 23.5550, lng: 120.4285, note: "" },
+            { name: "麻古茶坊 民雄店", brand: "麻古茶坊", lat: 23.5528, lng: 120.4310, note: "芝芝系列" },
+            { name: "可不可熟成紅茶", brand: "可不可", lat: 23.5518, lng: 120.4320, note: "英倫風裝潢" },
+            { name: "迷客夏 民雄店", brand: "迷客夏", lat: 23.5522, lng: 120.4298, note: "為了牛奶來的" },
+            { name: "大苑子 民雄店", brand: "大苑子", lat: 23.5535, lng: 120.4290, note: "水果茶專賣" },
+            { name: "茶湯會", brand: "茶湯會", lat: 23.5515, lng: 120.4325, note: "鐵觀音拿鐵" },
+            { name: "鮮茶道", brand: "其他品牌", lat: 23.5540, lng: 120.4280, note: "" },
+            { name: "CoCo都可", brand: "其他品牌", lat: 23.5512, lng: 120.4330, note: "百香雙響砲" },
+            { name: "民雄在地紅茶冰", brand: "在地小店", lat: 23.5505, lng: 120.4340, note: "俗擱大碗" }
+        ];
+
+        // --- 1. 初始化地圖 ---
+        // 中心點設在民雄市區 (約在鵝肉街/火車站附近)
+        const map = L.map('map').setView([23.5525, 120.4310], 15);
+
+        // 底圖：使用 CartoDB 的淺色地圖，讓飲料店標記比較明顯
+        const lightMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: 'Map data &copy; OpenStreetMap contributors',
+            maxZoom: 20
+        }).addTo(map);
+
+        const osmMap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // --- 2. 處理資料並加到地圖上 ---
+        
+        // 準備一個物件來存放不同品牌的圖層群組 (LayerGroup)
+        const layers = {}; 
+        
+        // 準備統計數據
+        const brandCounts = {};
+
+        // 定義一個 helper 函數來決定標記顏色 (使用 Leaflet 預設 icon，但用 filter 變色 - 這裡簡單用 popup區分)
+        shopsData.forEach(shop => {
+            // 2.1 統計數量 (給圖表用)
+            if (brandCounts[shop.brand]) {
+                brandCounts[shop.brand]++;
+            } else {
+                brandCounts[shop.brand] = 1;
+            }
+
+            // 2.2 建立標記 (Marker)
+            const marker = L.marker([shop.lat, shop.lng])
+                .bindPopup(`<b>${shop.name}</b><br>品牌: ${shop.brand}<br>備註: ${shop.note}`);
+
+            // 2.3 分類圖層
+            // 如果這個品牌的圖層還沒建立，就開一個新的
+            if (!layers[shop.brand]) {
+                layers[shop.brand] = L.layerGroup();
+            }
+            // 把標記加到對應品牌的圖層中
+            layers[shop.brand].addLayer(marker);
+        });
+
+        // --- 3. 加入圖層控制器 ---
+        
+        // 把分類好的圖層加到地圖上 (預設全開)
+        for (let brand in layers) {
+            layers[brand].addTo(map);
+        }
+
+        const baseMaps = {
+            "簡潔淺色": lightMap,
+            "標準街景": osmMap
+        };
+
+        // 建立圖層控制項
+        L.control.layers(baseMaps, layers, { collapsed: false }).addTo(map);
+
+
+        // --- 4. 繪製統計圖表 (Chart.js) ---
+        const ctx = document.getElementById('brandChart').getContext('2d');
+        
+        // 整理圖表需要的標籤 (Labels) 和 數據 (Data)
+        const chartLabels = Object.keys(brandCounts);
+        const chartData = Object.values(brandCounts);
+
+        // 設定圖表顏色
+        const backgroundColors = [
+            'rgba(255, 206, 86, 0.6)', // 黃
+            'rgba(75, 192, 192, 0.6)', // 綠
+            'rgba(255, 99, 132, 0.6)', // 紅
+            'rgba(54, 162, 235, 0.6)', // 藍
+            'rgba(153, 102, 255, 0.6)', // 紫
+            'rgba(255, 159, 64, 0.6)'  // 橘
+        ];
+
+        new Chart(ctx, {
+            type: 'bar', // 長條圖
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: '店家數量',
+                    data: chartData,
+                    backgroundColor: backgroundColors,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 } // 讓Y軸只顯示整數
+                    }
+                },
+                plugins: {
+                    legend: { display: false } // 隱藏圖例 (只有一組數據不需要)
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
