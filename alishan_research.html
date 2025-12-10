@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿里山林鐵選址策略與環境災害研究</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    },
+                    colors: {
+                        'forest-dark': '#1a3c34',
+                        'forest-light': '#2d5a4e',
+                        'earth': '#8c705f',
+                        'paper': '#f4f1ea',
+                        'hazard': '#c0392b',
+                        'alert': '#e67e22'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f1ea;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8c705f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1a3c34;
+        }
+        
+        .drop-cap::first-letter {
+            font-size: 3.5rem;
+            font-weight: bold;
+            float: left;
+            line-height: 1;
+            margin-right: 0.5rem;
+            color: #1a3c34;
+        }
+
+        .chart-bar {
+            transition: width 1.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-paper text-gray-800 antialiased font-sans selection:bg-forest-light selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-forest-dark/95 backdrop-blur text-white z-50 shadow-md border-b border-earth/30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-serif font-bold text-lg tracking-widest">Alishan Research</div>
+            <div class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#intro" class="hover:text-earth transition-colors">導言</a>
+                <a href="#selection" class="hover:text-earth transition-colors">選址與資源</a>
+                <a href="#method" class="hover:text-earth transition-colors">工法與轉型</a>
+                <a href="#disaster" class="hover:text-earth transition-colors">自然災害</a>
+                <a href="#references" class="hover:text-earth transition-colors">參考文獻</a>
+            </div>
+            <!-- Mobile Menu Button (Simple implementation) -->
+            <button class="md:hidden" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-forest-dark border-t border-white/10 p-4">
+            <div class="flex flex-col space-y-3 text-sm">
+                <a href="#intro">導言</a>
+                <a href="#selection">選址與資源</a>
+                <a href="#method">工法與轉型</a>
+                <a href="#disaster">自然災害</a>
+                <a href="#references">參考文獻</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="intro" class="relative pt-32 pb-20 px-4 min-h-[80vh] flex items-center justify-center overflow-hidden bg-forest-dark text-paper">
+        <!-- Abstract Background SVG -->
+        <svg class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M0 100 L20 60 L40 80 L60 30 L80 50 L100 0 V100 H0 Z" fill="#ffffff" />
+        </svg>
+        
+        <div class="max-w-4xl text-center relative z-10">
+            <div class="inline-block border border-earth/50 px-3 py-1 text-xs tracking-[0.2em] mb-4 text-earth uppercase">Digital Humanities Report</div>
+            <h1 class="text-4xl md:text-6xl font-serif font-black mb-6 leading-tight">
+                阿里山林鐵<br>
+                <span class="text-earth">選址策略</span>與<span class="text-alert">環境災害</span>研究
+            </h1>
+            <p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto font-light leading-relaxed">
+                探討日本殖民政府如何透過鐵路選址進行資源掠奪與統治，以及這些工程決策如何在百年後的地質環境中留下不可磨滅的災害印記。
+            </p>
+            <div class="mt-10 animate-bounce">
+                <a href="#selection" class="text-earth hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Part I: Selection & Resources -->
+    <section id="selection" class="py-20 px-4 max-w-6xl mx-auto">
+        <div class="border-l-4 border-forest-dark pl-6 mb-12">
+            <h2 class="text-3xl font-serif font-bold text-forest-dark mb-2">壹、林鐵選址與土地利用</h2>
+            <p class="text-gray-600">資源驅動的決策與殖民統治的空間佈局</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <!-- Text Content -->
+            <div class="space-y-6 text-justify leading-loose text-gray-700">
+                <p class="drop-cap">
+                    阿里山森林鐵路的興建與選址策略是日本殖民政府進行大規模山林資源開發與殖民統治的重要政策產物。選線不僅考量了地理條件，更與資源的空間分佈及經營策略的轉變有密切相關。
+                </p>
+                <h3 class="text-xl font-bold text-forest-dark border-b border-gray-300 pb-2 mt-8">選址目的與資源驅動</h3>
+                <p>
+                    早在 1899 年，勘查報告即指出阿里山地區蘊藏有巨量的原始森林。當時總督府決定採用美國式鐵道運材方案來運輸材積大且長度長的珍貴紅檜。早期的探勘路線（如飯田豐二等人經清水溪上游的路線）雖然路徑較短，但因末端幾乎呈垂直爬升且止於大塔山斷崖，迫使總督府放棄此案，轉而採用林學博士河合鈰太郎規劃的阿里山側路線。
+                </p>
+                
+                <div class="bg-white p-6 rounded shadow-sm border border-gray-200 my-6">
+                    <h4 class="font-bold text-forest-dark mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        1899年 資源蘊藏量估計
+                    </h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>針葉林 (紅檜等)</span>
+                                <span class="font-mono font-bold">798,649 m³</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-forest-light h-2.5 rounded-full chart-bar" style="width: 32%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>闊葉林 (樟腦林等)</span>
+                                <span class="font-mono font-bold">1,728,660 m³</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-earth h-2.5 rounded-full chart-bar" style="width: 68%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    <strong>殖民政策考量：</strong>除了經濟利益外，河合鈰太郎的報告中明確指出，興築阿里山鐵路的主要目的之一是為了<strong>理蕃及開發蕃地</strong>。營林所將經營阿里山視為治理南蕃的基礎，主張若不先開發阿里山，將無法有效深入並掌控此地區的蕃地。
+                </p>
+            </div>
+
+            <!-- Visualization/Figures Placeholder -->
+            <div class="space-y-6">
+                <!-- Conceptual Figure 1 -->
+                <div class="bg-white p-4 border border-gray-300 shadow-lg rotate-1 transform transition hover:rotate-0 duration-500">
+                    <div class="bg-gray-100 aspect-[4/3] relative flex items-center justify-center overflow-hidden">
+                        <!-- Simulated Map Layers -->
+                        <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 100 100">
+                             <path d="M0,80 Q20,60 40,70 T80,50 T100,20" fill="none" stroke="#2d5a4e" stroke-width="20" stroke-opacity="0.2"/> <!-- Forest Zone -->
+                             <path d="M0,90 Q30,80 50,85 T100,70" fill="none" stroke="#8c705f" stroke-width="15" stroke-opacity="0.2"/> <!-- Camphor Zone -->
+                             <path d="M10,90 C 30,80 40,40 80,20" fill="none" stroke="black" stroke-width="2" stroke-dasharray="2,2"/> <!-- Railway Line -->
+                        </svg>
+                        <div class="absolute bottom-4 left-4 text-xs font-mono bg-white/80 p-1">
+                            圖一：選址與資源疊合<br>
+                            <span class="text-forest-light">■ 針葉林區</span> <span class="text-earth">■ 闊葉林區</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2 italic text-center">林鐵路線精準疊合了高海拔檜木林與低海拔樟腦林的分佈。</p>
+                </div>
+
+                <!-- Conceptual Figure 2 & 3 -->
+                <div class="bg-white p-4 border border-gray-300 shadow-lg -rotate-1 transform transition hover:rotate-0 duration-500">
+                    <div class="bg-gray-100 aspect-video relative flex items-end justify-center p-4">
+                        <!-- Simplified Elevation Profile -->
+                        <svg viewBox="0 0 200 100" class="w-full h-full">
+                            <!-- Failed Route -->
+                            <path d="M0,100 L50,90 L80,85 L90,10" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="4,2" />
+                            <text x="95" y="15" font-size="6" fill="#c0392b">大塔山斷崖 (失敗)</text>
+                            
+                            <!-- Actual Route -->
+                            <path d="M0,100 L40,90 Q60,85 70,70 T100,50 T150,30 L200,10" fill="none" stroke="#2d5a4e" stroke-width="2" />
+                            <text x="160" y="25" font-size="6" fill="#2d5a4e">現行迂迴路線</text>
+                            
+                            <!-- Axes -->
+                            <line x1="0" y1="100" x2="200" y2="100" stroke="#666" stroke-width="1"/>
+                            <line x1="0" y1="100" x2="0" y2="0" stroke="#666" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2 italic text-center">圖二、三：早期直線探勘路線與現行展線坡度比較。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Part II: Engineering & Transition -->
+    <section id="method" class="py-20 bg-gray-100">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-serif font-bold text-forest-dark mb-8 text-center">二、選線工法與經營策略的轉變</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                <!-- Independent Mountain (Spiral) -->
+                <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-forest-light relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8">
+                            <path d="M50 90 C 80 90 90 60 50 50 C 10 40 20 10 50 10" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-forest-dark">獨立山：螺旋線工法</h3>
+                    <p class="text-gray-600 mb-4 leading-relaxed">
+                        河合鈰太郎規劃的「螺旋線」旨在將坡度控制在 <strong>50‰</strong> 的理想範圍內。這不僅是運材工具，更展現了打造世界級登山鐵道的野心。此設計在當時為亞洲第二條，工程難度極高。
+                    </p>
+                    <span class="inline-block bg-forest-light text-white text-xs px-2 py-1 rounded">追求永續</span>
+                </div>
+
+                <!-- Z-switch (Zigzag) -->
+                <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-alert relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                         <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8">
+                            <path d="M10 90 L 90 70 L 10 50 L 90 30" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-forest-dark">屏遮那段：之字形工法</h3>
+                    <p class="text-gray-600 mb-4 leading-relaxed">
+                        後續接手者為追求速成與經濟效益，放棄緩坡原則，改採連續「之字形」硬攻山頭。坡度推升至 <strong>62.5~66.7‰</strong>。雖縮短建設時間，卻大幅增加營運與地質風險。
+                    </p>
+                    <span class="inline-block bg-alert text-white text-xs px-2 py-1 rounded">追求速成</span>
+                </div>
+            </div>
+
+            <div class="bg-forest-dark text-paper p-8 md:p-12 rounded-xl shadow-2xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-serif font-bold mb-6 text-earth">1930年代：從伐木到觀光的轉型</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <div class="border-l border-earth/30 pl-4">
+                            <strong class="block text-lg mb-2 text-white">困境</strong>
+                            1934年成本優勢不再，1936年評估天然林僅剩8年可採。單純依賴伐木難以維持。
+                        </div>
+                        <div class="border-l border-earth/30 pl-4">
+                            <strong class="block text-lg mb-2 text-white">契機</strong>
+                            1927年入選「臺灣八景」。雲海與高山景觀展現新價值，轉向觀光客運。
+                        </div>
+                        <div class="border-l border-earth/30 pl-4">
+                            <strong class="block text-lg mb-2 text-white">黃金交叉</strong>
+                            <span class="text-alert font-bold text-xl block my-1">1931年</span>
+                            客運收入首次超越貨運，正式轉型為具備現代觀光價值的登山鐵道。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Part III: Natural Disasters -->
+    <section id="disaster" class="py-20 px-4 max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+            <span class="text-hazard font-bold tracking-widest uppercase text-sm">Risk Analysis</span>
+            <h2 class="text-3xl md:text-4xl font-serif font-bold text-gray-800 mt-2">貳、林鐵與自然災害</h2>
+            <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+                經濟選址與工程征服背後，隱藏著穿越地質敏感帶的環境代價。
+            </p>
+        </div>
+
+        <div class="space-y-16">
+            <!-- Case 1: Independent Mountain -->
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="w-full md:w-1/2 relative">
+                    <!-- Conceptual GIS Map -->
+                    <div class="bg-gray-200 rounded-lg aspect-square relative overflow-hidden shadow-inner border border-gray-300 group">
+                        <!-- Terrain Noise -->
+                        <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%220.5%22/%3E%3C/svg%3E');"></div>
+                        
+                        <!-- Hazard Zones -->
+                        <div class="absolute top-10 left-10 w-32 h-32 bg-gray-600 rounded-full mix-blend-multiply opacity-40 blur-xl animate-pulse"></div>
+                        <div class="absolute bottom-10 right-20 w-24 h-40 bg-orange-400 rounded-full mix-blend-multiply opacity-30 blur-xl"></div>
+                        
+                        <!-- Spiral Line -->
+                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
+                             <path d="M100 180 C 160 180 180 120 100 100 C 20 80 40 20 100 20" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="5,5" />
+                             <!-- Points of failure -->
+                             <circle cx="160" cy="140" r="4" fill="#8e44ad" class="animate-ping" />
+                             <circle cx="40" cy="60" r="4" fill="#e67e22" />
+                        </svg>
+
+                        <div class="absolute bottom-2 right-2 bg-white/90 p-2 text-xs rounded border border-gray-400">
+                            圖六：災害潛勢疊圖<br>
+                            <span class="inline-block w-2 h-2 rounded-full bg-gray-600"></span> 敏感區 
+                            <span class="inline-block w-2 h-2 rounded-full bg-orange-400"></span> 土石流
+                            <span class="inline-block w-2 h-2 rounded-full bg-purple-600"></span> 落石
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 space-y-4">
+                    <h3 class="text-2xl font-bold text-forest-dark flex items-center">
+                        <span class="bg-gray-800 text-white text-sm px-2 py-1 rounded mr-3">CASE 01</span>
+                        獨立山螺旋路段
+                    </h3>
+                    <h4 class="text-hazard font-bold">地質代價：不穩定破碎帶</h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        根據災害潛勢疊圖分析，螺旋路段地質多屬崩積層與破碎帶，與「山崩與地滑敏感區」及「土石流潛勢溪流」高度重疊。為維持盤旋路線進行大量開挖，導致該路段長期面臨落石與邊坡坍方威脅。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Case 2: Erwanping -->
+            <div class="flex flex-col md:flex-row-reverse gap-8 items-center">
+                 <div class="w-full md:w-1/2 relative">
+                    <!-- Conceptual Dip Slope Diagram -->
+                    <div class="bg-white rounded-lg aspect-square relative overflow-hidden shadow-lg border border-gray-200 flex flex-col justify-center items-center p-6">
+                        <h5 class="absolute top-4 left-4 font-bold text-gray-500">順向坡示意圖 (Dip Slope)</h5>
+                        <svg viewBox="0 0 200 150" class="w-full">
+                            <!-- Stable ground -->
+                            <path d="M0 150 L200 150 L200 100 L0 100 Z" fill="#7f8c8d" />
+                            <!-- Sliding Layers -->
+                            <g class="transform transition-transform hover:translate-x-2 hover:translate-y-2 duration-700 cursor-pointer">
+                                <path d="M0 100 L200 100 L200 50 L0 50 Z" fill="#95a5a6" stroke="white" />
+                                <path d="M0 50 L200 50 L200 20 L0 20 Z" fill="#bdc3c7" stroke="white" />
+                                <!-- Station -->
+                                <rect x="80" y="10" width="40" height="10" fill="#c0392b" />
+                                <text x="100" y="8" text-anchor="middle" font-size="8" fill="#c0392b">二萬坪車站</text>
+                                <!-- Arrow -->
+                                <path d="M150 40 L170 60" stroke="#c0392b" stroke-width="2" marker-end="url(#arrow)" />
+                            </g>
+                        </svg>
+                        <p class="text-xs text-gray-500 mt-4 text-center">岩層傾向與坡面一致，遇豪雨極易大規模滑動。</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 space-y-4">
+                     <h3 class="text-2xl font-bold text-forest-dark flex items-center">
+                        <span class="bg-gray-800 text-white text-sm px-2 py-1 rounded mr-3">CASE 02</span>
+                        二萬坪順向坡
+                    </h3>
+                    <h4 class="text-hazard font-bold">速成工法的後遺症</h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        二萬坪雖地勢平緩適合設站，但地質分析顯示其完全座落於大規模的「順向坡山崩地滑區」。當年為求之字形爬升便利而忽視地質潛勢，埋下了百年來的災害隱憂（如1912年通車初期及莫拉克風災的走山）。
+                    </p>
+                </div>
+            </div>
+
+             <!-- Case 3: Mianyue -->
+             <div class="bg-gray-50 rounded-xl p-8 border border-gray-200">
+                <h3 class="text-2xl font-bold text-forest-dark mb-4">CASE 03: 眠月線的時空變遷</h3>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <div class="h-full bg-gray-200 rounded flex items-center justify-center text-gray-400 text-sm p-4 text-center">
+                            [圖八：衛星影像對比]<br>1996 vs 2024<br>崩塌範圍擴大
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 space-y-4">
+                        <p class="text-gray-700">
+                            <strong>長期環境效應：</strong>即使眠月線在921地震後停止主要營運，衛星影像顯示該區域地質崩壞並未停止。
+                        </p>
+                        <p class="text-gray-700">
+                            2024年的影像中，崩塌裸露地範圍比1996年更大。這證實了早期的開發切斷坡腳或擾動平衡，加上地震與颱風，導致災害呈現<strong>「延遲發生」</strong>與<strong>「規模擴大」</strong>的趨勢。
+                        </p>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </section>
+
+    <!-- References -->
+    <footer id="references" class="bg-forest-dark text-gray-400 py-16 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-serif font-bold text-paper mb-8 border-b border-gray-700 pb-4">參、參考資料</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
+                <div>
+                    <h3 class="text-earth font-bold mb-4 uppercase tracking-wider">歷史、林業與空間研究</h3>
+                    <ul class="space-y-3 font-light">
+                        <li>蔡龍保 (2023)。由森林鐵路到觀光鐵路：日治時期阿里山鐵路經營策略之轉變 (1896-1945)。《地理學報》，(105): 103-137。</li>
+                        <li>蔡佩蓉 (2023)。從帝國森林到帝國風景：阿里山的空間生產與文化想像 (1896-1937)。[博士論文]，成功大學歷史學系。</li>
+                        <li>蘇昭旭 (n.d.)。日治時期的森林鐵道—以阿里山森鐵為例。《台灣林業》。</li>
+                        <li>蘇昭旭 (n.d.)。河合鈰太郎與阿里山森林鐵路的誕生。《台灣林業》。</li>
+                        <li>總督府民政局殖產課 (1899)。阿里山森林調查報告書。</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-earth font-bold mb-4 uppercase tracking-wider">地質、災害與工程分析</h3>
+                    <ul class="space-y-3 font-light">
+                        <li>Lee, J. T. et al. (2012)。阿里山森林鐵路災害調查及復建規劃。《中華水土保持學報》。</li>
+                        <li>Luo, D. W. & Wu, Z. Z. (2011)。阿里山森林鐵路路基之破壞原因與邊坡穩定...《水土保持學報》。</li>
+                        <li>Chou, T. Y. (2025)。以大尺寸邊坡模型探討二萬坪崩塌地大規模滑動過程之研究。</li>
+                        <li>Lai, P. Y. (2012)。阿里山森林鐵路事件型山崩潛感分析。</li>
+                        <li>經濟部中央地質調查所 (2024)。地質敏感區查詢系統。</li>
+                        <li class="italic text-xs mt-4 opacity-50">* 完整參考文獻請參閱原始論文</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center text-xs opacity-30">
+                &copy; 2025 Alishan Forest Railway Research Visualization. Generated for educational purposes.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Simple Scroll Progress Bar -->
+    <div class="fixed top-0 left-0 h-1 bg-alert z-[60]" id="progress-bar" style="width: 0%"></div>
+
+    <script>
+        // Scroll Progress Logic
+        window.onscroll = function() {
+            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            var scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
+    </script>
+</body>
+</html>
