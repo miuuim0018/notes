@@ -9,7 +9,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght=400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -74,11 +74,20 @@
             border-radius: 4px;
         }
 
-        /* === 新增: 回到頂部按鈕的焦點樣式，使其可被 Tab 鍵選中時有視覺回饋 === */
+        /* 回到頂部按鈕的焦點樣式 */
         #back-to-top:focus {
-            outline: 4px solid #8D6E63; /* 使用土壤棕作為焦點環 */
+            outline: 4px solid #8D6E63; 
             outline-offset: 2px;
-            box-shadow: 0 0 0 2px rgba(47, 93, 64, 0.5); /* 增加陰影強調 */
+            box-shadow: 0 0 0 2px rgba(47, 93, 64, 0.5); 
+        }
+
+        /* PDF 嵌入容器樣式 */
+        .pdf-viewer {
+            width: 100%;
+            height: 700px; /* 設定預覽高度 */
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -234,7 +243,7 @@
 
         <hr class="border-t-2 border-forest opacity-30 my-12">
 
-        <section class="mb-20">
+        <section class="mb-12">
             <h2 class="font-serif text-2xl font-bold text-forest mb-6">參、參考資料</h2>
             <div class="text-base text-gray-600 font-serif leading-relaxed">
                 <p class="hanging-indent">洪致文 (2014)。《阿里山森林鐵路：世界遺產鐵道》。台北：行政院農業委員會林務局。</p>
@@ -244,6 +253,52 @@
             </div>
         </section>
 
+        <section class="mb-20">
+            <h2 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-8 border-l-4 border-soil pl-4">肆、專題成果展示與下載</h2>
+            
+            <div class="space-y-12">
+                <div class="bg-paper p-6 rounded-lg shadow-xl border border-forest/20">
+                    <h3 class="font-serif text-xl font-bold text-forest mb-4">專題文檔（完整版 PDF 預覽）</h3>
+                    <p class="text-sm text-soil mb-4">
+                        文件 ID: 1ZqXuLs7DEQ8HlajJm_PZhnBDhtfb96O1
+                    </p>
+                    <iframe 
+                        src="https://drive.google.com/file/d/1ZqXuLs7DEQ8HlajJm_PZhnBDhtfb96O1/preview" 
+                        class="pdf-viewer" 
+                        frameborder="0"
+                        title="專題文檔 PDF 預覽"
+                    >
+                        <p>您的瀏覽器不支援內嵌框架 (iframe)。請點擊 <a href="https://drive.google.com/file/d/1ZqXuLs7DEQ8HlajJm_PZhnBDhtfb96O1/view?usp=sharing" class="text-forest underline" target="_blank">此處下載文檔 PDF</a>。</p>
+                    </iframe>
+                    <div class="mt-4 text-center">
+                        <a href="https://drive.google.com/file/d/1ZqXuLs7DEQ8HlajJm_PZhnBDhtfb96O1/view?usp=sharing" download class="inline-block bg-soil text-white font-sans font-medium py-2 px-6 rounded hover:bg-soil/90 transition-colors">
+                            下載專題文檔 PDF
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-paper p-6 rounded-lg shadow-xl border border-forest/20">
+                    <h3 class="font-serif text-xl font-bold text-forest mb-4">專題海報（PDF 預覽）</h3>
+                    <p class="text-sm text-soil mb-4">
+                        海報 ID: 1jypJDVKaVvPJYVtroiD6NekGTiU6TX7a
+                    </p>
+                    <iframe 
+                        src="https://drive.google.com/file/d/1jypJDVKaVvPJYVtroiD6NekGTiU6TX7a/preview" 
+                        class="pdf-viewer" 
+                        frameborder="0"
+                        title="專題海報 PDF 預覽"
+                    >
+                        <p>您的瀏覽器不支援內嵌框架 (iframe)。請點擊 <a href="https://drive.google.com/file/d/1jypJDVKaVvPJYVtroiD6NekGTiU6TX7a/view?usp=sharing" class="text-forest underline" target="_blank">此處下載海報 PDF</a>。</p>
+                    </iframe>
+                    <div class="mt-4 text-center">
+                        <a href="https://drive.google.com/file/d/1jypJDVKaVvPJYVtroiD6NekGTiU6TX7a/view?usp=sharing" download class="inline-block bg-soil text-white font-sans font-medium py-2 px-6 rounded hover:bg-soil/90 transition-colors">
+                            下載專題海報 PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </section>
         <footer class="text-center text-sm text-gray-500 py-8 border-t border-gray-300">
             <p>© 2024 國立嘉義大學數位學習設計與管理學系專題製作</p>
         </footer>
@@ -281,35 +336,29 @@
                 progressBar.style.width = scrollPercent + '%';
             });
 
-            /* --- 2. 回到頂部按鈕邏輯 (已優化 Tab 鍵相關) --- */
+            /* --- 2. 回到頂部按鈕邏輯 --- */
             const backToTopBtn = document.getElementById('back-to-top');
             
-            // 由於您使用了 `hidden md:block` 隱藏按鈕，我們在這裡手動處理 Tab 鍵的可訪問性，
-            // 確保它在隱藏時不會被 Tab 選中，顯示時可以。
             const checkScrollPosition = () => {
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.remove('opacity-0');
-                    // 讓按鈕可被 Tab 鍵選中
                     backToTopBtn.setAttribute('tabindex', '0'); 
                 } else {
                     backToTopBtn.classList.add('opacity-0');
-                    // 讓按鈕不可被 Tab 鍵選中，避免鍵盤使用者操作無效元素
                     backToTopBtn.setAttribute('tabindex', '-1');
                 }
             };
 
-            // 初始設定 tabindex 為 -1
             backToTopBtn.setAttribute('tabindex', '-1'); 
 
             window.addEventListener('scroll', checkScrollPosition);
-            window.addEventListener('load', checkScrollPosition); // 載入時檢查一次
+            window.addEventListener('load', checkScrollPosition); 
 
             backToTopBtn.addEventListener('click', () => {
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
                 });
-                // 點擊後將焦點移回頁面頂部或其他邏輯起點，提高無障礙體驗
                 document.querySelector('h1').focus(); 
             });
 
@@ -319,19 +368,17 @@
             const lightboxCaption = document.getElementById('lightbox-caption');
             const closeBtn = document.getElementById('lightbox-close');
             
-            // 選取所有文章內的圖片 (排除裝飾性icon)
             const contentImages = document.querySelectorAll('main figure img');
 
             const openLightbox = (src, alt) => {
                 lightboxImg.src = src;
                 lightboxCaption.textContent = alt;
                 lightbox.classList.remove('hidden');
-                // 強制重繪以觸發 transition
                 requestAnimationFrame(() => {
                     lightbox.classList.remove('opacity-0');
                 });
-                document.body.style.overflow = 'hidden'; // 防止背景滾動
-                closeBtn.focus(); // 開啟後將焦點移至關閉按鈕，方便鍵盤操作
+                document.body.style.overflow = 'hidden'; 
+                closeBtn.focus(); 
             };
 
             const closeLightbox = () => {
@@ -339,20 +386,22 @@
                 setTimeout(() => {
                     lightbox.classList.add('hidden');
                     lightboxImg.src = '';
-                }, 300); // 等待過渡效果結束
+                }, 300); 
                 document.body.style.overflow = '';
             };
 
-            // 為每張圖片添加點擊事件
+            // 為每張圖片添加點擊事件及鍵盤無障礙處理
             contentImages.forEach(img => {
-                img.parentElement.addEventListener('click', (e) => { // 點擊 figure
-                    e.stopPropagation(); // 防止冒泡
+                const figure = img.closest('figure');
+                figure.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
                     openLightbox(img.src, img.alt);
                 });
-                // 為圖片加上鍵盤事件 (Enter 鍵)
-                img.parentElement.setAttribute('tabindex', '0');
-                img.parentElement.setAttribute('role', 'button');
-                img.parentElement.addEventListener('keydown', (e) => {
+                
+                // 鍵盤無障礙：使其可聚焦並用 Enter 鍵開啟燈箱
+                figure.setAttribute('tabindex', '0');
+                figure.setAttribute('role', 'button');
+                figure.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         openLightbox(img.src, img.alt);
@@ -365,7 +414,7 @@
             
             // 點擊背景關閉
             lightbox.addEventListener('click', (e) => {
-                if (e.target === lightbox || e.target.closest('.max-w-5xl') === null) {
+                if (e.target === lightbox && e.target !== lightboxImg) {
                     closeLightbox();
                 }
             });
