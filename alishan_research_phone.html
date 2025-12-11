@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿里山林業鐵路選址策略與災害潛勢分析</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#F9F7F2',     // 米黃色背景 (紙張質感)
+                        forest: '#2F5D40',    // 深森林綠 (主色)
+                        soil: '#8D6E63',      // 土壤棕 (強調色/圖說)
+                        ink: '#2D2D2D',       // 深灰 (內文)
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'], // 標題用襯線體
+                        sans: ['"Noto Sans TC"', 'sans-serif'], // 內文用無襯線體
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 全局設定 */
+        body {
+            background-color: #F9F7F2;
+            color: #2D2D2D;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 閱讀進度條樣式 */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: transparent;
+            z-index: 50;
+        }
+        #progress-bar {
+            height: 100%;
+            background: #2F5D40;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* 參考文獻懸掛縮排 (Hanging Indent) */
+        .hanging-indent {
+            padding-left: 2em;
+            text-indent: -2em;
+            margin-bottom: 0.5em;
+        }
+
+        /* 圖片燈箱過渡效果 */
+        .lightbox-overlay {
+            transition: opacity 0.3s ease;
+        }
+        
+        /* 手機版優化：圖片不切邊 */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="font-sans text-lg md:text-xl leading-relaxed selection:bg-forest selection:text-white">
+
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <main class="max-w-3xl mx-auto px-6 py-12 md:py-20">
+
+        <header class="mb-12 text-center border-b-2 border-forest pb-8">
+            <h1 class="font-serif text-3xl md:text-5xl font-bold text-forest mb-4 leading-tight">
+                阿里山林業鐵路<br>選址策略與災害潛勢分析
+            </h1>
+            <div class="text-soil font-serif text-base md:text-lg space-y-2">
+                <p class="font-bold">國立嘉義大學數位學習設計與管理學系</p>
+                <p>作者：葉怡廷、朱書靚、劉芷瑩</p>
+                <p>指導教授：李佩倫 教授</p>
+            </div>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-6 border-l-4 border-soil pl-4">壹、林鐵選址與土地利用</h2>
+            
+            <p class="mb-6 text-justify">
+                阿里山林業鐵路的興建與選址策略是日本殖民政府進行大規模山林資源開發與殖民統治的重要政策產物。為了有效運輸高山地區豐富的林木資源，早期的選址經過了詳盡的探勘與評估。根據當時的調查報告，阿里山區擁有廣大的原始檜木林，估計闊葉林材積達 1,728,660 立方公尺。當時總督府決定採用美國式鐵道運材方案來運輸材積大且長度長的珍貴紅檜。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/ksySn2jb/image.png" alt="圖一、阿里山林鐵選址與林木資源空間分佈疊合圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖一、阿里山林鐵選址與林木資源空間分佈疊合圖
+                </figcaption>
+            </figure>
+
+            <p class="mb-6 text-justify">
+                早期的探勘路線（如飯田豐二等人經清水溪上游的路線）雖然路徑較短，直線距離看起來最具效益。然而，若從高度剖面圖比較（圖二）可見，該路線末端幾乎呈垂直爬升，這在當時的鐵道工程技術上是極大的挑戰，甚至是不可行的。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/qYS5HfVp/image.png" alt="圖二、高度剖面圖比較" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖二、探勘路線與現行路線高度剖面圖比較
+                </figcaption>
+            </figure>
+
+            <p class="mb-6 text-justify">
+                進一步檢視地形分析圖，我們可以更清楚地理解為何當時的工程師放棄了清水溪路線。大塔山斷崖的存在形成了一道天然的屏障。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/HD4fLjdq/image.png" alt="圖三、清水溪探勘路線與大塔山斷崖地形分析圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖三、清水溪探勘路線與大塔山斷崖地形分析圖
+                </figcaption>
+            </figure>
+
+            <p class="mb-6 text-justify">
+                而從豐山休息區視角的3D地形圖來看，斷崖的險峻程度一目了然，這解釋了為何最終路線選擇繞行較遠但坡度相對平緩的路徑。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/7NB49085/image.png" alt="圖四、豐山休息區看大塔山斷崖圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖四、豐山休息區看大塔山斷崖圖
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="mb-12">
+            <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 mt-8">二、選線工法與經營策略的轉變</h3>
+            
+            <p class="mb-6 text-justify">
+                為了克服急劇爬升的地形，工程師河合鈰太郎發揮了極致的創意與工程技術。如圖五所示，河合在獨立山路段的規劃上採用了複雜的螺旋線工法，讓火車以迴旋方式攀升，不僅解決了高度差問題，也成為今日世界登山鐵道的經典案例。同時，這段路線也與當時的樟腦產業範圍高度重疊，顯示選線除了地形考量外，也兼顧了產業運輸的需求。隨著時代變遷，林業功能逐漸退場，林鐵的經營策略也隨之轉型，從單純的資源掠奪工具，轉變為觀光休閒與文化資產保存的載體，最終成為今日我們所見的世界級登山鐵道。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/LhCm77Wr/image.png" alt="圖五、獨立山螺旋路線與樟腦產業範圍疊合圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖五、獨立山螺旋路線與樟腦產業範圍疊合圖
+                </figcaption>
+            </figure>
+        </section>
+
+        <div class="my-16 bg-white p-4 rounded-lg shadow-inner border border-gray-200">
+            <h4 class="text-center font-serif text-forest mb-2 font-bold">林鐵全線海拔高度變化</h4>
+            <figure class="group cursor-zoom-in">
+                <img src="https://i.ibb.co/YB8776SG/image.png" alt="阿里山林鐵全線剖面圖" class="w-full">
+            </figure>
+        </div>
+
+        <section class="mb-12">
+            <h2 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-6 border-l-4 border-soil pl-4">貳、林鐵與自然災害</h2>
+            <p class="mb-6 text-justify">
+                阿里山林鐵雖然是工程奇蹟，但也因為穿越了地質破碎帶，長年面臨自然災害的威脅。本章節將分析幾個關鍵路段的地質條件與災害歷史。
+            </p>
+
+            <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 mt-8">一、經濟選址的地質代價：獨立山螺旋路段</h3>
+            
+            <p class="mb-6 text-justify">
+                獨立山螺旋線雖然巧妙克服了高度，但也付出了地質代價。根據獨立山段地質災害潛勢圖(圖六），該區域位於多個地層交界處，岩性相對脆弱，屬於崩塌潛勢較高的區域。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/JWPpYMMJ/image.jpg" alt="圖六、獨立山段地質災害潛勢圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖六、獨立山段地質災害潛勢圖
+                </figcaption>
+            </figure>
+
+            <p class="mb-6 text-justify">
+                除了先天脆弱的地質條件，後天的人為開發也加劇了風險。疊合圖顯示，該區域有大量的檳榔種植分布。淺根系的檳榔樹無法有效抓地，在豪雨來襲時，容易導致表土流失，進而誘發土石流或邊坡滑動，對鐵路安全構成嚴重威脅。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/YTF9P8Qz/image.jpg" alt="圖七、獨立山段地質災害潛勢區及檳榔種植分布疊合圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖七、獨立山段地質災害潛勢區及檳榔種植分布疊合圖
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="mb-12">
+            <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 mt-8">二、速成工法的後遺症：二萬坪順向坡危機</h3>
+            
+            <p class="mb-6 text-justify">
+                二萬坪路段是林鐵歷史上災害最頻繁的區域之一。從地質地形分析(圖八）來看，該路段位於標準的「順向坡」地形上。岩層的傾斜方向與坡面方向一致，一旦坡腳受到侵蝕或地下水壓升高，岩層極易沿著層面滑動，造成大規模走山。這也是為何二萬坪車站曾多次發生路基流失的主要原因。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/F4C5HHry/image.jpg" alt="圖八、二萬坪至屏遮那段地質分析圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖八、二萬坪至屏遮那段地質分析圖
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="mb-12">
+            <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 mt-8">三、開發的長期環境效應：眠月線的時空變遷</h3>
+            
+            <p class="mb-6 text-justify">
+                眠月線曾是熱門的觀光支線，但在921大地震後嚴重受損。透過關鍵時間點的衛星影像監測（圖九），我們可以清楚看見地貌的劇烈變化。對比1996年災前與1999年震後的影像，原本翠綠的山林出現了大面積的崩塌地，鐵路路基被土石掩埋或沖毀。這些影像證據說明了地震與後續颱風對脆弱地質造成的不可逆破壞。
+            </p>
+
+            <figure class="mb-10 group cursor-zoom-in">
+                <img src="https://i.ibb.co/35gMZ814/image.jpg" alt="圖九、1996年災前與1999年震後眠月線衛星影像崩塌對比圖" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
+                    圖九、1996年災前與1999年震後眠月線衛星影像崩塌對比圖
+                </figcaption>
+            </figure>
+        </section>
+
+        <hr class="border-t-2 border-forest opacity-30 my-12">
+
+        <section class="mb-20">
+            <h2 class="font-serif text-2xl font-bold text-forest mb-6">參、參考資料</h2>
+            <div class="text-base text-gray-600 font-serif leading-relaxed">
+                <p class="hanging-indent">洪致文 (2014)。《阿里山森林鐵路：世界遺產鐵道》。台北：行政院農業委員會林務局。</p>
+                <p class="hanging-indent">蘇昭旭 (2012)。《阿里山森林鐵路與台灣林業文化》。嘉義：嘉義林管處。</p>
+                <p class="hanging-indent">賴明洲 (2000)。〈阿里山地區地質災害與植被變遷之研究〉。《台灣林業科學》，15(3)，321-335。</p>
+                <p class="hanging-indent">阿里山林業鐵路及文化資產管理處 (2023)。《阿里山林業鐵路歷史沿革》。取自 https://afrch.forest.gov.tw</p>
+            </div>
+        </section>
+
+        <footer class="text-center text-sm text-gray-500 py-8 border-t border-gray-300">
+            <p>© 2024 國立嘉義大學數位學習設計與管理學系專題製作</p>
+        </footer>
+
+    </main>
+
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-forest text-white p-4 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-opacity-90 z-40 hidden md:block" aria-label="回到頂部">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
+
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden flex justify-center items-center opacity-0 lightbox-overlay" role="dialog" aria-modal="true">
+        <button id="lightbox-close" class="absolute top-4 right-4 text-white p-2 hover:text-soil transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="max-w-5xl max-h-screen p-4 flex flex-col items-center">
+            <img id="lightbox-img" src="" alt="放大預覽" class="max-h-[85vh] w-auto object-contain rounded shadow-2xl">
+            <p id="lightbox-caption" class="text-gray-300 mt-4 text-lg font-serif text-center"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            /* --- 1. 閱讀進度條邏輯 --- */
+            const progressBar = document.getElementById('progress-bar');
+            
+            window.addEventListener('scroll', () => {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrollPercent = (scrollTop / scrollHeight) * 100;
+                progressBar.style.width = scrollPercent + '%';
+            });
+
+            /* --- 2. 回到頂部按鈕邏輯 --- */
+            const backToTopBtn = document.getElementById('back-to-top');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.remove('opacity-0');
+                } else {
+                    backToTopBtn.classList.add('opacity-0');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            /* --- 3. Lightbox (燈箱) 邏輯 --- */
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            const closeBtn = document.getElementById('lightbox-close');
+            
+            // 選取所有文章內的圖片 (排除裝飾性icon)
+            const contentImages = document.querySelectorAll('main figure img');
+
+            const openLightbox = (src, alt) => {
+                lightboxImg.src = src;
+                lightboxCaption.textContent = alt;
+                lightbox.classList.remove('hidden');
+                // 強制重繪以觸發 transition
+                requestAnimationFrame(() => {
+                    lightbox.classList.remove('opacity-0');
+                });
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            };
+
+            const closeLightbox = () => {
+                lightbox.classList.add('opacity-0');
+                setTimeout(() => {
+                    lightbox.classList.add('hidden');
+                    lightboxImg.src = '';
+                }, 300); // 等待過渡效果結束
+                document.body.style.overflow = '';
+            };
+
+            // 為每張圖片添加點擊事件
+            contentImages.forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 防止冒泡
+                    openLightbox(img.src, img.alt);
+                });
+            });
+
+            // 關閉事件綁定
+            closeBtn.addEventListener('click', closeLightbox);
+            
+            // 點擊背景關閉
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox || e.target.closest('.max-w-5xl') === null) {
+                    closeLightbox();
+                }
+            });
+
+            // ESC 鍵關閉
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+                    closeLightbox();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
