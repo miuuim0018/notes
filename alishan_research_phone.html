@@ -9,17 +9,17 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght=400;700;900&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        paper: '#F9F7F2',     // 米黃色背景 (紙張質感)
-                        forest: '#2F5D40',    // 深森林綠 (主色)
-                        soil: '#8D6E63',      // 土壤棕 (強調色/圖說)
-                        ink: '#2D2D2D',       // 深灰 (內文)
+                        paper: '#F9F7F2',       // 米黃色背景 (紙張質感)
+                        forest: '#2F5D40',     // 深森林綠 (主色)
+                        soil: '#8D6E63',       // 土壤棕 (強調色/圖說)
+                        ink: '#2D2D2D',        // 深灰 (內文)
                     },
                     fontFamily: {
                         serif: ['"Noto Serif TC"', 'serif'], // 標題用襯線體
@@ -73,6 +73,13 @@
             height: auto;
             border-radius: 4px;
         }
+
+        /* === 新增: 回到頂部按鈕的焦點樣式，使其可被 Tab 鍵選中時有視覺回饋 === */
+        #back-to-top:focus {
+            outline: 4px solid #8D6E63; /* 使用土壤棕作為焦點環 */
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(47, 93, 64, 0.5); /* 增加陰影強調 */
+        }
     </style>
 </head>
 <body class="font-sans text-lg md:text-xl leading-relaxed selection:bg-forest selection:text-white">
@@ -113,7 +120,7 @@
             </p>
 
             <figure class="mb-10 group cursor-zoom-in">
-                <img src="https://i.ibb.co/qYS5HfVp/image.png" alt="圖二、高度剖面圖比較" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="https://i.ibb.co/qYS5HfVp/image.png" alt="圖二、探勘路線與現行路線高度剖面圖比較" class="shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <figcaption class="text-soil text-sm md:text-base text-center mt-3 font-medium italic">
                     圖二、探勘路線與現行路線高度剖面圖比較
                 </figcaption>
@@ -243,7 +250,7 @@
 
     </main>
 
-    <button id="back-to-top" class="fixed bottom-6 right-6 bg-forest text-white p-4 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-opacity-90 z-40 hidden md:block" aria-label="回到頂部">
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-forest text-white p-4 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-opacity-90 z-40 hidden md:block" aria-label="回到頂部" title="回到頂部 (Top)">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
@@ -274,22 +281,36 @@
                 progressBar.style.width = scrollPercent + '%';
             });
 
-            /* --- 2. 回到頂部按鈕邏輯 --- */
+            /* --- 2. 回到頂部按鈕邏輯 (已優化 Tab 鍵相關) --- */
             const backToTopBtn = document.getElementById('back-to-top');
             
-            window.addEventListener('scroll', () => {
+            // 由於您使用了 `hidden md:block` 隱藏按鈕，我們在這裡手動處理 Tab 鍵的可訪問性，
+            // 確保它在隱藏時不會被 Tab 選中，顯示時可以。
+            const checkScrollPosition = () => {
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.remove('opacity-0');
+                    // 讓按鈕可被 Tab 鍵選中
+                    backToTopBtn.setAttribute('tabindex', '0'); 
                 } else {
                     backToTopBtn.classList.add('opacity-0');
+                    // 讓按鈕不可被 Tab 鍵選中，避免鍵盤使用者操作無效元素
+                    backToTopBtn.setAttribute('tabindex', '-1');
                 }
-            });
+            };
+
+            // 初始設定 tabindex 為 -1
+            backToTopBtn.setAttribute('tabindex', '-1'); 
+
+            window.addEventListener('scroll', checkScrollPosition);
+            window.addEventListener('load', checkScrollPosition); // 載入時檢查一次
 
             backToTopBtn.addEventListener('click', () => {
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
                 });
+                // 點擊後將焦點移回頁面頂部或其他邏輯起點，提高無障礙體驗
+                document.querySelector('h1').focus(); 
             });
 
             /* --- 3. Lightbox (燈箱) 邏輯 --- */
@@ -310,6 +331,7 @@
                     lightbox.classList.remove('opacity-0');
                 });
                 document.body.style.overflow = 'hidden'; // 防止背景滾動
+                closeBtn.focus(); // 開啟後將焦點移至關閉按鈕，方便鍵盤操作
             };
 
             const closeLightbox = () => {
@@ -323,9 +345,18 @@
 
             // 為每張圖片添加點擊事件
             contentImages.forEach(img => {
-                img.addEventListener('click', (e) => {
+                img.parentElement.addEventListener('click', (e) => { // 點擊 figure
                     e.stopPropagation(); // 防止冒泡
                     openLightbox(img.src, img.alt);
+                });
+                // 為圖片加上鍵盤事件 (Enter 鍵)
+                img.parentElement.setAttribute('tabindex', '0');
+                img.parentElement.setAttribute('role', 'button');
+                img.parentElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openLightbox(img.src, img.alt);
+                    }
                 });
             });
 
