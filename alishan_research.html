@@ -6,13 +6,10 @@
     <meta name="description" content="阿里山林鐵選址策略與環境災害研究 - 數位人文視角下的百年軌跡">
     <title>阿里山林鐵：雲端上的百年軌跡與地質對話</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
@@ -25,28 +22,22 @@
                     },
                     colors: {
                         forest: {
-                            950: '#0f2922', // 更深的夜林色
-                            900: '#1a3c34',
+                            900: '#1a3c34', // 深林綠
                             800: '#234a40',
                             700: '#2d5a4e',
                             100: '#e8f3f0'
                         },
                         earth: {
-                            900: '#4a3b32',
-                            600: '#8c705f',
-                            500: '#a38471',
-                            100: '#f4f1ea'
+                            900: '#5c4638',
+                            600: '#8c705f', // 土壤褐
+                            100: '#f4f1ea'  // 舊紙色
                         },
-                        hazard: '#c0392b',
-                        alert: '#d35400'
-                    },
-                    backgroundImage: {
-                        'topo-pattern': "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%238c705f' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E\")",
+                        hazard: '#c0392b', // 災害紅
+                        alert: '#e67e22'   // 警示橘
                     },
                     animation: {
                         'fade-up': 'fadeUp 0.8s ease-out forwards',
                         'grow-width': 'growWidth 1.5s ease-out forwards',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         fadeUp: {
@@ -68,16 +59,15 @@
         body {
             background-color: #f4f1ea;
             color: #1a3c34;
-            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
-        /* Smooth Scrollbar */
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f4f1ea; }
         ::-webkit-scrollbar-thumb { background: #8c705f; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #5c4638; }
 
-        /* Typography - Drop Cap */
+        /* Typography Utilities */
         .drop-cap::first-letter {
             font-size: 3.5rem;
             font-weight: 900;
@@ -89,12 +79,12 @@
             font-family: "Noto Serif TC", serif;
         }
 
-        /* Technical Grid Background (Refined) */
+        /* Technical Grid Background */
         .technical-grid {
-            background-size: 40px 40px;
+            background-size: 20px 20px;
             background-image:
-                linear-gradient(to right, rgba(140, 112, 95, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(140, 112, 95, 0.05) 1px, transparent 1px);
+                linear-gradient(to right, rgba(140, 112, 95, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(140, 112, 95, 0.1) 1px, transparent 1px);
         }
 
         /* Animation Classes */
@@ -102,232 +92,204 @@
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.8s ease-out;
-            will-change: opacity, transform;
         }
         .reveal-on-scroll.is-visible {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* Timeline styles - Improved connection */
+        /* Timeline styles */
         .timeline-line::before {
             content: '';
             position: absolute;
-            top: 24px; /* Adjust start point */
+            top: 0;
             bottom: 0;
-            left: 15px; /* Center with dots */
+            left: 15px;
             width: 2px;
-            background: linear-gradient(to bottom, #8c705f 40%, transparent);
+            background: #8c705f;
             opacity: 0.3;
         }
 
-        /* Zoom Interactions */
+        /* Image Hover & Modal Styles */
         .zoom-container {
             position: relative;
             cursor: pointer;
             overflow: hidden;
-            transform: translateZ(0); /* Hardware acceleration */
         }
         .zoom-image {
-            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.7s ease;
         }
         .zoom-container:hover .zoom-image {
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
-        
+        .zoom-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 60, 52, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .zoom-container:hover .zoom-overlay {
+            opacity: 1;
+        }
+
         /* Modal Transitions */
         .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease;
             opacity: 0;
-            visibility: hidden;
+            pointer-events: none;
         }
         .modal.open {
             opacity: 1;
-            visibility: visible;
-        }
-
-        /* Loader for images */
-        .image-loader {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            pointer-events: auto;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-earth-600 selection:text-white relative">
+<body class="antialiased selection:bg-earth-600 selection:text-white">
 
-    <!-- Progress Bar -->
-    <div class="fixed top-0 left-0 w-full h-1 z-[70]">
-        <div id="progress-bar" class="h-full bg-gradient-to-r from-earth-600 to-alert width-0 transition-all duration-100 ease-out"></div>
+    <div class="fixed top-0 left-0 w-full h-1 z-[60]">
+        <div id="progress-bar" class="h-full bg-hazard width-0 transition-all duration-100"></div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-forest-900/0 text-white z-50 transition-all duration-300 border-b border-transparent" id="navbar">
+    <nav class="fixed top-0 w-full bg-forest-900/95 backdrop-blur-md text-white z-50 shadow-lg border-b border-white/10 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 group cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <div class="w-10 h-10 bg-forest-800 rounded flex items-center justify-center border border-white/20 group-hover:border-alert transition-colors">
-                        <i class="fa-solid fa-train text-alert"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="font-serif font-bold text-lg tracking-[0.15em] leading-none">ALISHAN</span>
-                        <span class="text-xs text-gray-400 font-light tracking-widest uppercase mt-1">Research Project</span>
-                    </div>
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-train text-alert"></i>
+                    <span class="font-serif font-bold text-lg tracking-widest text-white">ALISHAN <span class="text-earth-600 font-light">Research</span></span>
                 </div>
                 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-10 text-sm font-medium tracking-wide">
-                    <a href="#intro" class="relative hover:text-alert transition-colors py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-alert after:bottom-0 after:left-0 after:transition-all hover:after:w-full">導言</a>
-                    <a href="#history" class="relative hover:text-alert transition-colors py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-alert after:bottom-0 after:left-0 after:transition-all hover:after:w-full">歷史脈絡</a>
-                    <a href="#engineering" class="relative hover:text-alert transition-colors py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-alert after:bottom-0 after:left-0 after:transition-all hover:after:w-full">工程選址</a>
-                    <a href="#disaster" class="relative hover:text-alert transition-colors py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-alert after:bottom-0 after:left-0 after:transition-all hover:after:w-full">地質災害</a>
-                    <a href="#ecology" class="relative hover:text-alert transition-colors py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-alert after:bottom-0 after:left-0 after:transition-all hover:after:w-full">生態文化</a>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-300">
+                    <a href="#intro" class="hover:text-white hover:border-b-2 border-alert transition-all py-1">導言</a>
+                    <a href="#history" class="hover:text-white hover:border-b-2 border-alert transition-all py-1">歷史沿革</a>
+                    <a href="#engineering" class="hover:text-white hover:border-b-2 border-alert transition-all py-1">工程選址</a>
+                    <a href="#disaster" class="hover:text-white hover:border-b-2 border-alert transition-all py-1">地質災害</a>
+                    <a href="#ecology" class="hover:text-white hover:border-b-2 border-alert transition-all py-1">生態文化</a>
                 </div>
 
-                <!-- Mobile Button -->
-                <button class="md:hidden text-white focus:outline-none p-2" onclick="toggleMenu()" aria-label="Menu">
+                <button class="md:hidden text-white focus:outline-none" onclick="toggleMenu()">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
             </div>
         </div>
         
-        <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu" class="hidden md:hidden absolute top-20 left-0 w-full bg-forest-900 border-t border-white/10 shadow-xl overflow-hidden transition-all duration-300">
-            <div class="flex flex-col p-4 space-y-2">
-                <a href="#intro" onclick="toggleMenu()" class="block px-4 py-3 hover:bg-forest-800 rounded text-gray-300 hover:text-white border-l-2 border-transparent hover:border-alert transition-all">導言</a>
-                <a href="#history" onclick="toggleMenu()" class="block px-4 py-3 hover:bg-forest-800 rounded text-gray-300 hover:text-white border-l-2 border-transparent hover:border-alert transition-all">歷史脈絡</a>
-                <a href="#engineering" onclick="toggleMenu()" class="block px-4 py-3 hover:bg-forest-800 rounded text-gray-300 hover:text-white border-l-2 border-transparent hover:border-alert transition-all">工程選址</a>
-                <a href="#disaster" onclick="toggleMenu()" class="block px-4 py-3 hover:bg-forest-800 rounded text-gray-300 hover:text-white border-l-2 border-transparent hover:border-alert transition-all">地質災害</a>
-                <a href="#ecology" onclick="toggleMenu()" class="block px-4 py-3 hover:bg-forest-800 rounded text-gray-300 hover:text-white border-l-2 border-transparent hover:border-alert transition-all">生態文化</a>
+        <div id="mobile-menu" class="hidden md:hidden bg-forest-900 border-t border-white/10 p-4 absolute w-full">
+            <div class="flex flex-col space-y-4 text-center text-gray-300">
+                <a href="#intro" onclick="toggleMenu()" class="block py-2 hover:text-white hover:bg-forest-800 rounded">導言</a>
+                <a href="#history" onclick="toggleMenu()" class="block py-2 hover:text-white hover:bg-forest-800 rounded">歷史沿革</a>
+                <a href="#engineering" onclick="toggleMenu()" class="block py-2 hover:text-white hover:bg-forest-800 rounded">工程選址</a>
+                <a href="#disaster" onclick="toggleMenu()" class="block py-2 hover:text-white hover:bg-forest-800 rounded">地質災害</a>
+                <a href="#ecology" onclick="toggleMenu()" class="block py-2 hover:text-white hover:bg-forest-800 rounded">生態文化</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header id="intro" class="relative pt-32 pb-24 min-h-[90vh] flex items-center justify-center bg-forest-900 text-earth-100 overflow-hidden">
-        <!-- Abstract Topo Map Background -->
-        <div class="absolute inset-0 opacity-10 bg-topo-pattern animate-pulse-slow"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-forest-900 via-transparent to-forest-900 opacity-80 pointer-events-none"></div>
+    <header id="intro" class="relative pt-32 pb-24 min-h-[85vh] flex items-center justify-center bg-forest-900 text-earth-100 overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 100 L100 20 L100 100 Z" fill="#ffffff" />
+                <path d="M0 100 L40 60 L100 80 L100 100 Z" fill="#8c705f" />
+            </svg>
+        </div>
         
-        <div class="max-w-5xl mx-auto px-4 relative z-10 text-center reveal-on-scroll">
-            <div class="inline-flex items-center gap-3 border border-earth-600/30 bg-forest-800/80 backdrop-blur px-5 py-2 rounded-full text-xs tracking-[0.2em] mb-10 text-earth-500 uppercase shadow-lg hover:bg-forest-800 transition-colors cursor-default">
-                <span class="w-2 h-2 rounded-full bg-alert animate-ping"></span>
-                Digital Humanities GIS Report
+        <div class="max-w-4xl mx-auto px-4 relative z-10 text-center reveal-on-scroll">
+            <div class="inline-flex items-center gap-2 border border-earth-600/50 bg-forest-800/50 backdrop-blur px-4 py-1.5 rounded-full text-xs tracking-[0.2em] mb-8 text-alert uppercase">
+                <span class="w-2 h-2 rounded-full bg-alert animate-pulse"></span>
+                Digital Humanities Report
             </div>
             
-            <h1 class="text-4xl md:text-7xl font-serif font-black mb-8 leading-tight tracking-tight drop-shadow-2xl">
+            <h1 class="text-4xl md:text-6xl font-serif font-black mb-6 leading-tight tracking-tight">
                 阿里山林鐵<br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-earth-500 via-earth-100 to-earth-500">雲端上的百年軌跡</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-earth-600 to-white">雲端上的百年軌跡</span>
             </h1>
             
-            <p class="text-xl md:text-2xl font-serif text-earth-500 mb-10 font-light italic max-w-3xl mx-auto">
-                「這是一條挑戰重力的鐵路，也是一場長達百年的地質與經濟博弈。」
+            <p class="text-xl md:text-2xl font-serif text-earth-600 mb-8 font-light italic">
+                挑戰地形的工程奇蹟，見證台灣林業與地質的百年對話
             </p>
 
-            <p class="text-base md:text-lg opacity-80 max-w-2xl mx-auto font-light leading-relaxed text-gray-300 mb-14 tracking-wide">
-                從海拔 30 公尺至 2,451 公尺。本研究結合歷史地理資訊（HGIS）與災害潛勢分析，解構日本殖民政府如何透過精密的工程選址進行資源掠奪，並探討這些決策如何與台灣脆弱的年輕地質產生碰撞。
+            <p class="text-base md:text-lg opacity-80 max-w-2xl mx-auto font-light leading-relaxed text-gray-300 mb-12">
+                從海拔 30 公尺到 2,451 公尺。本研究透過歷史地理資訊（HGIS）與地質潛勢分析，探討日本殖民政府如何透過鐵路選址進行資源掠奪，以及這些工程決策如何在百年後的地質環境中留下不可磨滅的印記。
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-5 justify-center">
-                <a href="#engineering" class="group bg-earth-600 text-white px-8 py-3.5 rounded hover:bg-earth-900 transition-all duration-300 font-medium tracking-wide shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i> 探索選址 GIS 分析
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#engineering" class="bg-earth-600 text-white px-8 py-3 rounded hover:bg-earth-900 transition-colors duration-300 font-medium tracking-wide shadow-lg">
+                    探索選址策略
                 </a>
-                <a href="#disaster" class="group border border-white/20 text-white px-8 py-3.5 rounded hover:bg-white/10 hover:border-white/40 transition-all duration-300 font-medium tracking-wide flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation text-alert opacity-80 group-hover:opacity-100"></i> 檢視地質災害
+                <a href="#disaster" class="border border-white/30 text-white px-8 py-3 rounded hover:bg-white/10 transition-colors duration-300 font-medium tracking-wide">
+                    檢視地質災害
                 </a>
             </div>
         </div>
         
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-earth-600 opacity-60">
-            <span class="text-xs uppercase tracking-widest block mb-2 text-center">Scroll</span>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-earth-600">
             <i class="fa-solid fa-chevron-down text-xl"></i>
         </div>
     </header>
-
-    <!-- Part I: History (Timeline) -->
-    <section id="history" class="py-24 px-4 bg-white relative">
+    
+    <section id="history" class="py-20 px-4 bg-white relative">
         <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-20 reveal-on-scroll">
-                <span class="text-alert font-bold tracking-widest text-xs uppercase mb-2 block">Chronology</span>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-6">壹、歷史沿革：開發與轉型</h2>
-                <div class="h-1 w-24 bg-earth-600 mx-auto rounded"></div>
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-4">壹、歷史沿革</h2>
+                <div class="h-1 w-20 bg-earth-600 mx-auto rounded"></div>
+                <p class="mt-4 text-earth-600">從資源掠奪到世界遺產潛力點的轉型之路</p>
             </div>
 
             <div class="relative timeline-line pl-4 md:pl-0">
-                <!-- Event 1 -->
-                <div class="mb-16 md:flex md:gap-12 items-start reveal-on-scroll group">
-                    <div class="md:w-1/4 md:text-right md:pr-8 mb-4 md:mb-0 relative pt-2">
-                        <span class="text-5xl font-serif font-bold text-earth-900/10 group-hover:text-earth-600 transition-colors duration-500">1899</span>
-                        <div class="hidden md:block absolute top-5 right-[-53px] w-5 h-5 bg-forest-900 rounded-full border-4 border-white shadow-md z-10 group-hover:scale-125 transition-transform"></div>
-                        <div class="md:hidden absolute top-4 left-[-24px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                <div class="mb-12 md:flex md:gap-8 items-start reveal-on-scroll group">
+                    <div class="md:w-1/4 md:text-right md:pr-8 mb-2 md:mb-0 relative">
+                        <span class="text-4xl font-serif font-bold text-earth-600 block opacity-20 group-hover:opacity-100 transition-opacity">1899</span>
+                        <div class="hidden md:block absolute top-3 right-[-37px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                        <div class="md:hidden absolute top-1 left-[-23px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
                     </div>
-                    <div class="md:w-3/4 bg-white p-8 rounded-xl shadow-lg border border-gray-100 group-hover:border-forest-900/20 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-forest-900"></div>
-                        <h3 class="text-xl font-bold text-forest-900 mb-3 flex items-center gap-3">
-                            <i class="fa-solid fa-magnifying-glass-location text-earth-600"></i> 資源探勘與發現
-                        </h3>
-                        <p class="text-gray-600 leading-loose text-justify text-sm">
-                            技工小池三九郎於鄒族人的引導下，深入阿里山區發現巨大的針葉林（紅檜與扁柏）蓄積量。總督府隨即確認其開發價值，這不僅是林業的開端，更是殖民政府將權力延伸至高山地帶的象徵。
+                    <div class="md:w-3/4 bg-earth-100 p-6 rounded-lg shadow-sm border-l-4 border-forest-900 hover:shadow-md transition-shadow">
+                        <h3 class="text-xl font-bold text-forest-900 mb-2">資源探勘與發現</h3>
+                        <p class="text-gray-700 leading-relaxed text-sm">
+                            技工小池三九郎發現阿里山區巨大的針葉林（紅檜與扁柏）蓄積量。總督府確認開發價值，開啟了這場高山鐵路的序幕。
                         </p>
                     </div>
                 </div>
 
-                <!-- Event 2 -->
-                <div class="mb-16 md:flex md:gap-12 items-start reveal-on-scroll group">
-                    <div class="md:w-1/4 md:text-right md:pr-8 mb-4 md:mb-0 relative pt-2">
-                        <span class="text-5xl font-serif font-bold text-earth-900/10 group-hover:text-earth-600 transition-colors duration-500">1912</span>
-                        <div class="hidden md:block absolute top-5 right-[-53px] w-5 h-5 bg-forest-900 rounded-full border-4 border-white shadow-md z-10 group-hover:scale-125 transition-transform"></div>
-                        <div class="md:hidden absolute top-4 left-[-24px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                <div class="mb-12 md:flex md:gap-8 items-start reveal-on-scroll group">
+                    <div class="md:w-1/4 md:text-right md:pr-8 mb-2 md:mb-0 relative">
+                        <span class="text-4xl font-serif font-bold text-earth-600 block opacity-20 group-hover:opacity-100 transition-opacity">1912</span>
+                        <div class="hidden md:block absolute top-3 right-[-37px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                        <div class="md:hidden absolute top-1 left-[-23px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
                     </div>
-                    <div class="md:w-3/4 bg-white p-8 rounded-xl shadow-lg border border-gray-100 group-hover:border-forest-900/20 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-forest-900"></div>
-                        <h3 class="text-xl font-bold text-forest-900 mb-3 flex items-center gap-3">
-                            <i class="fa-solid fa-train-subway text-earth-600"></i> 嘉義至二萬平通車
-                        </h3>
-                        <p class="text-gray-600 leading-loose text-justify text-sm">
-                            在克服了資金凍結與技術難題後，林鐵主線通車至二萬平。這標誌著工業化伐木的正式啟動，原本需耗時數日的步行路程被縮短至數小時，山區資源開始源源不絕地輸往海外。
+                    <div class="md:w-3/4 bg-earth-100 p-6 rounded-lg shadow-sm border-l-4 border-forest-900 hover:shadow-md transition-shadow">
+                        <h3 class="text-xl font-bold text-forest-900 mb-2">嘉義至二萬平通車</h3>
+                        <p class="text-gray-700 leading-relaxed text-sm">
+                            克服艱鉅地形與資金困難，林鐵主線通車。這是工程技術的勝利，也是大規模伐木時代的開始。
                         </p>
                     </div>
                 </div>
 
-                <!-- Event 3 -->
-                <div class="mb-16 md:flex md:gap-12 items-start reveal-on-scroll group">
-                    <div class="md:w-1/4 md:text-right md:pr-8 mb-4 md:mb-0 relative pt-2">
-                        <span class="text-5xl font-serif font-bold text-earth-900/10 group-hover:text-alert transition-colors duration-500">1931</span>
-                        <div class="hidden md:block absolute top-5 right-[-53px] w-5 h-5 bg-alert rounded-full border-4 border-white shadow-md z-10 group-hover:scale-125 transition-transform"></div>
-                        <div class="md:hidden absolute top-4 left-[-24px] w-4 h-4 bg-alert rounded-full border-4 border-white z-10"></div>
+                <div class="mb-12 md:flex md:gap-8 items-start reveal-on-scroll group">
+                    <div class="md:w-1/4 md:text-right md:pr-8 mb-2 md:mb-0 relative">
+                        <span class="text-4xl font-serif font-bold text-earth-600 block opacity-20 group-hover:opacity-100 transition-opacity">1931</span>
+                        <div class="hidden md:block absolute top-3 right-[-37px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                        <div class="md:hidden absolute top-1 left-[-23px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
                     </div>
-                    <div class="md:w-3/4 bg-white p-8 rounded-xl shadow-lg border border-gray-100 group-hover:border-alert/30 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-alert"></div>
-                        <h3 class="text-xl font-bold text-forest-900 mb-3 flex items-center gap-3">
-                            <i class="fa-solid fa-camera-retro text-alert"></i> 觀光轉型的黃金交叉
-                        </h3>
-                        <p class="text-gray-600 leading-loose text-justify text-sm">
-                            隨著「臺灣八景」的入選與國立公園的推動，雲海景觀吸引大量遊客。該年度客運收入首次超越貨運收入，林鐵性質發生質變，由單純的產業鐵路轉向觀光運輸，埋下了今日轉型的種子。
+                    <div class="md:w-3/4 bg-earth-100 p-6 rounded-lg shadow-sm border-l-4 border-alert hover:shadow-md transition-shadow">
+                        <h3 class="text-xl font-bold text-forest-900 mb-2">觀光轉型的黃金交叉</h3>
+                        <p class="text-gray-700 leading-relaxed text-sm">
+                            隨著「臺灣八景」入選，雲海景觀吸引大量遊客。客運收入首次超越貨運收入，林鐵性質由單純產業鐵路轉向觀光運輸。
                         </p>
                     </div>
                 </div>
 
-                <!-- Event 4 -->
-                <div class="mb-4 md:flex md:gap-12 items-start reveal-on-scroll group">
-                    <div class="md:w-1/4 md:text-right md:pr-8 mb-4 md:mb-0 relative pt-2">
-                        <span class="text-5xl font-serif font-bold text-earth-900/10 group-hover:text-forest-700 transition-colors duration-500">Today</span>
-                        <div class="hidden md:block absolute top-5 right-[-53px] w-5 h-5 bg-forest-700 rounded-full border-4 border-white shadow-md z-10 group-hover:scale-125 transition-transform"></div>
-                        <div class="md:hidden absolute top-4 left-[-24px] w-4 h-4 bg-forest-700 rounded-full border-4 border-white z-10"></div>
+                <div class="mb-12 md:flex md:gap-8 items-start reveal-on-scroll group">
+                    <div class="md:w-1/4 md:text-right md:pr-8 mb-2 md:mb-0 relative">
+                        <span class="text-4xl font-serif font-bold text-earth-600 block opacity-20 group-hover:opacity-100 transition-opacity">1984~</span>
+                        <div class="hidden md:block absolute top-3 right-[-37px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
+                        <div class="md:hidden absolute top-1 left-[-23px] w-4 h-4 bg-forest-900 rounded-full border-4 border-white z-10"></div>
                     </div>
-                    <div class="md:w-3/4 bg-white p-8 rounded-xl shadow-lg border border-gray-100 group-hover:border-forest-700/30 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-forest-700"></div>
-                        <h3 class="text-xl font-bold text-forest-900 mb-3 flex items-center gap-3">
-                            <i class="fa-solid fa-award text-forest-700"></i> 文化資產與世界遺產潛力
-                        </h3>
-                        <p class="text-gray-600 leading-loose text-justify text-sm">
-                            2019年公告為國家級重要文化景觀。阿里山林鐵已不再是伐木工具，而是見證工程技術、生態保育與歷史記憶的載體，並持續推動申請世界文化遺產。
+                    <div class="md:w-3/4 bg-earth-100 p-6 rounded-lg shadow-sm border-l-4 border-forest-700 hover:shadow-md transition-shadow">
+                        <h3 class="text-xl font-bold text-forest-900 mb-2">祝山線與文化資產</h3>
+                        <p class="text-gray-700 leading-relaxed text-sm">
+                            為觀日出增設祝山線。2019年公告為國家級重要文化景觀，見證伐木時代結束與生態保育興起，並與多國高山鐵路締結姊妹鐵路。
                         </p>
                     </div>
                 </div>
@@ -335,305 +297,158 @@
         </div>
     </section>
 
-    <!-- Part II: Engineering & Resources -->
-    <section id="engineering" class="py-24 px-4 bg-earth-100 technical-grid relative border-t border-earth-600/10">
-        <!-- Decoration -->
-        <div class="absolute top-0 right-0 p-10 opacity-5">
-            <i class="fa-solid fa-compass-drafting text-9xl text-forest-900"></i>
-        </div>
-
-        <div class="max-w-7xl mx-auto">
-            
-            <!-- Subsection 1: Route Selection Strategy -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-24">
+    <section id="engineering" class="py-20 px-4 bg-earth-100 technical-grid">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 
-                <!-- Text Content (Sticky Sidebar) -->
-                <div class="lg:col-span-5 order-2 lg:order-1 reveal-on-scroll lg:sticky lg:top-32 self-start">
-                    <span class="text-earth-600 font-bold tracking-widest text-xs uppercase mb-2 block">Spatial Analysis</span>
-                    <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-6">貳、選址邏輯：<br>資源與地形的博弈</h2>
+                <div class="order-2 lg:order-1 reveal-on-scroll sticky top-24">
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-6">貳、選址邏輯：資源與地形的博弈</h2>
                     
-                    <p class="drop-cap text-gray-700 text-lg leading-loose mb-10 text-justify">
-                        阿里山林鐵的選線並非隨機，而是一場精密的計算。透過地理資訊系統（GIS）疊圖分析，我們發現選線策略直接對應了資源的垂直分佈。鐵路不僅要克服海拔，更要最大化對經濟林區的接觸面積。
+                    <p class="drop-cap text-gray-700 text-lg leading-loose mb-8 text-justify">
+                        阿里山林鐵的選線並非隨機，而是一場精密的計算。透過地理資訊系統（GIS）疊圖分析，我們發現選線策略直接對應了資源的垂直分佈。
                     </p>
 
-                    <!-- Analysis Card -->
-                    <div class="bg-white p-8 rounded-xl shadow-xl border border-white/40 backdrop-blur-sm mb-8">
-                        <h4 class="font-bold text-forest-900 mb-6 text-xs uppercase tracking-[0.2em] border-b pb-3 flex justify-between items-center">
-                            <span>GIS Insights</span>
-                            <i class="fa-solid fa-layer-group text-earth-500"></i>
-                        </h4>
-                        <ul class="space-y-4 text-sm text-gray-600">
-                            <li class="flex items-start gap-4">
-                                <div class="w-8 h-8 rounded-full bg-forest-100 flex items-center justify-center flex-shrink-0 mt-1">
-                                    <span class="font-serif font-bold text-forest-800">1</span>
-                                </div>
-                                <div>
-                                    <strong class="block text-forest-900 mb-1">全線策略</strong>
-                                    利用長距離盤旋串聯 <span class="text-earth-600 font-medium">樟腦（低海拔）</span> 與 <span class="text-forest-700 font-medium">檜木（高海拔）</span> 兩大經濟帶。
-                                </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-earth-600/10 mb-8">
+                        <h4 class="font-bold text-forest-900 mb-4 text-sm uppercase tracking-wide border-b pb-2">圖資分析重點</h4>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-map text-earth-600 mt-1"></i>
+                                <span><strong>全線策略：</strong>利用長距離盤旋串聯樟腦（低海拔）與檜木（高海拔）兩大經濟帶。</span>
                             </li>
-                            <li class="flex items-start gap-4">
-                                <div class="w-8 h-8 rounded-full bg-forest-100 flex items-center justify-center flex-shrink-0 mt-1">
-                                    <span class="font-serif font-bold text-forest-800">2</span>
-                                </div>
-                                <div>
-                                    <strong class="block text-forest-900 mb-1">螺旋線 (Spiral) 邏輯</strong>
-                                    獨立山螺旋不僅是為了爬升，更是為了擴大對樟腦寮周邊林地的「腹地控制範圍」，增加集貨效率。
-                                </div>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-notch text-earth-600 mt-1"></i>
+                                <span><strong>螺旋線邏輯：</strong>獨立山螺旋不僅是為了爬升，更是為了擴大對樟腦寮周邊林地的控制範圍。</span>
                             </li>
                         </ul>
                     </div>
                     
-                    <!-- Stats Dashboard -->
-                    <div class="bg-forest-900 p-6 rounded-xl shadow-xl text-white">
-                        <h4 class="font-bold text-white/80 mb-6 text-xs uppercase tracking-[0.2em] border-b border-white/10 pb-3">
-                            Resource Volume
-                        </h4>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-earth-600/10">
+                        <h4 class="font-bold text-forest-900 mb-6 text-sm uppercase tracking-wide border-b pb-2">資源蘊藏量分析</h4>
                         <div class="space-y-6">
-                            <div class="group">
-                                <div class="flex justify-between text-sm mb-2 font-medium items-end">
-                                    <span class="text-gray-300">針葉林 (檜木)</span>
-                                    <span class="text-xl font-mono text-white">798,649 <span class="text-xs text-gray-500">m³</span></span>
+                            <div class="relative">
+                                <div class="flex justify-between text-sm mb-1 font-medium">
+                                    <span>針葉林 (紅檜/扁柏)</span>
+                                    <span class="text-forest-900">798,649 m³</span>
                                 </div>
-                                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-gradient-to-r from-forest-700 to-green-400 h-full rounded-full chart-bar shadow-[0_0_10px_rgba(74,222,128,0.5)]" data-width="32%"></div>
+                                <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                                    <div class="bg-forest-700 h-full rounded-full chart-bar" data-width="32%"></div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1 text-right">High Value / High Altitude</p>
                             </div>
-                            <div class="group">
-                                <div class="flex justify-between text-sm mb-2 font-medium items-end">
-                                    <span class="text-gray-300">闊葉林 (樟腦)</span>
-                                    <span class="text-xl font-mono text-earth-500">1,728,660 <span class="text-xs text-gray-500">m³</span></span>
+                            <div class="relative">
+                                <div class="flex justify-between text-sm mb-1 font-medium">
+                                    <span>闊葉林 (樟腦/楠木)</span>
+                                    <span class="text-earth-600">1,728,660 m³</span>
                                 </div>
-                                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-gradient-to-r from-earth-600 to-orange-400 h-full rounded-full chart-bar shadow-[0_0_10px_rgba(251,146,60,0.5)]" data-width="68%"></div>
+                                <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                                    <div class="bg-earth-600 h-full rounded-full chart-bar" data-width="68%"></div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1 text-right">Volume Leader / Low Altitude</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Images Column (Grid) -->
-                <div class="lg:col-span-7 order-1 lg:order-2 space-y-10 reveal-on-scroll">
+                <div class="order-1 lg:order-2 space-y-8 reveal-on-scroll">
                     
-                    <!-- Image 1 -->
-                    <div class="group cursor-pointer zoom-container rounded-2xl shadow-2xl overflow-hidden border-4 border-white bg-white" onclick="openModal('overall-map')">
-                        <div class="relative aspect-[16/10] bg-gray-200">
-                            <!-- Image Loader -->
-                            <div class="absolute inset-0 image-loader z-0"></div>
-                            <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E9%98%BF%E9%87%8C%E5%B1%B1%E6%9E%97%E9%90%B5%E9%81%B8%E5%9D%80%E8%88%87%E6%9E%97%E6%9C%A8%E8%B3%87%E6%BA%90%E7%A9%BA%E9%96%93%E5%88%86%E4%BD%88%E7%96%8A%E5%90%88%E5%9C%96.png?raw=true" class="w-full h-full object-cover zoom-image relative z-10" loading="lazy" alt="林鐵全線選址圖" onload="this.style.opacity=1; this.previousElementSibling.style.display='none'">
-                            
-                            <div class="zoom-overlay absolute inset-0 bg-forest-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-[2px]">
-                                <div class="bg-white px-6 py-3 rounded-full text-forest-900 font-bold text-sm shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                                    <i class="fa-solid fa-magnifying-glass-plus mr-2"></i> 點擊放大 GIS 疊圖
+                    <div class="group cursor-pointer zoom-container rounded-xl shadow-xl overflow-hidden" onclick="openModal('overall-map')">
+                        <div class="relative aspect-[4/3]">
+                            <img src="https://i.ibb.co/QF4ZdXFV/1.jpg" class="w-full h-full object-cover zoom-image" alt="林鐵全線選址圖">
+                            <div class="zoom-overlay">
+                                <div class="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-forest-900 font-bold text-sm shadow-lg">
+                                    <i class="fa-solid fa-magnifying-glass-plus mr-2"></i> 點擊查看全線資源分析
                                 </div>
                             </div>
-                            
-                            <!-- Legend/Badge -->
-                            <div class="absolute bottom-4 left-4 z-20">
-                                <span class="bg-forest-900/90 text-white text-xs px-3 py-1.5 rounded backdrop-blur border border-white/20">
-                                    Overview
-                                </span>
-                            </div>
                         </div>
-                        <div class="p-6">
-                            <div class="flex justify-between items-baseline mb-2">
-                                <h3 class="text-xl font-bold text-forest-900">宏觀選址：資源垂直分佈</h3>
-                                <span class="text-xs font-mono text-gray-400">FIG. 2.1</span>
-                            </div>
-                            <p class="text-sm text-gray-500">利用 1916 年蕃地地形圖與資源分佈進行疊合分析。</p>
+                        <div class="bg-white p-4 border-t border-gray-100">
+                            <div class="text-xs font-bold text-earth-600 tracking-wider mb-1">MACRO VIEW</div>
+                            <h3 class="text-lg font-bold text-forest-900">資源垂直分佈與選線策略</h3>
                         </div>
                     </div>
 
-                    <!-- Image 2 -->
-                    <div class="group cursor-pointer zoom-container rounded-2xl shadow-2xl overflow-hidden border-4 border-white bg-white" onclick="openModal('spiral-camphor')">
-                        <div class="relative aspect-[16/10] bg-gray-200">
-                             <div class="absolute inset-0 image-loader z-0"></div>
-                            <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%9E%97%E9%90%B5%E4%BD%8E%E6%B5%B7%E6%8B%94%E9%81%B8%E5%9D%80%E8%88%87%E6%A8%9F%E8%85%A6%E7%94%A2%E6%A5%AD%E7%AF%84%E5%9C%8D%E7%96%8A%E5%90%88%E5%9C%96.png?raw=true" class="w-full h-full object-cover zoom-image relative z-10" loading="lazy" alt="獨立山螺旋圖" onload="this.style.opacity=1; this.previousElementSibling.style.display='none'">
-                            
-                            <div class="zoom-overlay absolute inset-0 bg-forest-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-[2px]">
-                                <div class="bg-white px-6 py-3 rounded-full text-forest-900 font-bold text-sm shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                                    <i class="fa-solid fa-magnifying-glass-plus mr-2"></i> 點擊查看微觀分析
+                    <div class="group cursor-pointer zoom-container rounded-xl shadow-xl overflow-hidden" onclick="openModal('spiral-camphor')">
+                        <div class="relative aspect-[4/3]">
+                            <img src="https://i.ibb.co/YB8776SG/image.png" class="w-full h-full object-cover zoom-image" alt="獨立山螺旋圖">
+                            <div class="zoom-overlay">
+                                <div class="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-forest-900 font-bold text-sm shadow-lg">
+                                    <i class="fa-solid fa-magnifying-glass-plus mr-2"></i> 點擊查看螺旋線疊圖
                                 </div>
                             </div>
-
-                            <div class="absolute bottom-4 left-4 z-20">
-                                <span class="bg-earth-600/90 text-white text-xs px-3 py-1.5 rounded backdrop-blur border border-white/20">
-                                    Focus Area
-                                </span>
-                            </div>
                         </div>
-                        <div class="p-6">
-                            <div class="flex justify-between items-baseline mb-2">
-                                <h3 class="text-xl font-bold text-forest-900">微觀戰術：獨立山螺旋</h3>
-                                <span class="text-xs font-mono text-gray-400">FIG. 2.2</span>
-                            </div>
-                            <p class="text-sm text-gray-500">疊合 1904 年堡圖，顯示螺旋線與樟腦資源的空間重疊關係。</p>
+                        <div class="bg-white p-4 border-t border-gray-100">
+                            <div class="text-xs font-bold text-earth-600 tracking-wider mb-1">MICRO VIEW</div>
+                            <h3 class="text-lg font-bold text-forest-900">獨立山螺旋與樟腦資源</h3>
                         </div>
                     </div>
 
                 </div>
             </div>
-
-            <!-- Subsection 2: The Alternative Route (New Content) -->
-            <div class="border-t border-earth-600/20 pt-16 mt-16 reveal-on-scroll">
-                <div class="text-center mb-12">
-                    <span class="text-earth-600 font-bold tracking-widest text-xs uppercase mb-2 block">Alternative Route Analysis</span>
-                    <h3 class="text-2xl md:text-3xl font-serif font-bold text-forest-900">選址困境：清水溪案的放棄與修正</h3>
-                    <p class="mt-4 text-gray-600 max-w-3xl mx-auto">
-                        早期的測量隊曾考慮沿著清水溪（西側）直接上溯的路線，距離更短。然而，面對「大塔山斷崖」的天然屏障，工程師們被迫做出了歷史性的轉折。
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <!-- Left: Qingshui Analysis Map -->
-                    <div class="space-y-8">
-                        <div class="group cursor-pointer zoom-container rounded-2xl shadow-xl overflow-hidden border border-gray-200" onclick="openModal('qingshui-analysis')">
-                            <div class="relative aspect-[4/3] bg-gray-200">
-                                <div class="absolute inset-0 image-loader z-0"></div>
-                                <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%B8%85%E6%B0%B4%E6%BA%AA%E6%8E%A2%E5%8B%98%E8%B7%AF%E7%B7%9A%E8%88%87%E5%A4%A7%E5%A1%94%E5%B1%B1%E6%96%B7%E5%B4%96%E5%9C%B0%E5%BD%A2%E5%88%86%E6%9E%90%E5%9C%96.png?raw=true" class="w-full h-full object-cover zoom-image relative z-10" loading="lazy" onload="this.style.opacity=1; this.previousElementSibling.style.display='none'">
-                                <div class="zoom-overlay absolute inset-0 bg-forest-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 backdrop-blur-[2px]">
-                                    <div class="bg-white px-5 py-2 rounded-full text-forest-900 font-bold text-sm shadow-xl"><i class="fa-solid fa-magnifying-glass-plus mr-2"></i> 探勘路線對比分析</div>
-                                </div>
-                            </div>
-                            <div class="bg-white p-5 border-t border-gray-100">
-                                <h4 class="font-bold text-forest-900 mb-1">清水溪探勘路線 vs. 最終路線</h4>
-                                <p class="text-xs text-gray-500">紅色為最終路線，虛線為曾考慮的清水溪路徑。</p>
-                            </div>
-                        </div>
-
-                        <div class="group cursor-pointer zoom-container rounded-2xl shadow-xl overflow-hidden border border-gray-200" onclick="openModal('tatajia-cliff')">
-                            <div class="relative aspect-[16/9] bg-gray-200">
-                                <div class="absolute inset-0 image-loader z-0"></div>
-                                <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E8%B1%90%E5%B1%B1%E4%BC%91%E6%81%AF%E5%8D%80%E7%9C%8B%E5%A4%A7%E5%A1%94%E5%B1%B1%E6%96%B7%E5%B4%96.png?raw=true" class="w-full h-full object-cover zoom-image relative z-10" loading="lazy" onload="this.style.opacity=1; this.previousElementSibling.style.display='none'">
-                                <div class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded">Visual Context</div>
-                            </div>
-                            <div class="bg-white p-4 border-t border-gray-100">
-                                <h4 class="font-bold text-forest-900 mb-1 text-sm">不可跨越的屏障：大塔山斷崖</h4>
-                                <p class="text-xs text-gray-500">從豐山視角仰望，可見其幾近垂直的岩壁，說明了清水溪案不可行的地理因素。</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Profile Comparison -->
-                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-forest-100 rounded-bl-full opacity-50 z-0"></div>
-                        <h4 class="font-bold text-forest-900 mb-6 text-lg relative z-10"><i class="fa-solid fa-chart-area mr-2 text-earth-600"></i>剖面圖證據：為何這是一場不可能的任務？</h4>
-                        
-                        <!-- Failed Profile -->
-                        <div class="mb-8 group cursor-pointer" onclick="openModal('profile-failed')">
-                            <div class="text-xs font-bold text-hazard uppercase tracking-wider mb-2 flex justify-between">
-                                <span>Option A: Qingshui River Route</span>
-                                <span class="bg-hazard/10 text-hazard px-2 rounded">FAILED</span>
-                            </div>
-                            <div class="relative h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:border-hazard transition-colors">
-                                <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%A4%B1%E6%95%97%E6%9E%97%E9%90%B5%E5%89%96%E9%9D%A2%E5%9C%96.png?raw=true" class="w-full h-full object-contain mix-blend-multiply p-2" alt="Failed Profile">
-                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-white/50 transition-opacity">
-                                    <i class="fa-solid fa-plus-circle text-2xl text-hazard"></i>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">坡度過大，需短距離內爬升千米，且遭遇斷崖，工程技術無法克服。</p>
-                        </div>
-
-                        <!-- Success Profile -->
-                        <div class="group cursor-pointer" onclick="openModal('profile-success')">
-                            <div class="text-xs font-bold text-forest-700 uppercase tracking-wider mb-2 flex justify-between">
-                                <span>Option B: Current Route (Spiral)</span>
-                                <span class="bg-forest-100 text-forest-700 px-2 rounded">ADOPTED</span>
-                            </div>
-                            <div class="relative h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:border-forest-700 transition-colors">
-                                <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%9E%97%E9%90%B5%E5%89%96%E9%9D%A2%E5%9C%96.png?raw=true" class="w-full h-full object-contain mix-blend-multiply p-2" alt="Success Profile">
-                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-white/50 transition-opacity">
-                                    <i class="fa-solid fa-plus-circle text-2xl text-forest-700"></i>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">透過獨立山螺旋與之字形折返，有效延長路線長度以換取平緩坡度 (Grade)。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </section>
 
-    <!-- Part III: Geology & Disasters -->
-    <section id="disaster" class="py-24 px-4 bg-forest-900 text-earth-100 relative overflow-hidden">
-        <!-- Background Elements -->
-        <div class="absolute inset-0 bg-topo-pattern opacity-10 mix-blend-overlay"></div>
-        <div class="absolute -left-20 top-40 w-96 h-96 bg-hazard rounded-full filter blur-[150px] opacity-20"></div>
-
-        <div class="max-w-7xl mx-auto relative z-10">
-            <div class="text-center mb-20 reveal-on-scroll">
-                <span class="text-alert font-bold tracking-widest text-xs uppercase mb-2 block">Risk Assessment</span>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mb-6">參、與災害共舞：地質代價</h2>
-                <div class="h-1 w-24 bg-alert mx-auto rounded"></div>
-                <p class="mt-8 text-gray-300 max-w-2xl mx-auto text-lg font-light leading-relaxed">
-                    經濟選址與工程征服背後，隱藏著穿越地質敏感帶的環境代價。<br>請點擊下方卡片，檢視詳細的災害潛勢與地質構造分析。
+    <section id="disaster" class="py-24 px-4 bg-forest-900 text-earth-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mb-4">參、與災害共舞：地質代價</h2>
+                <div class="h-1 w-20 bg-alert mx-auto rounded"></div>
+                <p class="mt-4 text-gray-400 max-w-2xl mx-auto">
+                    經濟選址與工程征服背後，隱藏著穿越地質敏感帶的環境代價。點擊下方卡片檢視詳細地質分析。
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- Case 1: Duli Shan Geology -->
-                <article class="bg-forest-950 rounded-xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container hover:border-hazard/50 transition-colors" onclick="openModal('spiral-geo')">
+                <article class="bg-forest-800 rounded-2xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container" onclick="openModal('spiral-geo')">
                     <div class="relative h-64 overflow-hidden">
-                         <div class="absolute inset-0 image-loader z-0 opacity-20"></div>
-                        <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E7%8D%A8%E7%AB%8B%E5%B1%B1%E6%AE%B5.jpg?raw=true" class="w-full h-full object-cover zoom-image relative z-10" alt="獨立山地質" loading="lazy">
-                        <div class="absolute top-4 left-4 bg-hazard text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider z-20">High Risk</div>
-                        <div class="zoom-overlay absolute inset-0 bg-black/50 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <img src="https://i.ibb.co/F4C5HHry/image.jpg" class="w-full h-full object-cover zoom-image" alt="獨立山地質">
+                        <div class="absolute top-4 left-4 bg-hazard text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider">High Risk</div>
+                        <div class="zoom-overlay">
                             <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white drop-shadow-lg"></i>
                         </div>
                     </div>
-                    <div class="p-8">
-                        <h3 class="text-xl font-bold text-white mb-3">破碎帶的螺旋：獨立山</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">破碎帶的螺旋：獨立山</h3>
+                        <p class="text-gray-400 text-sm line-clamp-3">
                             螺旋路段地質多屬崩積層，與「山崩與地滑敏感區」高度重疊。為維持盤旋路線進行大量開挖，導致該路段長期面臨落石威脅。
                         </p>
-                        <div class="text-alert text-sm font-bold flex items-center group-hover:translate-x-2 transition-transform">
-                            查看 GIS 疊圖分析 <i class="fa-solid fa-arrow-right-long ml-3"></i>
+                        <div class="mt-4 text-alert text-sm font-medium flex items-center group-hover:translate-x-2 transition-transform">
+                            查看GIS疊圖分析 <i class="fa-solid fa-arrow-right ml-2"></i>
                         </div>
                     </div>
                 </article>
 
-                <!-- Case 2: Erwanping Geology -->
-                <article class="bg-forest-950 rounded-xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container hover:border-hazard/50 transition-colors" style="transition-delay: 150ms;" onclick="openModal('erwanping')">
+                <article class="bg-forest-800 rounded-2xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container" style="transition-delay: 200ms;" onclick="openModal('erwanping')">
                     <div class="relative h-64 overflow-hidden">
-                         <div class="absolute inset-0 image-loader z-0 opacity-20"></div>
-                        <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%B1%8F%E9%81%AE%E9%82%A3%E5%88%B0%E4%BA%8C%E8%90%AC%E5%9D%AA.jpg?raw=true" class="w-full h-full object-cover zoom-image relative z-10" alt="二萬平地質" loading="lazy">
-                        <div class="absolute top-4 left-4 bg-hazard text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider z-20 animate-pulse">Critical</div>
-                        <div class="zoom-overlay absolute inset-0 bg-black/50 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <img src="https://i.ibb.co/qYS5HfVp/image.png" class="w-full h-full object-cover zoom-image" alt="二萬平地質">
+                        <div class="absolute top-4 left-4 bg-hazard text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider">Critical</div>
+                        <div class="zoom-overlay">
                             <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white drop-shadow-lg"></i>
                         </div>
                     </div>
-                    <div class="p-8">
-                        <h3 class="text-xl font-bold text-white mb-3">順向坡的夢魘：二萬平</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                            二萬平站體完全座落於大規模「順向坡滑動區」。歷史上多次大崩塌證明，這是選址於平坦地形卻忽略地層傾角條件的典型案例。
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">順向坡的夢魘：二萬平</h3>
+                        <p class="text-gray-400 text-sm line-clamp-3">
+                            二萬平站體完全座落於大規模「順向坡滑動區」。歷史上多次大崩塌證明，這是選址於平坦地形卻忽略地質條件的典型案例。
                         </p>
-                        <div class="text-alert text-sm font-bold flex items-center group-hover:translate-x-2 transition-transform">
-                            查看順向坡分析 <i class="fa-solid fa-arrow-right-long ml-3"></i>
+                        <div class="mt-4 text-alert text-sm font-medium flex items-center group-hover:translate-x-2 transition-transform">
+                            查看順向坡分析 <i class="fa-solid fa-arrow-right ml-2"></i>
                         </div>
                     </div>
                 </article>
 
-                <!-- Case 3: Mianyue Line -->
-                <article class="bg-forest-950 rounded-xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container hover:border-alert/50 transition-colors" style="transition-delay: 300ms;" onclick="openModal('mianyue')">
+                <article class="bg-forest-800 rounded-2xl overflow-hidden shadow-2xl border border-white/5 reveal-on-scroll group cursor-pointer zoom-container" style="transition-delay: 400ms;" onclick="openModal('mianyue')">
                     <div class="relative h-64 overflow-hidden">
-                         <div class="absolute inset-0 image-loader z-0 opacity-20"></div>
-                        <img src="https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%8F%A4%E4%BB%8A%E7%9C%A0%E6%9C%88%E7%B7%9A%E5%B0%8D%E6%AF%94%E5%9C%96%20(1).jpg?raw=true" class="w-full h-full object-cover zoom-image relative z-10" alt="眠月線崩塌" loading="lazy">
-                        <div class="absolute top-4 left-4 bg-alert text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider z-20">Time Series</div>
-                        <div class="zoom-overlay absolute inset-0 bg-black/50 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <img src="https://i.ibb.co/YTF9P8Qz/image.jpg" class="w-full h-full object-cover zoom-image" alt="眠月線崩塌">
+                        <div class="absolute top-4 left-4 bg-alert text-white text-xs font-bold px-3 py-1 rounded shadow-lg uppercase tracking-wider">Time Series</div>
+                        <div class="zoom-overlay">
                             <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white drop-shadow-lg"></i>
                         </div>
                     </div>
-                    <div class="p-8">
-                        <h3 class="text-xl font-bold text-white mb-3">時空變遷：眠月線</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                            透過衛星影像時序分析 (1996 vs 2024)，眠月線周邊崩塌地持續擴大，證實早期開發擾動後，地質環境已難以自然復原。
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">時空變遷：眠月線崩塌</h3>
+                        <p class="text-gray-400 text-sm line-clamp-3">
+                            衛星影像對比顯示，眠月線周邊崩塌地持續擴大，證實早期開發擾動了地質平衡。
                         </p>
-                        <div class="text-alert text-sm font-bold flex items-center group-hover:translate-x-2 transition-transform">
-                            查看衛星影像對比 <i class="fa-solid fa-arrow-right-long ml-3"></i>
+                        <div class="mt-4 text-alert text-sm font-medium flex items-center group-hover:translate-x-2 transition-transform">
+                            查看衛星影像對比 <i class="fa-solid fa-arrow-right ml-2"></i>
                         </div>
                     </div>
                 </article>
@@ -642,260 +457,186 @@
         </div>
     </section>
 
-    <!-- Part IV: Ecology, Culture & Trivia -->
-    <section id="ecology" class="py-24 px-4 bg-earth-100 relative">
+    <section id="ecology" class="py-20 px-4 bg-earth-100">
         <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16 reveal-on-scroll">
-                <span class="text-earth-600 font-bold tracking-widest text-xs uppercase mb-2 block">Heritage Value</span>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-6">肆、生態與文化資產</h2>
-            </div>
+            <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest-900 mb-12 text-center reveal-on-scroll">肆、生態與文化資產</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
-                <!-- Ecology -->
-                <div class="bg-white p-10 rounded-xl shadow-lg reveal-on-scroll border-t-4 border-forest-700 hover:-translate-y-1 transition-transform duration-300">
-                    <div class="flex items-center gap-5 mb-6">
-                        <div class="w-14 h-14 bg-forest-100 rounded-full flex items-center justify-center text-forest-800 text-2xl">
-                            <i class="fa-solid fa-tree"></i>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                <div class="bg-white p-8 rounded-xl shadow-lg reveal-on-scroll border-t-4 border-forest-700">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-forest-100 rounded-full flex items-center justify-center text-forest-900">
+                            <i class="fa-solid fa-tree text-2xl"></i>
                         </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-forest-900">垂直生態走廊</h3>
-                            <span class="text-xs text-gray-500 font-mono uppercase">Vertical Ecosystem</span>
-                        </div>
+                        <h3 class="text-2xl font-bold text-forest-900">垂直生態走廊</h3>
                     </div>
-                    <p class="text-gray-600 mb-8 leading-loose text-justify">
-                        鐵路沿線垂直落差大，從平地到高山，造就了舉世罕見的氣候帶壓縮現象。短短 70 公里內，林相由熱帶、暖帶過渡至溫帶。
+                    <p class="text-gray-700 mb-4 leading-relaxed">
+                        鐵路沿線垂直落差大，從熱帶、暖帶到溫帶林相變化豐富。
                     </p>
                     <div class="flex gap-2 flex-wrap">
-                        <span class="px-4 py-1.5 bg-forest-100 text-forest-900 rounded-full text-xs font-bold border border-forest-200">相思樹 (低)</span>
-                        <span class="px-4 py-1.5 bg-earth-100 text-earth-900 rounded-full text-xs font-bold border border-earth-200">樟樹 (中)</span>
-                        <span class="px-4 py-1.5 bg-forest-900 text-white rounded-full text-xs font-bold shadow-sm">紅檜/扁柏 (高)</span>
+                        <span class="px-3 py-1 bg-forest-100 text-forest-900 rounded-full text-xs font-bold">相思樹 (低海拔)</span>
+                        <span class="px-3 py-1 bg-earth-100 text-earth-900 rounded-full text-xs font-bold">樟樹 (中海拔)</span>
+                        <span class="px-3 py-1 bg-forest-900 text-white rounded-full text-xs font-bold">紅檜/扁柏 (高海拔)</span>
                     </div>
                 </div>
 
-                <!-- Culture -->
-                <div class="bg-white p-10 rounded-xl shadow-lg reveal-on-scroll border-t-4 border-earth-600 hover:-translate-y-1 transition-transform duration-300">
-                    <div class="flex items-center gap-5 mb-6">
-                        <div class="w-14 h-14 bg-earth-100 rounded-full flex items-center justify-center text-earth-600 text-2xl">
-                            <i class="fa-solid fa-globe"></i>
+                <div class="bg-white p-8 rounded-xl shadow-lg reveal-on-scroll border-t-4 border-earth-600">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-earth-100 rounded-full flex items-center justify-center text-earth-600">
+                            <i class="fa-solid fa-globe text-2xl"></i>
                         </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-forest-900">國際鐵道遺產</h3>
-                            <span class="text-xs text-gray-500 font-mono uppercase">World Heritage Potential</span>
-                        </div>
+                        <h3 class="text-2xl font-bold text-forest-900">國際鐵道遺產</h3>
                     </div>
-                    <p class="text-gray-600 mb-8 leading-loose text-justify">
-                        不僅是台灣首個重要文化景觀，更積極與國際接軌。阿里山林鐵保有登山鐵路五大工法中的四項，是現存極少數仍在運行的登山鐵路活化石。
+                    <p class="text-gray-700 mb-4 leading-relaxed">
+                        2019 年公告為台灣首個重要文化景觀。與日本大井川鐵道、瑞士馬特洪哥達鐵道等多國高山鐵路締結姊妹鐵路。
                     </p>
-                    <div class="flex gap-3 flex-wrap">
-                        <span class="px-4 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs border hover:bg-white transition-colors">🇯🇵 大井川鐵道</span>
-                        <span class="px-4 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs border hover:bg-white transition-colors">🇨🇭 馬特洪哥達</span>
-                        <span class="px-4 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs border hover:bg-white transition-colors">🇮🇳 尼吉里</span>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">🇯🇵 日本</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">🇨🇭 瑞士</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">🇮🇳 印度</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Data Dashboard Box -->
-            <div class="bg-gradient-to-br from-forest-900 to-forest-950 text-white rounded-2xl p-8 md:p-12 relative overflow-hidden reveal-on-scroll shadow-2xl">
-                <!-- Decoration -->
-                <div class="absolute -top-10 -right-10 w-40 h-40 border-8 border-white/5 rounded-full"></div>
-                <div class="absolute top-10 right-20 w-10 h-10 bg-alert rounded-full opacity-20 animate-pulse"></div>
-
-                <div class="relative z-10">
-                    <h3 class="text-2xl font-serif font-bold mb-10 text-white border-l-4 border-alert pl-4">Key Statistics / 關鍵數據</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
-                        <div class="pt-4 md:pt-0 group">
-                            <div class="text-5xl font-black text-white mb-2 counter tabular-nums group-hover:text-alert transition-colors" data-target="2451">0</div>
-                            <div class="text-xs text-gray-400 tracking-widest uppercase mb-2">Meters Above Sea Level</div>
-                            <p class="text-sm font-light opacity-80">祝山站海拔 (台灣鐵路最高點)</p>
-                        </div>
-                        <div class="pt-4 md:pt-0 md:pl-10 group">
-                            <div class="text-5xl font-black text-white mb-2 group-hover:text-alert transition-colors">Shay</div>
-                            <div class="text-xs text-gray-400 tracking-widest uppercase mb-2">Locomotive Type</div>
-                            <p class="text-sm font-light opacity-80">直立式汽缸與傘型齒輪技術</p>
-                        </div>
-                        <div class="pt-4 md:pt-0 md:pl-10 group">
-                            <div class="text-5xl font-black text-white mb-2 counter tabular-nums group-hover:text-alert transition-colors" data-target="71.4">0</div>
-                            <div class="text-xs text-gray-400 tracking-widest uppercase mb-2">Kilometers</div>
-                            <p class="text-sm font-light opacity-80">主線全長 (穿越三種氣候帶)</p>
-                        </div>
+            <div class="bg-forest-900 text-white rounded-2xl p-8 md:p-12 relative overflow-hidden reveal-on-scroll">
+                <i class="fa-solid fa-circle-question absolute -top-4 -right-4 text-9xl text-white opacity-5"></i>
+                <h3 class="text-2xl font-serif font-bold mb-8 text-alert">Did You Know? 鐵道冷知識</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/20">
+                    <div class="pt-4 md:pt-0">
+                        <div class="text-4xl font-black text-white mb-2 counter" data-target="2451">0</div>
+                        <div class="text-sm text-gray-400 tracking-widest uppercase">公尺</div>
+                        <p class="mt-2 text-sm">祝山站海拔，台灣鐵路最高點</p>
+                    </div>
+                    <div class="pt-4 md:pt-0 md:pl-8">
+                        <div class="text-4xl font-black text-white mb-2">Shay</div>
+                        <div class="text-sm text-gray-400 tracking-widest uppercase">蒸汽火車</div>
+                        <p class="mt-2 text-sm">直立式汽缸與傘型齒輪，工業革命活化石</p>
+                    </div>
+                    <div class="pt-4 md:pt-0 md:pl-8">
+                        <div class="text-4xl font-black text-white mb-2">71</div>
+                        <div class="text-sm text-gray-400 tracking-widest uppercase">公里</div>
+                        <p class="mt-2 text-sm">主線全長，穿越三種氣候帶</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- References Footer -->
-    <footer id="references" class="bg-white border-t border-gray-200 pt-20 pb-10 px-4">
+    <footer id="references" class="bg-white border-t border-gray-200 py-16 px-4">
         <div class="max-w-4xl mx-auto">
-            <h2 class="text-lg font-bold text-forest-900 mb-8 border-b border-gray-200 pb-4 tracking-wide uppercase">References & Sources</h2>
+            <h2 class="text-xl font-bold text-forest-900 mb-8 border-b border-gray-200 pb-4">參考文獻與資料來源</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm text-gray-600 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm text-gray-600">
                 <div>
-                    <h3 class="font-bold text-forest-800 mb-4 flex items-center"><i class="fa-solid fa-book-open mr-2 text-earth-500"></i>歷史與空間研究</h3>
-                    <ul class="space-y-3">
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-earth-500 transition-colors">
-                            <span class="font-medium text-forest-900">蔡龍保 (2023)</span>。由森林鐵路到觀光鐵路：日治時期阿里山鐵路經營策略之轉變。《地理學報》。
-                        </li>
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-earth-500 transition-colors">
-                            <span class="font-medium text-forest-900">蔡佩蓉 (2023)</span>。從帝國森林到帝國風景：阿里山的空間生產與文化想像。
-                        </li>
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-earth-500 transition-colors">
-                            <span class="font-medium text-forest-900">總督府民政局殖產課 (1899)</span>。阿里山森林調查報告書。
-                        </li>
+                    <h3 class="font-bold text-forest-700 mb-3"><i class="fa-solid fa-book mr-2"></i>歷史與空間研究</h3>
+                    <ul class="space-y-3 list-disc list-outside pl-4">
+                        <li>蔡龍保 (2023)。由森林鐵路到觀光鐵路：日治時期阿里山鐵路經營策略之轉變 (1896-1945)。《地理學報》。</li>
+                        <li>蔡佩蓉 (2023)。從帝國森林到帝國風景：阿里山的空間生產與文化想像。</li>
+                        <li>總督府民政局殖產課 (1899)。阿里山森林調查報告書。</li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-bold text-forest-800 mb-4 flex items-center"><i class="fa-solid fa-triangle-exclamation mr-2 text-hazard"></i>地質災害分析</h3>
-                    <ul class="space-y-3">
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-hazard transition-colors">
-                            <span class="font-medium text-forest-900">Lee, J. T. et al. (2012)</span>。阿里山森林鐵路災害調查及復建規劃。
-                        </li>
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-hazard transition-colors">
-                            <span class="font-medium text-forest-900">Chou, T. Y. (2025)</span>。以大尺寸邊坡模型探討二萬坪崩塌地大規模滑動過程。
-                        </li>
-                        <li class="pl-4 border-l-2 border-gray-100 hover:border-hazard transition-colors">
-                            <span class="font-medium text-forest-900">經濟部中央地質調查所</span>。地質敏感區查詢系統。
-                        </li>
+                    <h3 class="font-bold text-hazard mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>地質災害分析</h3>
+                    <ul class="space-y-3 list-disc list-outside pl-4">
+                        <li>Lee, J. T. et al. (2012)。阿里山森林鐵路災害調查及復建規劃。</li>
+                        <li>Chou, T. Y. (2025)。以大尺寸邊坡模型探討二萬坪崩塌地大規模滑動過程。</li>
+                        <li>經濟部中央地質調查所 (2024)。地質敏感區查詢系統。</li>
                     </ul>
                 </div>
             </div>
             
-            <div class="flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 border-t border-gray-100 pt-8">
-                <p>&copy; 2025 Alishan Forest Railway Research Project.</p>
-                <p class="mt-2 md:mt-0">Designed for Digital Humanities Presentation.</p>
+            <div class="mt-12 text-center text-xs text-gray-400">
+                <p>&copy; 2025 Alishan Forest Railway Research Project. Designed for Digital Humanities.</p>
             </div>
         </div>
     </footer>
 
-    <!-- MODAL STRUCTURE -->
-    <div id="image-modal" class="modal fixed inset-0 z-[100] bg-forest-900/95 backdrop-blur-md flex items-center justify-center p-0 md:p-8" aria-hidden="true">
-        
-        <!-- Close Button -->
-        <button onclick="closeModal()" class="absolute top-4 right-4 md:top-6 md:right-6 text-white/50 hover:text-white hover:rotate-90 transition-all duration-300 z-[110] focus:outline-none bg-black/20 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur">
-            <i class="fa-solid fa-xmark text-xl"></i>
+    <div id="image-modal" class="modal fixed inset-0 z-[100] bg-forest-900/95 backdrop-blur-md hidden flex items-center justify-center p-4 md:p-8">
+        <button onclick="closeModal()" class="absolute top-4 right-4 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors z-[110]">
+            <i class="fa-solid fa-xmark text-4xl"></i>
         </button>
 
-        <div class="bg-white md:rounded-2xl overflow-hidden w-full h-full md:max-w-7xl md:max-h-[90vh] flex flex-col md:flex-row shadow-2xl relative" onclick="event.stopPropagation()">
+        <div class="bg-white rounded-2xl overflow-hidden max-w-7xl w-full max-h-[90vh] flex flex-col md:flex-row shadow-2xl relative" onclick="event.stopPropagation()">
             
-            <!-- Modal Image Side -->
-            <div class="md:w-2/3 bg-gray-100 flex items-center justify-center p-0 relative overflow-hidden group h-[40vh] md:h-full bg-topo-pattern">
-                 <!-- Loader -->
-                <div id="modal-loader" class="absolute inset-0 image-loader z-0"></div>
-                
-                <img id="modal-img" src="" alt="Detail View" class="w-full h-full object-contain transition-transform duration-500 cursor-zoom-in relative z-10 opacity-0" onload="this.style.opacity=1; document.getElementById('modal-loader').style.display='none'">
-                
-                <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur text-white text-xs px-3 py-1.5 rounded pointer-events-none z-20">
-                    <i class="fa-solid fa-arrows-up-down-left-right mr-1"></i> 滾輪或雙指可縮放
+            <div class="md:w-2/3 bg-gray-100 flex items-center justify-center p-4 md:p-0 relative overflow-hidden group">
+                <img id="modal-img" src="" alt="Detail View" class="max-h-[50vh] md:max-h-full w-full object-contain transition-transform duration-700 hover:scale-110 cursor-zoom-in">
+                <div class="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                    <i class="fa-solid fa-arrows-up-down-left-right mr-1"></i> 可縮放檢視
                 </div>
             </div>
 
-            <!-- Modal Content Side -->
-            <div class="md:w-1/3 p-6 md:p-10 overflow-y-auto bg-white flex flex-col relative h-[60vh] md:h-full shadow-[-10px_0_20px_rgba(0,0,0,0.05)]">
-                
-                <div class="mb-auto">
-                    <div class="flex items-center gap-2 mb-6">
-                        <span id="modal-tag" class="px-3 py-1 bg-forest-100 text-forest-800 rounded-full text-[10px] font-bold tracking-widest uppercase border border-forest-200">
-                            GIS Analysis
-                        </span>
-                        <div class="h-px flex-grow bg-gray-200"></div>
-                    </div>
+            <div class="md:w-1/3 p-8 md:p-10 overflow-y-auto bg-white flex flex-col relative">
+                <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-quote-right text-6xl text-forest-900"></i>
+                </div>
 
-                    <h2 id="modal-title" class="text-2xl md:text-3xl font-serif font-bold text-forest-900 mb-6 leading-tight"></h2>
+                <div class="mb-auto">
+                    <div id="modal-tag" class="inline-block px-3 py-1 bg-earth-100 text-earth-600 rounded-full text-xs font-bold tracking-widest uppercase mb-4">
+                        GIS Analysis
+                    </div>
+                    <h2 id="modal-title" class="text-2xl md:text-3xl font-serif font-bold text-forest-900 mb-6 leading-tight">
+                        </h2>
+                    <div class="w-12 h-1 bg-alert mb-6 rounded-full"></div>
                     
-                    <div class="prose prose-sm prose-stone max-w-none">
-                        <p id="modal-desc" class="text-base text-forest-800 font-medium leading-relaxed mb-6"></p>
-                        
-                        <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-earth-500">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Professional Analysis</h4>
-                            <p id="modal-analysis" class="text-gray-600 font-light leading-relaxed text-justify text-sm"></p>
-                        </div>
+                    <div class="prose prose-sm text-gray-600 leading-relaxed space-y-4">
+                        <p id="modal-desc" class="text-lg text-forest-800 font-medium">
+                            </p>
+                        <div id="modal-analysis" class="text-gray-500 font-light border-l-2 border-gray-200 pl-4 mt-4">
+                            </div>
                     </div>
                 </div>
 
-                <!-- Footer in Modal -->
-                <div class="mt-8 pt-6 border-t border-gray-100 text-xs text-gray-400 flex flex-col gap-1">
-                    <span class="font-bold text-gray-300 uppercase tracking-wider">Source Data</span>
-                    <span><i class="fa-regular fa-map mr-2"></i> Historical Topographic Maps (1904/1916)</span>
-                    <span><i class="fa-solid fa-satellite mr-2"></i> Sentinel-2 / SPOT Satellite Imagery</span>
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+                    <span><i class="fa-regular fa-image mr-1"></i> Data Source: Historical Maps / Satellite Imagery</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
-        // --- 1. Data Structure (Updated with new images) ---
+        // --- 1. Data Structure for Image Analysis ---
+        // 修正版：已全部使用 ImgBB 直連網址，確保秒開
         const imageDetails = {
             'overall-map': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E9%98%BF%E9%87%8C%E5%B1%B1%E6%9E%97%E9%90%B5%E9%81%B8%E5%9D%80%E8%88%87%E6%9E%97%E6%9C%A8%E8%B3%87%E6%BA%90%E7%A9%BA%E9%96%93%E5%88%86%E4%BD%88%E7%96%8A%E5%90%88%E5%9C%96.png?raw=true',
+                src: 'https://i.ibb.co/QF4ZdXFV/1.jpg',
                 tag: 'Macro Strategy',
                 title: '資源垂直分佈與選線策略總覽',
                 desc: '林鐵選址的根本邏輯：紅色鐵路路線精準串聯了黃色（樟腦）與綠色（紅檜）兩大經濟區塊。',
                 analysis: '透過1916年蕃地地形圖與資源分佈的疊合，我們可以清晰看見，鐵路路線的蜿蜒並非僅為了克服地形，更是為了最大化資源控制範圍。從平地的熱帶林到高山的溫帶林，鐵路成為了掠奪垂直生態資源的輸送帶。'
             },
             'spiral-camphor': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%9E%97%E9%90%B5%E4%BD%8E%E6%B5%B7%E6%8B%94%E9%81%B8%E5%9D%80%E8%88%87%E6%A8%9F%E8%85%A6%E7%94%A2%E6%A5%AD%E7%AF%84%E5%9C%8D%E7%96%8A%E5%90%88%E5%9C%96.png?raw=true',
+                src: 'https://i.ibb.co/YB8776SG/image.png',
                 tag: 'Historical Overlay',
                 title: '獨立山螺旋線：為了樟腦而盤旋',
                 desc: '疊合1904年日治臺灣堡圖，揭示螺旋線的「腹地擴張」功能。',
                 analysis: '許多人認為螺旋線（Spiral）純粹是為了爬升，但從圖中可見，螺旋路線刻意包圍了「樟腦寮」周邊的樟樹林（黃色區塊）。這是一種透過延長路線來增加腹地（Hinterland）接觸面積的經濟策略，讓火車能更有效率地將該區域的樟腦運送下山。'
             },
-            'qingshui-analysis': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%B8%85%E6%B0%B4%E6%BA%AA%E6%8E%A2%E5%8B%98%E8%B7%AF%E7%B7%9A%E8%88%87%E5%A4%A7%E5%A1%94%E5%B1%B1%E6%96%B7%E5%B4%96%E5%9C%B0%E5%BD%A2%E5%88%86%E6%9E%90%E5%9C%96.png?raw=true',
-                tag: 'Route Analysis',
-                title: '清水溪探勘路線與大塔山斷崖地形分析',
-                desc: '為何放棄距離更短的清水溪路線？圖中虛線顯示了早期探勘的清水溪路徑，直指大塔山斷崖。',
-                analysis: '這張圖說明了選址的關鍵困境。清水溪路線（虛線）雖然直線距離較短，但必須面對幾乎垂直的「大塔山斷崖」。等高線的極度密集顯示了地形的不可跨越性，迫使工程師最終選擇了繞行距離較遠、但坡度可控的現行路線（實線）。'
-            },
-            'tatajia-cliff': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E8%B1%90%E5%B1%B1%E4%BC%91%E6%81%AF%E5%8D%80%E7%9C%8B%E5%A4%A7%E5%A1%94%E5%B1%B1%E6%96%B7%E5%B4%96.png?raw=true',
-                tag: 'Field Observation',
-                title: '仰望天險：大塔山斷崖',
-                desc: '從豐山休息區視角，實地見證阻斷清水溪路線的天然屏障。',
-                analysis: '照片中高聳的岩壁即為大塔山斷崖。若當年堅持選擇清水溪路線，火車將必須在此處進行幾乎不可能的爬升。這張實景照片與GIS地形分析圖相互呼應，提供了「為何繞路」的有力視覺證據。'
-            },
-            'profile-failed': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%A4%B1%E6%95%97%E6%9E%97%E9%90%B5%E5%89%96%E9%9D%A2%E5%9C%96.png?raw=true',
-                tag: 'Engineering Failure',
-                title: '失敗的嘗試：清水溪路線剖面圖',
-                desc: '坡度分析顯示，清水溪路線需要在極短的水平距離內爬升巨大的高度。',
-                analysis: '這張剖面圖呈現了「不可能的坡度」。若採用清水溪案，其坡度將遠遠超過黏著式鐵路（Adhesion Railway）的極限（一般約為 6%）。這意味著除非改用齒軌鐵路（Rack Railway）或纜車，否則火車根本無法行駛，這在當時的成本效益考量下被否決。'
-            },
-            'profile-success': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E6%9E%97%E9%90%B5%E5%89%96%E9%9D%A2%E5%9C%96.png?raw=true',
-                tag: 'Successful Profile',
-                title: '最終方案：現行林鐵剖面圖',
-                desc: '透過螺旋與之字形折返，將坡度拉長、攤平。',
-                analysis: '相較於失敗的清水溪案，這張剖面圖顯示了坡度的平緩化。透過獨立山的螺旋繞行（增加距離換取高度）以及後段的之字形折返，工程師成功將坡度控制在 Shay 蒸汽火車可攀爬的範圍內，展現了「以迂為直」的工程智慧。'
-            },
             'spiral-geo': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E7%8D%A8%E7%AB%8B%E5%B1%B1%E6%AE%B5.jpg?raw=true',
+                src: 'https://i.ibb.co/F4C5HHry/image.jpg',
                 tag: 'Hazard Analysis',
                 title: '破碎帶上的軌跡：獨立山災害潛勢',
                 desc: '雖然解決了爬升，但螺旋線密集穿越地質敏感區。',
-                analysis: '此圖顯示該區域密布「落石」與「邊坡坍方」災害點（圖中紫色與橘色線段）。這證實了在頁岩與砂岩互層的破碎地質上，進行多層次的密集開挖（三迴旋），長期以來造成了邊坡極度不穩定，是今日林鐵維護最困難的路段之一。'
+                analysis: '此圖顯示該區域密布「落石」與「邊坡坍方」災害點。這證實了在頁岩與砂岩互層的破碎地質上，進行多層次的密集開挖（三迴旋），長期以來造成了邊坡極度不穩定，是今日林鐵維護最困難的路段之一。'
             },
             'erwanping': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%B1%8F%E9%81%AE%E9%82%A3%E5%88%B0%E4%BA%8C%E8%90%AC%E5%9D%AA.jpg?raw=true',
+                src: 'https://i.ibb.co/qYS5HfVp/image.png',
                 tag: 'Critical Failure',
                 title: '二萬平順向坡：選址的代價',
                 desc: '為了尋求平坦腹地設站，卻踏入了順向坡的陷阱。',
-                analysis: '圖中高海拔的「二萬平」車站（藍點），完全座落於大規模的「山崩與地滑地質敏感區」（灰色區塊）。這是一個經典的順向坡（Dip Slope）地形。雖然地形平坦適合設站與儲木，但地層傾角與坡面一致，一旦豪雨潤滑岩層介面，便極易發生大規模滑動。'
+                analysis: '圖中高海拔的「二萬平」車站，完全座落於大規模的「山崩與地滑地質敏感區」。這是一個經典的順向坡（Dip Slope）地形。雖然地形平坦適合設站與儲木，但地層傾角與坡面一致，一旦豪雨潤滑岩層介面，便極易發生大規模滑動。'
             },
             'mianyue': {
-                src: 'https://github.com/miuuim0018/notes/blob/main/%E5%9C%96%E7%89%87/%E5%8F%A4%E4%BB%8A%E7%9C%A0%E6%9C%88%E7%B7%9A%E5%B0%8D%E6%AF%94%E5%9C%96%20(1).jpg?raw=true',
+                src: 'https://i.ibb.co/YTF9P8Qz/image.jpg',
                 tag: 'Time Series',
                 title: '傷痕難癒：眠月線崩塌時空對比',
                 desc: '1996年與2024年衛星影像對比，見證環境回復力的喪失。',
-                analysis: '左上圖為1996年，右下圖為2024年。可以清晰看見眠月線沿線的崩塌地（粉紅線周邊白色裸露處）在近30年間並未復原，反而有擴大趨勢。這證明了高山地質一經工程擾動，加上近年極端氣候強降雨沖刷，其自然修復機制已近乎失效。'
+                analysis: '可以清晰看見眠月線沿線的崩塌地在近30年間並未復原，反而有擴大趨勢。這證明了高山地質一經工程擾動，加上近年極端氣候強降雨沖刷，其自然修復機制已近乎失效。'
             }
         };
 
         // --- 2. Modal Logic ---
         const modal = document.getElementById('image-modal');
         const modalImg = document.getElementById('modal-img');
-        const modalLoader = document.getElementById('modal-loader');
         const modalTag = document.getElementById('modal-tag');
         const modalTitle = document.getElementById('modal-title');
         const modalDesc = document.getElementById('modal-desc');
@@ -905,10 +646,6 @@
             const data = imageDetails[key];
             if (!data) return;
 
-            // Reset State
-            modalImg.style.opacity = '0';
-            modalLoader.style.display = 'block';
-
             // Populate Content
             modalImg.src = data.src;
             modalTag.innerText = data.tag;
@@ -917,10 +654,11 @@
             modalAnalysis.innerText = data.analysis;
 
             // Show Modal
-            modal.classList.remove('hidden'); // Accessibility
-            requestAnimationFrame(() => {
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity transition
+            setTimeout(() => {
                 modal.classList.add('open');
-            });
+            }, 10);
             
             // Disable body scroll
             document.body.style.overflow = 'hidden';
@@ -929,9 +667,8 @@
         function closeModal() {
             modal.classList.remove('open');
             setTimeout(() => {
-                // Clear source after transition to prevent ghosting
-                modalImg.src = '';
-            }, 300);
+                modal.classList.add('hidden');
+            }, 300); // Match transition duration
             document.body.style.overflow = 'auto';
         }
 
@@ -942,73 +679,45 @@
             }
         });
 
-        // Simple Pan/Zoom Effect for Modal Image (Mouse Move)
-        const imgContainer = modalImg.parentElement;
-        imgContainer.addEventListener('mousemove', function(e) {
-            if(window.innerWidth < 768) return; // Disable on mobile
-            const { left, top, width, height } = this.getBoundingClientRect();
-            const x = (e.clientX - left) / width;
-            const y = (e.clientY - top) / height;
-            
-            modalImg.style.transformOrigin = `${x * 100}% ${y * 100}%`;
-            modalImg.style.transform = 'scale(1.5)';
-        });
-
-        imgContainer.addEventListener('mouseleave', function() {
-            modalImg.style.transform = 'scale(1)';
-        });
-
+        // Close on clicking outside content (handled by onclick on parent div)
+        modal.onclick = function() {
+            closeModal();
+        }
 
         // --- 3. Animation Logic ---
         document.addEventListener('DOMContentLoaded', () => {
-            const observerOptions = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
-            
+            const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
                         entry.target.classList.add('animate-fade-up');
                         
-                        // Trigger Chart Animation
+                        // Trigger Chart Animation if inside
                         const charts = entry.target.querySelectorAll('.chart-bar');
                         charts.forEach(chart => {
-                            // Slight delay for charts
-                            setTimeout(() => {
-                                chart.style.width = chart.getAttribute('data-width');
-                            }, 300);
+                            chart.style.width = chart.getAttribute('data-width');
                         });
 
-                        // Trigger Number Counter
+                        // Trigger Number Counter if inside
                         const counters = entry.target.querySelectorAll('.counter');
                         counters.forEach(counter => {
                             const target = +counter.getAttribute('data-target');
-                            const duration = 2000;
-                            const start = 0;
-                            const startTime = performance.now();
+                            const duration = 2000; // ms
+                            const increment = target / (duration / 16); 
                             
-                            const updateCounter = (currentTime) => {
-                                const elapsed = currentTime - startTime;
-                                const progress = Math.min(elapsed / duration, 1);
-                                
-                                // Ease out quart
-                                const ease = 1 - Math.pow(1 - progress, 4);
-                                
-                                const current = start + (target - start) * ease;
-                                
-                                // Format logic: if target is integer, show integer, else 1 decimal
-                                if (Number.isInteger(target)) {
-                                    counter.innerText = Math.floor(current);
-                                } else {
-                                    counter.innerText = current.toFixed(1);
-                                }
-
-                                if (progress < 1) {
+                            let current = 0;
+                            const updateCounter = () => {
+                                current += increment;
+                                if (current < target) {
+                                    counter.innerText = Math.ceil(current);
                                     requestAnimationFrame(updateCounter);
                                 } else {
                                     counter.innerText = target;
                                 }
                             };
-                            requestAnimationFrame(updateCounter);
+                            updateCounter();
+                            // Remove class to prevent re-run
                             counter.classList.remove('counter');
                         });
 
@@ -1021,7 +730,7 @@
             revealElements.forEach(el => observer.observe(el));
         });
 
-        // Navbar Logic
+        // Progress Bar & Navbar Logic
         window.onscroll = function() {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -1030,17 +739,13 @@
             
             const nav = document.getElementById('navbar');
             if (winScroll > 50) {
-                nav.classList.add('bg-forest-900/95', 'shadow-lg', 'backdrop-blur-md');
-                nav.classList.remove('bg-forest-900/0');
-            } else {
-                nav.classList.remove('bg-forest-900/95', 'shadow-lg', 'backdrop-blur-md');
-                nav.classList.add('bg-forest-900/0');
+                nav.classList.add('shadow-lg', 'bg-forest-900/95');
+                nav.classList.remove('bg-transparent');
             }
         };
 
         function toggleMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         }
     </script>
 </body>
