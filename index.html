@@ -3,227 +3,472 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>期中考複習傳送門</title>
+    <title>吃電怪獸 - 租屋族必備的分帳神器</title>
+    <link rel="icon" href="https://i.ibb.co/gM8HTfnW/image.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: 'var(--bg)',
+                        surface: 'var(--surface)',
+                        surfaceHighlight: 'var(--surface-highlight)',
+                        primary: 'var(--primary)',
+                        primaryText: 'var(--primary-text)',
+                        secondary: 'var(--secondary)',
+                        accent: 'var(--accent)',
+                        textMain: 'var(--text-main)',
+                        textSub: 'var(--text-sub)',
+                        border: 'var(--border)',
+                        success: 'var(--success)'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --primary: #6366f1;       /* 主色調 (靛藍) */
-            --primary-hover: #4f46e5;
-            --bg-main: #f8fafc;       /* 背景灰 */
-            --text-main: #1e293b;     /* 深色文字 */
-            --text-muted: #64748b;    /* 次要文字 */
-            --card-bg: #ffffff;       /* 卡片背景 */
+            /* 預設 Midnight 主題 */
+            --bg: #13141f;
+            --surface: #1e2230;
+            --surface-highlight: #2a2d3e;
+            --text-main: #f5f6fa;
+            --text-sub: #a0a3bd;
+            --primary: #21e6c1;
+            --primary-text: #13141f;
+            --secondary: #f0932b;
+            --accent: #ff6b81;
+            --border: #2f3640;
+            --success: #7bed9f;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-main);
+            background-color: var(--bg);
             color: var(--text-main);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            margin: 50px auto;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 1.2rem;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* Grid Layout for Cards */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            padding: 20px;
+        div, button, nav, span, i, section, footer, code, img {
+            transition: all 0.5s ease;
         }
 
-        /* Course Card Styles */
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s ease;
-            text-decoration: none; /* Remove default link underline */
-            color: inherit;
-            border: 2px solid transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            position: relative;
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            opacity: 0.9;
+        }
+
+        .phone-mockup {
+            border: 12px solid #2f3640;
+            border-radius: 40px;
             overflow: hidden;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: var(--primary);
-        }
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            background: var(--bg-main);
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-        .card:hover .card-icon {
-            background: var(--primary);
-            transform: scale(1.1) rotate(5deg);
+            position: relative;
+            background: var(--bg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--text-main);
-        }
-        .card p {
-            color: var(--text-muted);
-            flex-grow: 1; /* Pushes the button to the bottom if text length varies */
-        }
-        .card-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #dbeafe;
-            color: #1e40af;
-            font-size: 0.8rem;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-        /* 特別為史迪奇卡片設計的標籤顏色 */
-        .card-badge.relax {
-            background: #dcfce7;
-            color: #166534;
-        }
-        /* 特別為日文卡片設計的標籤顏色 (粉色系) */
-        .card-badge.lang {
-            background: #fce7f3;
-            color: #9d174d;
-        }
-        /* 特別為地理/地圖卡片設計的標籤顏色 (橘色系) */
-        .card-badge.geo {
-            background: #ffedd5;
-            color: #c2410c;
-        }
-        /* 新增：特別為 APP 專案設計的標籤顏色 (科技青) */
-        .card-badge.tech {
-            background: #ccfbf1;
-            color: #0f766e;
+        .theme-btn-active {
+            border-color: var(--primary) !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .btn-enter {
-            margin-top: 25px;
-            padding: 10px 20px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.2s;
-            width: 100%;
-            text-align: center;
+        /* Modal 動畫通用設定 */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
-        .card:hover .btn-enter {
-            background-color: var(--primary-hover);
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
         }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .grid { grid-template-columns: 1fr; }
+        .modal-content {
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        /* Icon 呼吸燈效果 */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px var(--primary); }
+            50% { box-shadow: 0 0 20px var(--primary), 0 0 10px var(--secondary); }
         }
     </style>
 </head>
-<body>
+<body class="antialiased font-sans">
 
-    <div class="container">
-        <header>
-            <h1>🎓 期中考複習傳送門</h1>
-            <p class="subtitle">選擇科目，開始高效複習</p>
-        </header>
+    <nav class="fixed w-full z-50 bg-bg/95 border-b border-border backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <img src="https://i.ibb.co/gM8HTfnW/image.png" alt="App Icon" class="w-10 h-10 rounded-xl border border-primary/50 shadow-lg">
+                    <span class="text-xl font-bold tracking-wider text-textMain">吃電怪獸</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#features-detail" class="text-textSub hover:text-primary transition px-3 py-2 rounded-md text-sm font-medium">核心功能</a>
+                        <a href="#theme-engine" class="text-textSub hover:text-primary transition px-3 py-2 rounded-md text-sm font-medium">主題引擎</a>
+                        <a href="#team" class="text-textSub hover:text-primary transition px-3 py-2 rounded-md text-sm font-medium">團隊成員</a>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <a href="https://expo.dev/accounts/aaajin/projects/Test/builds/bc09041d-a645-4a2a-ae3e-ff3fcc9231c5" target="_blank" class="hidden md:flex bg-surfaceHighlight hover:bg-surface border border-primary text-primary px-4 py-2 rounded-full text-sm font-bold transition items-center gap-2">
+                         <i class="fa-solid fa-rocket"></i> Expo 直接開啟
+                    </a>
+                    <button onclick="toggleQrModal()" class="bg-primary hover:opacity-90 text-primaryText px-4 py-2 rounded-full text-sm font-bold transition shadow-lg shadow-primary/30 flex items-center gap-2">
+                        <i class="fa-solid fa-qrcode"></i> 掃碼下載
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-        <main class="grid">
-            
-            <a href="index.html" class="card">
-                <span class="card-badge tech">App Project</span>
-                <div class="card-icon">⚡</div>
-                <h2>吃電怪獸</h2>
-                <p>租屋族分帳神器！視覺化電力儀表板、台電費率自動試算，解決室友間的電費分攤難題。</p>
-                <div class="btn-enter">查看專案 →</div>
+    <div id="qrModal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="modal-content bg-surface p-8 rounded-3xl max-w-sm w-full text-center border border-primary relative shadow-2xl shadow-primary/20">
+            <button onclick="toggleQrModal()" class="absolute top-4 right-4 text-textSub hover:text-primary text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-4 flex justify-center">
+                 <img src="https://i.ibb.co/gM8HTfnW/image.png" alt="App Icon" class="w-16 h-16 rounded-2xl shadow-lg">
+            </div>
+            <h3 class="text-2xl font-bold mb-2 text-textMain">掃描下載 APP</h3>
+            <p class="text-textSub text-sm mb-6">使用 Android 手機相機掃描</p>
+            <div class="bg-white p-4 rounded-xl inline-block mb-6 relative">
+                <img src="https://i.ibb.co/v62nTFyS/message-Image-1766344501272.jpg" alt="Download QR Code" class="w-48 h-48 object-contain">
+                <div class="absolute inset-0 border-4 border-primary/20 rounded-xl pointer-events-none"></div>
+            </div>
+            <p class="text-xs text-textSub mb-4">如果無法掃描，請直接點擊下方按鈕</p>
+            <a href="https://expo.dev/accounts/aaajin/projects/Test/builds/bc09041d-a645-4a2a-ae3e-ff3fcc9231c5" target="_blank" class="block w-full bg-primary text-primaryText py-3 rounded-xl font-bold hover:opacity-90 transition">
+                前往下載頁面
             </a>
-
-            <a href="Project_Management_MidtermExam.html" class="card">
-                <span class="card-badge">Midterm</span>
-                <div class="card-icon">📘</div>
-                <h2>專案管理</h2>
-                <p>PMBOK 核心知識、五大流程、十大知識領域、敏捷管理、關鍵角色職責。</p>
-                <div class="btn-enter">進入複習 →</div>
-            </a>
-
-            <a href="Sports_Medicine_MidtermExam.html" class="card">
-                <span class="card-badge">Midterm</span>
-                <div class="card-icon">🏥</div>
-                <h2>運動醫學</h2>
-                <p>(尚未建立檔案) 點擊此處將連結到您的運動醫學複習筆記頁面。</p>
-                <div class="btn-enter">進入複習 →</div>
-            </a>
-
-            <a href="Japanese_Vocabulary.html" class="card">
-                <span class="card-badge lang">Language</span>
-                <div class="card-icon">🇯🇵</div>
-                <h2>日文50音單字</h2>
-                <p>平假名與片假名對照表、基礎發音規則、初級必背單字總整理。</p>
-                <div class="btn-enter">進入複習 →</div>
-            </a>
-
-            <a href="japan_prefectures.html" class="card">
-                <span class="card-badge geo">Geography</span>
-                <div class="card-icon">🗾</div>
-                <h2>日本都道府縣</h2>
-                <p>47個都道府縣、行政區劃與首府記憶。包含單字卡、翻牌對對樂與配對消除遊戲。</p>
-                <div class="btn-enter">進入挑戰 →</div>
-            </a>
-
-            <a href="map_assignment.html" class="card">
-                <span class="card-badge geo">Assignment</span>
-                <div class="card-icon">🥤</div>
-                <h2>民雄手搖杯地圖</h2>
-                <p>視覺化分析民雄手搖飲一級戰區分佈，包含炫泡熱點圖與品牌市佔率統計。</p>
-                <div class="btn-enter">查看地圖 →</div>
-            </a>
-
-            <a href="Stitch.html" class="card">
-                <span class="card-badge relax">Relax Mode</span>
-                <div class="card-icon">💙</div>
-                <h2>史迪奇日常</h2>
-                <p>讀書讀太累了嗎？休息一下，來看看藍色外星人的可愛地球生活日記吧！</p>
-                <div class="btn-enter">去被療癒 →</div>
-            </a>
-
-        </main>
+        </div>
     </div>
 
-    <footer style="margin-top: auto; padding: 20px; color: var(--text-muted); font-size: 0.9em;">
-        祝考試順利 All Pass! 💯
+    <div id="videoModal" class="modal fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="modal-content w-full max-w-5xl bg-black rounded-2xl overflow-hidden shadow-2xl relative border border-gray-800">
+            <button onclick="toggleVideoModal()" class="absolute top-4 right-4 z-20 text-white hover:text-primary bg-black/50 hover:bg-black/80 rounded-full w-10 h-10 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="aspect-video w-full relative">
+                <iframe id="yt-video" class="absolute top-0 left-0 w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <header class="relative pt-32 pb-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 z-10 mb-12 md:mb-0">
+                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-surfaceHighlight border border-border text-primary text-xs font-bold mb-6 tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    V 1.0 正式發布
+                </div>
+                <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight text-textMain">
+                    不再為了<br>
+                    <span class="gradient-text">幾塊電費</span> 感到尷尬
+                </h1>
+                <p class="text-textSub text-lg mb-8 max-w-lg leading-relaxed">
+                    專為大學生租屋族設計。精準計算個人與公用電費，內建台電累進費率，一鍵揭露房東是否超收。
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="toggleQrModal()" class="bg-primary text-primaryText px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(33,230,193,0.4)] flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-android text-xl"></i> 立即下載
+                    </button>
+                    <button onclick="toggleVideoModal()" class="bg-transparent border border-textSub text-textMain px-8 py-4 rounded-xl font-bold text-lg hover:bg-surfaceHighlight hover:border-primary hover:text-primary transition duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> 觀看展示影片
+                    </button>
+                </div>
+            </div>
+
+            <div class="md:w-1/2 flex justify-center z-10 relative">
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary rounded-full blur-[100px] opacity-20"></div>
+                <div class="phone-mockup w-[300px] h-[600px] shadow-2xl relative z-10">
+                    <div class="bg-surface p-4 flex justify-between items-center border-b border-border">
+                        <div class="flex items-center gap-2">
+                             <img src="https://i.ibb.co/gM8HTfnW/image.png" class="w-6 h-6 rounded bg-primary/20">
+                             <span class="font-bold text-textMain text-sm">吃電怪獸</span>
+                        </div>
+                        <div class="flex gap-2 text-xs">
+                            <span id="mockup-badge" class="px-2 py-1 rounded bg-surfaceHighlight text-textSub">午夜深藍</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-bg h-full">
+                        <div class="bg-surface p-4 rounded-2xl border border-border mb-4 shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-2 opacity-10">
+                                <i class="fa-solid fa-bolt text-6xl text-primary"></i>
+                            </div>
+                            <div class="text-textSub text-xs mb-1">本月預估電費</div>
+                            <div class="text-primary text-4xl font-bold">$450</div>
+                            <div class="text-xs text-textSub mt-2 flex items-center gap-1">
+                                <span class="text-success">▼ 省下 $120</span> 與上月相比
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center bg-surface p-3 rounded-xl border border-border">
+                                <div class="w-10 h-10 rounded-lg bg-surfaceHighlight flex items-center justify-center text-xl mr-3 text-textMain">💡</div>
+                                <div class="flex-1">
+                                    <div class="font-bold text-sm text-textMain">LED 燈泡</div>
+                                    <div class="text-xs text-textSub mt-1">
+                                        <span class="bg-primary text-primaryText px-1 rounded mr-1">共用</span> 10W
+                                    </div>
+                                </div>
+                                <div class="text-secondary font-bold">$20</div>
+                            </div>
+                            <div class="flex items-center bg-surface p-3 rounded-xl border border-border">
+                                <div class="w-10 h-10 rounded-lg bg-surfaceHighlight flex items-center justify-center text-xl mr-3 text-textMain">❄️</div>
+                                <div class="flex-1">
+                                    <div class="font-bold text-sm text-textMain">變頻冷氣 (我)</div>
+                                    <div class="text-xs text-textSub mt-1">
+                                        <span class="bg-surfaceHighlight text-textSub px-1 rounded mr-1">我</span> 900W
+                                    </div>
+                                </div>
+                                <div class="text-secondary font-bold">$350</div>
+                            </div>
+                        </div>
+                         <div class="absolute bottom-10 right-6 w-14 h-14 bg-primary rounded-full flex items-center justify-center text-primaryText text-2xl shadow-lg font-bold hover:scale-110 transition cursor-pointer">
+                            +
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-20 bg-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-textMain">我們想解決的<span class="text-primary">三大痛點</span></h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-surfaceHighlight rounded-xl flex items-center justify-center text-3xl mb-6 text-accent">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-textMain">用電無感</h3>
+                    <p class="text-textSub text-sm leading-relaxed">
+                        不知道吹風機、熱水器其實是耗電怪獸？內建常見家電數據，快速估算成本。
+                    </p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-surfaceHighlight rounded-xl flex items-center justify-center text-3xl mb-6 text-secondary">
+                        <i class="fa-solid fa-scale-unbalanced"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-textMain">分攤不公</h3>
+                    <p class="text-textSub text-sm leading-relaxed">
+                        獨創「分房管理系統」，公私領域分開計算，避免室友間的心理不平衡。
+                    </p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-surfaceHighlight rounded-xl flex items-center justify-center text-3xl mb-6 text-primary">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-textMain">資訊落差</h3>
+                    <p class="text-textSub text-sm leading-relaxed">
+                        導入台電累進費率公式，一鍵揭露房東超收金額，保障您的權益。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features-detail" class="py-20 bg-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center mb-24 gap-12">
+                <div class="md:w-1/2">
+                    <div class="text-primary font-bold tracking-wider mb-2 uppercase">Core Feature 01</div>
+                    <h3 class="text-3xl font-bold mb-6 text-textMain">視覺化電力儀表板</h3>
+                    <p class="text-textSub mb-6">
+                        採用卡片式設計 (Card UI)，將複雜的電器資訊群組化。您可以自訂費率，並使用 <code class="bg-surfaceHighlight px-2 py-1 rounded text-primary text-sm">Switch</code> 開關即時查看開啟/關閉特定電器對總金額的影響。
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-textSub"><i class="fa-solid fa-circle-check text-primary mr-3 text-sm"></i> 內建 LED、電磁爐等常見家電瓦數</li>
+                        <li class="flex items-center text-textSub"><i class="fa-solid fa-circle-check text-primary mr-3 text-sm"></i> 支援 每日/每週/每月 多種時間單位</li>
+                    </ul>
+                </div>
+                <div class="md:w-1/2 bg-surfaceHighlight p-6 rounded-3xl border border-border">
+                    <div class="font-mono text-xs text-textSub">
+                        <div class="flex gap-2 mb-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <p><span class="text-accent">const</span> <span class="text-primary">calculateTotal</span> = () => {</p>
+                        <p class="pl-4">appliances.<span class="text-primary">forEach</span>(app => {</p>
+                        <p class="pl-8"><span class="text-accent">if</span> (app.isActive) {</p>
+                        <p class="pl-12">monthlyHours = app.usage * 30;</p>
+                        <p class="pl-12">total += (app.watts * monthlyHours) / 1000;</p>
+                        <p class="pl-8">}</p>
+                        <p class="pl-4">});</p>
+                        <p class="pl-4">setTotalCost(total * pricePerKwh);</p>
+                        <p>}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row-reverse items-center gap-12">
+                <div class="md:w-1/2">
+                    <div class="text-secondary font-bold tracking-wider mb-2 uppercase">Core Feature 02</div>
+                    <h3 class="text-3xl font-bold mb-6 text-textMain">智慧分房結算系統</h3>
+                    <p class="text-textSub mb-6">
+                        解決合租最頭痛的問題。系統邏輯將電器分為 <span class="text-textMain font-bold">owner: 'shared'</span> 與 <span class="text-textMain font-bold">owner: 'User'</span>。
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-surface p-4 rounded-xl text-center border border-border">
+                            <div class="text-textSub text-xs mb-1">室友A 應繳</div>
+                            <div class="text-xl font-bold text-textMain">$ 570</div>
+                            <div class="text-xs text-success mt-1">含公用 $120</div>
+                        </div>
+                        <div class="bg-surface p-4 rounded-xl text-center border border-border">
+                            <div class="text-textSub text-xs mb-1">我 應繳</div>
+                            <div class="text-xl font-bold text-primary">$ 820</div>
+                            <div class="text-xs text-success mt-1">含公用 $120</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative w-full h-64 bg-surface rounded-2xl border border-border overflow-hidden flex items-center justify-center">
+                        <i class="fa-solid fa-users-viewfinder text-6xl text-surfaceHighlight"></i>
+                        <div class="absolute inset-0 flex items-center justify-center gap-8">
+                             <div class="text-center">
+                                <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center text-white text-2xl font-bold mb-2 shadow-lg z-10 relative">私</div>
+                                <div class="text-sm font-bold text-textMain">私人冷氣</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primaryText text-3xl font-bold mb-2 shadow-[0_0_30px_rgba(33,230,193,0.5)] z-20 relative">公</div>
+                                <div class="text-sm font-bold text-primary">客廳冰箱</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theme-engine" class="py-20 bg-surfaceHighlight/20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+             <h3 class="text-2xl font-bold mb-4 text-textMain">個性化主題引擎</h3>
+             <p class="text-textSub mb-8">點擊下方按鈕，即時體驗 App 的不同風格氛圍</p>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <button onclick="changeTheme('midnight')" id="btn-midnight" class="theme-btn theme-btn-active p-6 rounded-2xl bg-[#13141f] border-2 border-[#2f3640] text-center hover:shadow-xl transition group">
+                    <div class="text-[#21e6c1] font-bold mb-2 text-xl group-hover:scale-110 transition">Midnight 午夜</div>
+                    <div class="text-xs text-[#a0a3bd]">高對比度，科技感強 (預設)</div>
+                </button>
+                <button onclick="changeTheme('daylight')" id="btn-daylight" class="theme-btn p-6 rounded-2xl bg-[#f5f7fa] border-2 border-[#dfe6e9] text-center hover:shadow-xl transition group">
+                    <div class="text-[#0984e3] font-bold mb-2 text-xl group-hover:scale-110 transition">Daylight 日光</div>
+                    <div class="text-xs text-[#636e72]">白底黑字，清爽風格</div>
+                </button>
+                <button onclick="changeTheme('forest')" id="btn-forest" class="theme-btn p-6 rounded-2xl bg-[#1e272e] border-2 border-[#353b48] text-center hover:shadow-xl transition group">
+                    <div class="text-[#44bd32] font-bold mb-2 text-xl group-hover:scale-110 transition">Forest 森林</div>
+                    <div class="text-xs text-[#7f8fa6]">深綠色調，呼應節能</div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="py-20 bg-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-12 text-textMain">開發團隊</h2>
+            <div class="flex flex-wrap justify-center gap-10">
+                <div class="bg-bg px-10 py-8 rounded-2xl border border-border hover:border-primary transition group w-64">
+                    <div class="w-20 h-20 bg-surfaceHighlight rounded-full mx-auto mb-4 flex items-center justify-center text-3xl group-hover:bg-primary group-hover:text-primaryText transition duration-300">👩‍💻</div>
+                    <h3 class="text-xl font-bold text-textMain">葉怡嫻</h3>
+                    <div class="text-primary text-sm mb-2">1123846</div>
+                    <p class="text-textSub text-xs">核心程式 / Icon</p>
+                </div>
+                <div class="bg-bg px-10 py-8 rounded-2xl border border-border hover:border-primary transition group w-64">
+                    <div class="w-20 h-20 bg-surfaceHighlight rounded-full mx-auto mb-4 flex items-center justify-center text-3xl group-hover:bg-primary group-hover:text-primaryText transition duration-300">📦</div>
+                    <h3 class="text-xl font-bold text-textMain">朱書靚</h3>
+                    <div class="text-primary text-sm mb-2">1123848</div>
+                    <p class="text-textSub text-xs">打包發布 / 資源</p>
+                </div>
+                <div class="bg-bg px-10 py-8 rounded-2xl border border-border hover:border-primary transition group w-64">
+                    <div class="w-20 h-20 bg-surfaceHighlight rounded-full mx-auto mb-4 flex items-center justify-center text-3xl group-hover:bg-primary group-hover:text-primaryText transition duration-300">⚖️</div>
+                    <h3 class="text-xl font-bold text-textMain">劉芷瑩</h3>
+                    <div class="text-primary text-sm mb-2">1123850</div>
+                    <p class="text-textSub text-xs">公平算法 / 邏輯</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black py-8 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+            <p class="mb-2">&copy; 2025 吃電怪獸 Development Team.</p>
+        </div>
     </footer>
 
+    <script>
+        const themes = {
+            midnight: {
+                name: "午夜深藍", bg: '#13141f', surface: '#1e2230', surfaceHighlight: '#2a2d3e', textMain: '#f5f6fa', textSub: '#a0a3bd', primary: '#21e6c1', primaryText: '#13141f', secondary: '#f0932b', accent: '#ff6b81', border: '#2f3640', success: '#7bed9f'
+            },
+            daylight: {
+                name: "日光極簡", bg: '#f5f7fa', surface: '#ffffff', surfaceHighlight: '#f1f2f6', textMain: '#2d3436', textSub: '#636e72', primary: '#0984e3', primaryText: '#ffffff', secondary: '#00cec9', accent: '#d63031', border: '#dfe6e9', success: '#00b894'
+            },
+            forest: {
+                name: "森之靜謐", bg: '#1e272e', surface: '#2f3640', surfaceHighlight: '#353b48', textMain: '#dcdde1', textSub: '#7f8fa6', primary: '#44bd32', primaryText: '#fff', secondary: '#e1b12c', accent: '#c23616', border: '#353b48', success: '#4cd137'
+            }
+        };
+
+        function changeTheme(themeName) {
+            const theme = themes[themeName];
+            const root = document.documentElement;
+            Object.keys(theme).forEach(key => {
+                if (key !== 'name') root.style.setProperty(`--${key.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}`, theme[key]);
+            });
+
+            document.getElementById('mockup-badge').innerText = theme.name;
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('theme-btn-active'));
+            document.getElementById('btn-' + themeName).classList.add('theme-btn-active');
+        }
+
+        // 開關 QR Code 彈窗
+        function toggleQrModal() {
+            const modal = document.getElementById('qrModal');
+            modal.classList.toggle('active');
+        }
+
+        // 開關 Video 彈窗
+        function toggleVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('yt-video');
+            const isClosed = !modal.classList.contains('active');
+            
+            if (isClosed) {
+                modal.classList.add('active');
+                // 自動播放
+                iframe.src = "https://www.youtube.com/embed/FrQAzl6LuGo?si=E7Cid0xpIWJyXiJr&autoplay=1";
+            } else {
+                modal.classList.remove('active');
+                // 清空 src 以停止影片播放
+                iframe.src = "";
+            }
+        }
+
+        // 點擊 Modal 背景關閉
+        document.getElementById('qrModal').addEventListener('click', function(e) {
+            if (e.target === this) toggleQrModal();
+        });
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) toggleVideoModal();
+        });
+    </script>
 </body>
 </html>
