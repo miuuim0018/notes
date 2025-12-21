@@ -88,7 +88,7 @@
             box-shadow: 0 0 15px var(--primary);
         }
 
-        /* QR Code Modal 動畫 */
+        /* Modal 動畫通用設定 */
         .modal {
             opacity: 0;
             visibility: hidden;
@@ -110,9 +110,6 @@
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 10px var(--primary); }
             50% { box-shadow: 0 0 20px var(--primary), 0 0 10px var(--secondary); }
-        }
-        .app-icon-glow {
-            animation: pulse-glow 3s infinite;
         }
     </style>
 </head>
@@ -149,24 +146,30 @@
             <button onclick="toggleQrModal()" class="absolute top-4 right-4 text-textSub hover:text-primary text-xl">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            
             <div class="mb-4 flex justify-center">
                  <img src="https://i.ibb.co/gM8HTfnW/image.png" alt="App Icon" class="w-16 h-16 rounded-2xl shadow-lg">
             </div>
             <h3 class="text-2xl font-bold mb-2 text-textMain">掃描下載 APP</h3>
             <p class="text-textSub text-sm mb-6">使用 Android 手機相機掃描</p>
-            
             <div class="bg-white p-4 rounded-xl inline-block mb-6 relative">
                 <img src="https://i.ibb.co/v62nTFyS/message-Image-1766344501272.jpg" alt="Download QR Code" class="w-48 h-48 object-contain">
                 <div class="absolute inset-0 border-4 border-primary/20 rounded-xl pointer-events-none"></div>
             </div>
-
-            <p class="text-xs text-textSub mb-4">
-                如果無法掃描，請直接點擊下方按鈕
-            </p>
+            <p class="text-xs text-textSub mb-4">如果無法掃描，請直接點擊下方按鈕</p>
             <a href="https://expo.dev/accounts/aaajin/projects/Test/builds/bc09041d-a645-4a2a-ae3e-ff3fcc9231c5" target="_blank" class="block w-full bg-primary text-primaryText py-3 rounded-xl font-bold hover:opacity-90 transition">
                 前往下載頁面
             </a>
+        </div>
+    </div>
+
+    <div id="videoModal" class="modal fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="modal-content w-full max-w-5xl bg-black rounded-2xl overflow-hidden shadow-2xl relative border border-gray-800">
+            <button onclick="toggleVideoModal()" class="absolute top-4 right-4 z-20 text-white hover:text-primary bg-black/50 hover:bg-black/80 rounded-full w-10 h-10 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="aspect-video w-full relative">
+                <iframe id="yt-video" class="absolute top-0 left-0 w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
 
@@ -188,15 +191,14 @@
                     <button onclick="toggleQrModal()" class="bg-primary text-primaryText px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(33,230,193,0.4)] flex items-center justify-center gap-2">
                         <i class="fa-brands fa-android text-xl"></i> 立即下載
                     </button>
-                    <button class="bg-transparent border border-textSub text-textMain px-8 py-4 rounded-xl font-bold text-lg hover:bg-surfaceHighlight transition duration-300">
-                        觀看展示影片
+                    <button onclick="toggleVideoModal()" class="bg-transparent border border-textSub text-textMain px-8 py-4 rounded-xl font-bold text-lg hover:bg-surfaceHighlight hover:border-primary hover:text-primary transition duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> 觀看展示影片
                     </button>
                 </div>
             </div>
 
             <div class="md:w-1/2 flex justify-center z-10 relative">
                 <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary rounded-full blur-[100px] opacity-20"></div>
-                
                 <div class="phone-mockup w-[300px] h-[600px] shadow-2xl relative z-10">
                     <div class="bg-surface p-4 flex justify-between items-center border-b border-border">
                         <div class="flex items-center gap-2">
@@ -412,7 +414,7 @@
         </div>
     </footer>
 
-    <script>
+  <script>
         const themes = {
             midnight: {
                 name: "午夜深藍", bg: '#13141f', surface: '#1e2230', surfaceHighlight: '#2a2d3e', textMain: '#f5f6fa', textSub: '#a0a3bd', primary: '#21e6c1', primaryText: '#13141f', secondary: '#f0932b', accent: '#ff6b81', border: '#2f3640', success: '#7bed9f'
@@ -443,11 +445,29 @@
             modal.classList.toggle('active');
         }
 
+        // 開關 Video 彈窗
+        function toggleVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('yt-video');
+            const isClosed = !modal.classList.contains('active');
+            
+            if (isClosed) {
+                modal.classList.add('active');
+                // 修改：使用最乾淨的 Embed 網址格式，移除 si 參數，保留 autoplay
+                iframe.src = "https://www.youtube.com/embed/FrQAzl6LuGo?autoplay=1&rel=0";
+            } else {
+                modal.classList.remove('active');
+                // 清空 src 以停止影片播放
+                iframe.src = "";
+            }
+        }
+
         // 點擊 Modal 背景關閉
         document.getElementById('qrModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                toggleQrModal();
-            }
+            if (e.target === this) toggleQrModal();
+        });
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) toggleVideoModal();
         });
     </script>
 </body>
