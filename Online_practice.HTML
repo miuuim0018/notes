@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網路技術與資訊安全：從原理到實務全攻略</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.8;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #0f172a;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
+        }
+        .nav-link.active {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-right: 4px solid #1d4ed8;
+            font-weight: 700;
+        }
+        /* Enhanced Table Styling */
+        .tech-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .tech-table th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 700;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+        .tech-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+        .tech-table tr:hover {
+            background-color: #f8fafc;
+        }
+        /* Custom Blockquote for Exam Notes */
+        .exam-note {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .concept-card {
+            transition: transform 0.2s;
+        }
+        .concept-card:hover {
+            transform: translateY(-2px);
+        }
+        /* Q&A Accordion Style */
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- Mobile Menu Button -->
+    <div class="lg:hidden fixed top-0 w-full bg-white z-50 border-b px-4 py-3 flex justify-between items-center shadow-sm">
+        <span class="font-bold text-lg text-slate-800"><i class="fas fa-book-reader mr-2"></i>全攻略筆記</span>
+        <button id="menuBtn" class="text-slate-600 focus:outline-none hover:text-blue-600">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row min-h-screen pt-14 lg:pt-0">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="hidden lg:block w-full lg:w-72 bg-white border-r border-gray-200 fixed lg:sticky top-0 h-screen overflow-y-auto z-40 transition-transform transform -translate-x-full lg:translate-x-0 shadow-lg lg:shadow-none flex flex-col">
+            <div class="p-6 border-b border-gray-100 bg-slate-50">
+                <h1 class="text-xl font-bold text-slate-900 leading-tight">網路技術與<br>資訊安全全攻略</h1>
+                <p class="text-xs text-slate-500 mt-2 font-mono">Theory to Practice</p>
+            </div>
+            <nav class="py-4 space-y-1 flex-1 overflow-y-auto">
+                <a href="#intro" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-home w-6 text-center"></i> 導言
+                </a>
+                <a href="#part1" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-server w-6 text-center"></i> I. 基礎架構與實體層
+                </a>
+                <a href="#part2" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-network-wired w-6 text-center"></i> II. 協定與網路服務
+                </a>
+                <a href="#part3" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-wifi w-6 text-center"></i> III. 無線與行動通訊
+                </a>
+                <a href="#part4" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-terminal w-6 text-center"></i> IV. 封包分析與診斷
+                </a>
+                <a href="#part5" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-user-shield w-6 text-center"></i> V. 資訊安全防禦
+                </a>
+                <a href="#part6" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-pen-alt w-6 text-center"></i> VI. 實務考題精選
+                </a>
+                <a href="#part7" class="nav-link block px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-book-open w-6 text-center"></i> VII. 進階學術與實作
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-100 bg-yellow-50">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSctJGc7yy7kj4fl7GyVRKCS2HUa858IdF0iApSp38o_JVLvtg/viewform?usp=header" target="_blank" class="flex items-center justify-center w-full px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-lg transition-colors shadow-sm text-sm">
+                    <i class="fas fa-poll-h mr-2"></i> 填寫問卷支持筆記
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full max-w-6xl mx-auto p-4 lg:p-12 pb-24">
+            
+            <!-- Header Section -->
+            <section id="intro" class="mb-16 rounded-3xl overflow-hidden shadow-2xl gradient-header text-white p-10 lg:p-16 relative">
+                <div class="relative z-10">
+                    <h2 class="text-3xl lg:text-5xl font-extrabold mb-6 tracking-tight">網路技術與資訊安全<br><span class="text-blue-200">從原理到實務全攻略</span></h2>
+                    <p class="text-blue-100 text-lg lg:text-xl mb-8 font-light max-w-3xl">Advanced Network Technology & Information Security: Theory to Practice</p>
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/20 shadow-inner mb-8">
+                        <p class="leading-relaxed text-blue-50">本筆記整合了 <span class="font-bold text-white">OSI 七層模型</span>、<span class="font-bold text-white">TCP/IP 協定</span>、<span class="font-bold text-white">IEEE 802 標準</span>、<span class="font-bold text-white">行動通訊演進</span> 以及 <span class="font-bold text-white">資安防禦</span>。內容強化了「原理對照」與「考題實務」，適合系統化複習。</p>
+                    </div>
+
+                    <!-- Survey CTA Banner -->
+                    <div class="mt-8 p-5 bg-yellow-500/20 border border-yellow-400/40 rounded-xl backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+                        <div>
+                            <h3 class="text-yellow-200 font-bold text-lg"><i class="fas fa-clipboard-check mr-2"></i>覺得這份筆記有幫助嗎？</h3>
+                            <p class="text-yellow-50 text-sm mt-1">如果您覺得這份整理對您有幫助，請填個問卷當我的大善人滿足我的私慾</p>
+                        </div>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSctJGc7yy7kj4fl7GyVRKCS2HUa858IdF0iApSp38o_JVLvtg/viewform?usp=header" target="_blank" class="flex-shrink-0 px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-bold rounded-full shadow-md transition transform hover:scale-105 whitespace-nowrap">
+                            前往填寫問卷 <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 1: Infrastructure -->
+            <section id="part1" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第一部分：網路基礎架構與實體層</h3>
+                        <p class="text-slate-500 mt-1">Infrastructure & Physical Layer</p>
+                    </div>
+                </div>
+
+                <!-- 1.1 Network Design & Topology -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-blue-600 rounded mr-3"></span>
+                        1. 網路規劃與拓樸 (Topology)
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">網路連結模式 (拓樸)</h5>
+                            <ul class="space-y-3 text-sm text-slate-600">
+                                <li class="bg-slate-50 p-3 rounded border"><strong class="text-blue-700">匯流排 (Bus)</strong>：共用纜線，一處斷全網癱瘓 (早期技術)。</li>
+                                <li class="bg-slate-50 p-3 rounded border"><strong class="text-blue-700">星狀 (Star)</strong>：連接中央設備 (Switch)，單線故障不影響他人 (主流)。</li>
+                                <li class="bg-slate-50 p-3 rounded border"><strong class="text-blue-700">環狀 (Ring)</strong>：單向傳遞，使用 Token 控制傳輸權 (如 Token Ring)。</li>
+                                <li class="bg-slate-50 p-3 rounded border"><strong class="text-blue-700">網狀 (Mesh)</strong>：多重路徑連結，可靠性最高但成本高。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">網路架構</h5>
+                            <dl class="space-y-4 text-sm">
+                                <div>
+                                    <dt class="font-bold text-indigo-700">主從式 (Client-Server)</dt>
+                                    <dd class="text-slate-600 pl-4 border-l-2 border-indigo-200">資源集中管理、安全性高 (如 Web, Email Server)。</dd>
+                                </div>
+                                <div>
+                                    <dt class="font-bold text-indigo-700">對等式 (P2P)</dt>
+                                    <dd class="text-slate-600 pl-4 border-l-2 border-indigo-200">地位平等，資源分散、管理不易 (如 BitTorrent)。</dd>
+                                </div>
+                            </dl>
+                            <h5 class="font-bold text-slate-700 mt-6 mb-3">階層式設計 (Cisco)</h5>
+                            <ul class="list-disc ml-5 text-sm text-slate-600">
+                                <li><strong>核心層 (Core)</strong>：高速骨幹。</li>
+                                <li><strong>分散層 (Distribution)</strong>：路由、VLAN、ACL。</li>
+                                <li><strong>存取層 (Access)</strong>：終端接入 (L2 Switch)。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.2 Cabling & Ethernet Standards -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-orange-500 rounded mr-3"></span>
+                        2. 傳輸媒介與乙太網路標準
+                    </h4>
+
+                    <div class="overflow-x-auto mb-6">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th>規格標準</th>
+                                    <th>速度</th>
+                                    <th>線材媒介</th>
+                                    <th>備註 (考點)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td class="font-bold">10Base5 (粗纜)</td>
+                                    <td>10 Mbps</td>
+                                    <td>粗同軸電纜</td>
+                                    <td>匯流排拓樸，最大 500m (已淘汰)。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">10BaseT</td>
+                                    <td>10 Mbps</td>
+                                    <td>Cat 3 UTP</td>
+                                    <td><strong>T</strong> 代表 <strong>Twisted Pair</strong>。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-blue-700">1000BaseT</td>
+                                    <td>1 Gbps</td>
+                                    <td>Cat 5e/6 UTP</td>
+                                    <td>目前主流 LAN 標準。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-blue-700">1000BaseLX</td>
+                                    <td>1 Gbps</td>
+                                    <td>單模光纖</td>
+                                    <td>傳輸距離可達 5 公里。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Cat 6a</td>
+                                    <td>10 Gbps</td>
+                                    <td>Cat 6a UTP</td>
+                                    <td>抗干擾能力優於 Cat 6。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 1.3 Devices -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-teal-600 rounded mr-3"></span>
+                        3. 網路設備與 OSI 模型對照
+                    </h4>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th>設備</th>
+                                    <th>OSI 層級</th>
+                                    <th>運作原理</th>
+                                    <th>關鍵特性</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td class="font-bold">Repeater (中繼器)</td>
+                                    <td>L1 實體層</td>
+                                    <td>訊號放大再生</td>
+                                    <td>無流量管理，僅延伸距離。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Hub (集線器)</td>
+                                    <td>L1 實體層</td>
+                                    <td>盲目廣播</td>
+                                    <td>單一碰撞領域 (Collision Domain)。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-blue-700">Switch (交換器)</td>
+                                    <td>L2 資料鏈結層</td>
+                                    <td>依 MAC 轉發</td>
+                                    <td>獨享頻寬，每個埠為獨立碰撞領域。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-blue-700">Router (路由器)</td>
+                                    <td>L3 網路層</td>
+                                    <td>依 IP 路由</td>
+                                    <td>隔離廣播領域 (Broadcast Domain)。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Gateway (閘道器)</td>
+                                    <td>L4-L7</td>
+                                    <td>協定轉換</td>
+                                    <td>連接不同架構網路 (翻譯官)。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: Protocols -->
+            <section id="part2" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第二部分：協定與網路服務</h3>
+                        <p class="text-slate-500 mt-1">Protocols, DNS, DHCP & IPv6</p>
+                    </div>
+                </div>
+
+                <!-- 2.1 IP & IPv6 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-indigo-500 rounded mr-3"></span>
+                        1. IP 定址：IPv4 vs IPv6
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h5 class="font-bold text-indigo-800 mb-3">IPv4 結構與分類</h5>
+                            <ul class="text-sm text-slate-600 space-y-2 mb-4">
+                                <li><strong>Class A</strong>: 1.x.x.x - 126.x.x.x (Mask /8)</li>
+                                <li><strong>Class B</strong>: 128.x.x.x - 191.x.x.x (Mask /16)</li>
+                                <li><strong>Class C</strong>: 192.x.x.x - 223.x.x.x (Mask /24)</li>
+                                <li><strong>Private IP</strong>: 如 192.168.x.x, 需搭配 NAT。</li>
+                            </ul>
+                            <p class="text-xs bg-indigo-50 p-2 rounded text-indigo-700"><strong>CIDR</strong>: 無等級分際路由 (如 /24)，打破傳統 Class 限制，彈性配置。</p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-indigo-800 mb-3">IPv6 下世代協定</h5>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li><strong>長度</strong>: 128 位元 (16進位表示)。</li>
+                                <li><strong>簡化表頭</strong>: 移除 Checksum，提升路由器效能。</li>
+                                <li><strong>位址類型</strong>:
+                                    <ul class="list-disc ml-4 mt-1">
+                                        <li><strong>Global Unicast</strong> (2001::/16): 公開 IP。</li>
+                                        <li><strong>Link-Local</strong> (FE80::/10): 僅在連結內有效。</li>
+                                        <li><strong>Multicast</strong> (FF00::/8): 取代廣播。</li>
+                                    </ul>
+                                </li>
+                                <li><strong>SLAAC</strong>: 無狀態自動組態，即插即用。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2.2 DNS & DHCP -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-purple-600 rounded mr-3"></span>
+                        2. 核心服務：DNS 與 DHCP 詳解
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <!-- DNS -->
+                        <div class="bg-purple-50 p-5 rounded-xl border border-purple-100">
+                            <h5 class="font-bold text-purple-900 mb-3">DNS (網域名稱系統)</h5>
+                            <p class="text-sm text-slate-700 mb-2">階層式資料庫：Root (.) &rarr; TLD (.com) &rarr; SLD (google) &rarr; Host (www)。</p>
+                            <table class="w-full text-sm text-left mt-3 bg-white rounded overflow-hidden">
+                                <tr class="bg-purple-200"><th class="p-2">記錄 (RR)</th><th class="p-2">功能</th></tr>
+                                <tr><td class="p-2 font-mono font-bold">A</td><td class="p-2">主機名 &rarr; IPv4</td></tr>
+                                <tr><td class="p-2 font-mono font-bold">MX</td><td class="p-2">郵件伺服器</td></tr>
+                                <tr><td class="p-2 font-mono font-bold">CNAME</td><td class="p-2">別名 (Alias)</td></tr>
+                                <tr><td class="p-2 font-mono font-bold">PTR</td><td class="p-2">反解 (IP &rarr; 名稱)</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- DHCP -->
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                            <h5 class="font-bold text-blue-900 mb-3">DHCP (動態主機設定)</h5>
+                            <p class="text-sm text-slate-700 mb-2">使用 UDP (Port 67/68)。運作四步驟 (DORA)：</p>
+                            <ol class="list-decimal ml-5 text-sm space-y-2 text-slate-700">
+                                <li><strong>Discover</strong> (廣播): Client 找 Server。</li>
+                                <li><strong>Offer</strong>: Server 提供 IP。</li>
+                                <li><strong>Request</strong> (廣播): Client 確認租用。</li>
+                                <li><strong>Acknowledge</strong>: Server 正式授權租約。</li>
+                            </ol>
+                            <p class="text-xs text-slate-500 mt-2">* 租約過半 (50%) 時會嘗試 Renew (續約)。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2.3 TCP vs UDP -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-blue-600 rounded mr-3"></span>
+                        3. 傳輸層協定 (TCP/UDP)
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th width="15%">特性</th>
+                                    <th width="42%" class="text-blue-700">TCP</th>
+                                    <th width="43%" class="text-orange-600">UDP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td class="font-bold">連線型態</td>
+                                    <td><strong>連接導向</strong> (三向交握)</td>
+                                    <td><strong>非連接式</strong> (射後不理)</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">可靠性</td>
+                                    <td><strong>高</strong> (重送、排序、流量控制)</td>
+                                    <td><strong>低</strong> (不保證送達)</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">應用場景</td>
+                                    <td>HTTP, FTP, Email (需資料正確)</td>
+                                    <td>VoIP, 直播, DNS (需速度快)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="exam-note">
+                        <h5 class="font-bold text-blue-800 mb-1">常用 Port 速查</h5>
+                        <p class="text-sm text-slate-700">FTP(20/21), SSH(22), Telnet(23), SMTP(25), DNS(53), DHCP(67/68), HTTP(80), POP3(110), HTTPS(443)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: Wireless & IoT -->
+            <section id="part3" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第三部分：無線與行動通訊</h3>
+                        <p class="text-slate-500 mt-1">Wireless, Cellular & IoT</p>
+                    </div>
+                </div>
+
+                <!-- 3.1 Wi-Fi -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-teal-600 rounded mr-3"></span>
+                        1. Wi-Fi 技術與 AP 架設
+                    </h4>
+                    <div class="mb-6">
+                        <p class="font-bold text-teal-800 mb-2">CSMA/CA 機制</p>
+                        <p class="text-sm text-slate-600">監聽 &rarr; 等待 &rarr; RTS (請求) &rarr; CTS (允許) &rarr; 資料 &rarr; ACK (確認)。解決隱藏節點問題。</p>
+                    </div>
+
+                    <div class="overflow-x-auto mb-6">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th>標準</th>
+                                    <th>代數</th>
+                                    <th>關鍵技術</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td>802.11n</td>
+                                    <td>Wi-Fi 4</td>
+                                    <td><strong>MIMO</strong> (多輸入多輸出)</td>
+                                </tr>
+                                <tr>
+                                    <td>802.11ac</td>
+                                    <td>Wi-Fi 5</td>
+                                    <td><strong>MU-MIMO</strong> (5GHz 頻段)</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-teal-700">802.11ax</td>
+                                    <td class="font-bold text-teal-700">Wi-Fi 6</td>
+                                    <td><strong>OFDMA</strong> (多重存取，效率高)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-teal-50 p-4 rounded-lg border border-teal-100">
+                        <h5 class="font-bold text-teal-900 mb-2">AP 架設實務 (Infrastructure 模式)</h5>
+                        <ol class="list-decimal ml-5 text-sm text-teal-800 space-y-1">
+                            <li><strong>WAN 設定</strong>：接數據機，選 PPPoE (撥號) 或 DHCP。</li>
+                            <li><strong>WLAN 設定</strong>：設定 SSID 與 WPA2/WPA3 密碼。</li>
+                            <li><strong>頻道選擇</strong>：2.4G 頻段避免干擾，選擇 1, 6, 11 頻道。</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 3.2 Cellular & IoT -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-purple-600 rounded mr-3"></span>
+                        2. 行動通訊與 IoT
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">行動通訊演進</h5>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li><strong>2G (GSM)</strong>: 數位語音、簡訊 (SMS)。</li>
+                                <li><strong>3G</strong>: 上網速度提升。</li>
+                                <li><strong>4G (LTE)</strong>: 全 IP 化封包交換，OFDM 技術。</li>
+                                <li><strong>5G</strong>: 高頻寬 (10G)、低延遲 (1ms)、海量連結。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">IoT 短距通訊</h5>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li><strong>Bluetooth</strong>: 2.4G 跳頻 (FHSS)，低功耗 (BLE)。</li>
+                                <li><strong>NFC</strong>: 近場通訊 (<10cm)，高安全 (行動支付)。</li>
+                                <li><strong>ZigBee</strong>: 低速、低功耗，網狀拓樸 (智慧家庭)。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 4: Diagnostics -->
+            <section id="part4" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第四部分：封包分析與診斷</h3>
+                        <p class="text-slate-500 mt-1">Diagnostics & Analysis</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h4 class="text-xl font-bold text-slate-800 mb-4">常用指令與 Wireshark</h4>
+                    <ul class="space-y-4 text-sm font-mono text-slate-700">
+                        <li class="bg-slate-50 p-3 rounded border">
+                            <span class="text-purple-700 font-bold">ping [IP]</span>
+                            <span class="text-slate-500 block">測試連線 (ICMP)。</span>
+                        </li>
+                        <li class="bg-slate-50 p-3 rounded border">
+                            <span class="text-purple-700 font-bold">tracert</span>
+                            <span class="text-slate-500 block">追蹤路由路徑 (TTL 原理)。</span>
+                        </li>
+                        <li class="bg-slate-50 p-3 rounded border">
+                            <span class="text-purple-700 font-bold">nslookup - 8.8.8.8</span>
+                            <span class="text-slate-500 block">指定 DNS Server 查詢域名。</span>
+                        </li>
+                        <li class="bg-slate-50 p-3 rounded border">
+                            <span class="text-purple-700 font-bold">ipconfig /all</span>
+                            <span class="text-slate-500 block">查 MAC、DHCP、DNS 資訊。</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 p-4 bg-purple-50 rounded text-sm text-purple-900">
+                        <strong>Wireshark 過濾器</strong>：<code>ip.addr == x.x.x.x</code> (鎖定設備), <code>tcp.flags.syn == 1</code> (看連線請求), <code>http.request.method == "POST"</code> (看上傳)。
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 5: InfoSec -->
+            <section id="part5" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第五部分：資訊安全防禦</h3>
+                        <p class="text-slate-500 mt-1">Information Security</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                        <h4 class="text-xl font-bold text-red-700 mb-4">攻擊類型</h4>
+                        <ul class="list-disc ml-5 text-sm text-slate-700 space-y-2">
+                            <li><strong>DDoS</strong>：殭屍網路癱瘓服務。</li>
+                            <li><strong>MITM</strong>：中間人攔截未加密數據。</li>
+                            <li><strong>Phishing</strong>：釣魚郵件騙取帳密。</li>
+                            <li><strong>IP Spoofing</strong>：偽造來源 IP (如 SYN Flood)。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                        <h4 class="text-xl font-bold text-green-700 mb-4">防護機制</h4>
+                        <ul class="list-disc ml-5 text-sm text-slate-700 space-y-2">
+                            <li><strong>Wi-Fi</strong>：棄用 WEP，使用 <strong>WPA2/WPA3</strong>。</li>
+                            <li><strong>VPN</strong>：加密通道，隱藏 IP，安全遠端存取。</li>
+                            <li><strong>Firewall</strong>：狀態檢測 (Stateful)，拒絕非預期連入。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 6: Exam Questions -->
+            <section id="part6" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-pen-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第六部分：實務考題精選</h3>
+                        <p class="text-slate-500 mt-1">Exam Q&A Collection</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <div class="space-y-4">
+                        <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: 10 Base T 之中的 "T" 代表什麼？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400"><strong>Twisted Pair</strong> (雙絞線)。</p>
+                        </details>
+
+                        <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: DHCP 的 client 要求服務時，採用何種方式？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400">是採用 <strong>廣播 (Broadcast)</strong> 的方式進行 (DHCP Discover)。</p>
+                        </details>
+
+                        <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: Proxy 與 VPN 的共同功能為何？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400">都可以 <strong>隱藏真實 IP</strong>。</p>
+                        </details>
+
+                        <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: 哪一個無線傳輸技術最容易受到牆壁阻隔？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400"><strong>紅外線 (Infrared)</strong>，因為具有強烈方向性且無法穿透障礙物。</p>
+                        </details>
+
+                        <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: 在 TCP 協定中，封包遺失時如何重送？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400">由 <strong>Server 主動重送</strong> (基於 Timeout 或重複 ACK 機制)。</p>
+                        </details>
+
+                         <details class="group bg-slate-50 p-4 rounded-lg border border-slate-200 open:bg-amber-50 open:border-amber-200 transition-all">
+                            <summary class="font-bold text-slate-800 flex justify-between items-center">
+                                Q: 要解決非固定 IP 仍能連上網站，可以採用何種服務？
+                                <span class="text-slate-400 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                            </summary>
+                            <p class="text-sm text-slate-600 mt-3 pl-4 border-l-2 border-amber-400"><strong>DDNS (動態 DNS)</strong>。</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 7: Advanced Supplement (New Section) -->
+            <section id="part7" class="mb-20 scroll-mt-24">
+                <div class="flex items-center mb-8 border-b pb-4 border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-600 text-white flex items-center justify-center text-2xl shadow-lg mr-5">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800">第七部分：進階學術與實作詳解</h3>
+                        <p class="text-slate-500 mt-1">Advanced Theory & Practical Supplements</p>
+                    </div>
+                </div>
+
+                <!-- 7.1 Cabling DIY -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-cyan-600 rounded mr-3"></span>
+                        1. 網路線實作 (DIY Cabling)
+                    </h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">T568B 標準線序 (主流)</h5>
+                            <p class="text-sm text-slate-600 mb-3">由左至右 (1-8 pin)，常用於平行線 (Straight-through)。</p>
+                            <div class="flex space-x-1 text-xs text-center font-mono">
+                                <div class="w-8 bg-orange-100 text-orange-600 border border-orange-200 rounded p-1">橙白<br>1</div>
+                                <div class="w-8 bg-orange-500 text-white border border-orange-600 rounded p-1">橙<br>2</div>
+                                <div class="w-8 bg-green-100 text-green-600 border border-green-200 rounded p-1">綠白<br>3</div>
+                                <div class="w-8 bg-blue-600 text-white border border-blue-700 rounded p-1">藍<br>4</div>
+                                <div class="w-8 bg-blue-100 text-blue-600 border border-blue-200 rounded p-1">藍白<br>5</div>
+                                <div class="w-8 bg-green-500 text-white border border-green-600 rounded p-1">綠<br>6</div>
+                                <div class="w-8 bg-amber-100 text-amber-700 border border-amber-200 rounded p-1">棕白<br>7</div>
+                                <div class="w-8 bg-amber-700 text-white border border-amber-800 rounded p-1">棕<br>8</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-700 mb-3">跳線 (Crossover)</h5>
+                            <p class="text-sm text-slate-600 mb-2">一端 T568B，另一端 T568A。</p>
+                            <ul class="text-sm text-slate-600 list-disc ml-4">
+                                <li><strong>T568A 差異</strong>：1,3 對調 (綠白/橙白)，2,6 對調 (綠/橙)。</li>
+                                <li><strong>用途</strong>：同類設備連接 (電腦↔電腦, Switch↔Switch)。</li>
+                                <li><strong>備註</strong>：現代設備多支援 Auto-MDIX，平行線也可通用。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7.2 IPv6 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-indigo-600 rounded mr-3"></span>
+                        2. IPv6 進階架構
+                    </h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th>特性</th>
+                                    <th>IPv4</th>
+                                    <th>IPv6</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td class="font-bold">位址長度</td>
+                                    <td>32 bits (4 Bytes)</td>
+                                    <td>128 bits (16 Bytes)</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">表頭長度</td>
+                                    <td>20-60 Bytes (可變)</td>
+                                    <td>40 Bytes (固定) - 效率高</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">位址類型</td>
+                                    <td>Unicast, Broadcast, Multicast</td>
+                                    <td>Unicast, Multicast, <strong>Anycast</strong> (無 Broadcast)</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">自動設定</td>
+                                    <td>DHCP / APIPA</td>
+                                    <td><strong>SLAAC</strong> (Stateless Address Auto-config)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm">
+                        <p class="font-bold text-indigo-800 mb-2">IPv6 關鍵位址類型：</p>
+                        <ul class="list-disc ml-5 text-slate-700 space-y-1">
+                            <li><strong>Link-Local</strong> (FE80::/10)：僅在區域網路有效 (類似 IPv4 169.254.x.x)。</li>
+                            <li><strong>Global Unicast</strong> (2000::/3)：全球公開可路由 IP。</li>
+                            <li><strong>Multicast</strong> (FF00::/8)：取代廣播。</li>
+                            <li><strong>Loopback</strong> (::1)：等同 127.0.0.1。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 7.3 Cellular Evolution -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h4 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-purple-600 rounded mr-3"></span>
+                        3. 行動通訊演進 (1G - 5G)
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="tech-table">
+                            <thead>
+                                <tr>
+                                    <th>世代</th>
+                                    <th>訊號類型</th>
+                                    <th>關鍵技術/應用</th>
+                                    <th>備註</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr>
+                                    <td class="font-bold">1G</td>
+                                    <td>類比 (Analog)</td>
+                                    <td>AMPS (語音通話)</td>
+                                    <td>安全性低，易被竊聽。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">2G</td>
+                                    <td>數位 (Digital)</td>
+                                    <td>GSM, CDMA (語音 + 簡訊 SMS)</td>
+                                    <td>開始使用 SIM 卡。GPRS (2.5G) 支援上網。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">3G</td>
+                                    <td>數位</td>
+                                    <td>W-CDMA, CDMA2000 (高速上網)</td>
+                                    <td>支援視訊通話。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">4G</td>
+                                    <td>全 IP 分組</td>
+                                    <td><strong>LTE</strong>, OFDM (行動寬頻)</td>
+                                    <td>理論下載可達 100Mbps - 1Gbps。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-purple-700">5G</td>
+                                    <td>全 IP</td>
+                                    <td><strong>高頻寬、低延遲、廣連結</strong></td>
+                                    <td>支援 IoT, 自駕車, 遠端醫療。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="mt-20 pt-10 border-t border-slate-200 text-center text-slate-500 text-sm">
+                <p class="mb-2">&copy; 2025 Advanced Network & Security Guide.</p>
+                <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-100 inline-block text-left max-w-lg mx-auto mb-10 mt-6">
+                    <h5 class="text-yellow-800 font-bold mb-2 flex items-center justify-center"><i class="fas fa-heart text-yellow-500 mr-2"></i> 支持我們</h5>
+                    <p class="text-yellow-900/80 mb-4 text-center">覺得這份筆記對您有幫助嗎？請花一點時間填寫問卷，您的回饋能讓這份教材變得更好。</p>
+                    <div class="text-center">
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSctJGc7yy7kj4fl7GyVRKCS2HUa858IdF0iApSp38o_JVLvtg/viewform?usp=header" target="_blank" class="inline-block px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded shadow-sm transition">
+                            填寫問卷
+                        </a>
+                    </div>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" class="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-xl opacity-0 transition-opacity hover:bg-blue-700 focus:outline-none z-50 transform hover:scale-110">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Mobile Menu Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Close sidebar on link click (mobile)
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+        });
+
+        // Scroll to Top Logic
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                scrollTopBtn.classList.remove('opacity-0');
+            } else {
+                scrollTopBtn.classList.add('opacity-0');
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Active Link Highlighting
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
