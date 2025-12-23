@@ -59,7 +59,8 @@
         /* --- 懸浮標題樣式 (含半透明背板) --- */
         .hero-overlay {
             position: absolute;
-            top: 20%; /* 稍微往下調整，避免太貼頂 */
+            /* 手機版設定：往上移一點 (15%)，避免壓到內文 */
+            top: 15%; 
             left: 50%;
             transform: translateX(-50%);
             width: 90%; /* 手機版寬度 */
@@ -68,13 +69,22 @@
             z-index: 20;
             pointer-events: none;
             
-            /* 新增：半透明毛玻璃背板 */
-            background-color: rgba(0, 0, 0, 0.4); /* 40% 黑色背景 */
-            backdrop-filter: blur(4px); /* 毛玻璃模糊效果 */
-            padding: 2rem;
+            /* 半透明毛玻璃背板 */
+            background-color: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(4px); 
+            /* 手機版內距縮小 (1.5rem)，讓框變矮 */
+            padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1); /* 極細微邊框增加質感 */
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 電腦版調整：螢幕較大時回復較大的內距和位置 */
+        @media (min-width: 768px) {
+            .hero-overlay {
+                top: 20%;
+                padding: 2rem;
+            }
         }
 
         .hero-title-main {
