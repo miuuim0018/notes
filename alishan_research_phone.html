@@ -90,21 +90,20 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-     /* --- 修改後的時序地圖樣式 (解決閃爍版) --- */
+     /* --- 修改後的時序地圖樣式 (解決圖例消失與閃爍問題版) --- */
         .timelapse-wrapper {
             position: relative;
             width: 100%;
             /* 16:9 比例 (56.25%) */
             padding-bottom: 56.25%; 
-            /* 關鍵修改：將背景色改成跟地圖海洋一樣的顏色 (稍微偏藍灰)，
-               這樣萬一真的載入慢了，閃一下也不會那麼明顯是白色 */
             background-color: #d8e3e6; 
             border-radius: 0.5rem;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        .timelapse-wrapper img {
+        /* 修正點：只針對有 .tl-frame class 的圖片進行全螢幕拉伸與隱藏 */
+        .timelapse-wrapper img.tl-frame {
             position: absolute;
             top: 0;
             left: 0;
@@ -116,18 +115,19 @@
             opacity: 0;
             z-index: 1; /* 預設層級 */
             
-            /* 關鍵修改：移除 transition (淡入淡出)，改成 none */
+            /* 移除 transition (解決閃爍) */
             transition: none; 
             
             /* 效能優化 */
             will-change: opacity;
         }
 
-        .timelapse-wrapper img.active {
+        .timelapse-wrapper img.tl-frame.active {
             /* 顯示時 */
             opacity: 1;
             z-index: 10; /* 確保顯示的圖永遠壓在舊圖上面 */
         }
+        
         /* 自定義滑桿樣式 */
         input[type=range] {
             -webkit-appearance: none; 
@@ -456,6 +456,9 @@
                     const img = document.createElement('img');
                     img.src = path;
                     img.alt = `Time Point ${numStr}`;
+                    
+                    /* 修正關鍵：加入 class 讓 CSS 辨識這是地圖影格 */
+                    img.classList.add('tl-frame');
                     
                     if (i === 0) img.classList.add('active');
 
