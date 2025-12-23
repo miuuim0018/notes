@@ -16,14 +16,15 @@
             theme: {
                 extend: {
                     colors: {
-                        paper: '#F9F7F2',       // 米黃色背景 (紙張質感)
-                        forest: '#2F5D40',      // 深森林綠 (主色)
-                        soil: '#8D6E63',        // 土壤棕 (強調色/圖說)
-                        ink: '#2D2D2D',         // 深灰 (內文)
+                        paper: '#F9F7F2',       // 米黃色背景
+                        forest: '#2F5D40',      // 深森林綠
+                        soil: '#8D6E63',        // 土壤棕
+                        ink: '#2D2D2D',         // 深灰
+                        gold: '#bfa384',        // 阿里山金
                     },
                     fontFamily: {
-                        serif: ['"Noto Serif TC"', 'serif'], // 標題用襯線體
-                        sans: ['"Noto Sans TC"', 'sans-serif'], // 內文用無襯線體
+                        serif: ['"Noto Serif TC"', 'serif'], 
+                        sans: ['"Noto Sans TC"', 'sans-serif'], 
                     }
                 }
             }
@@ -36,122 +37,111 @@
             background-color: #F9F7F2;
             color: #2D2D2D;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden; 
         }
 
-        /* 閱讀進度條樣式 */
-        #progress-container {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* --- Hero 動畫區 --- */
+        #hero-container {
+            position: relative;
             width: 100%;
-            height: 6px;
+            height: 100vh; /* 全螢幕高度 */
+            background: #F9F7F2;
+            overflow: hidden;
+        }
+
+        #hero-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
             background: transparent;
-            z-index: 50;
+        }
+
+        /* --- 懸浮標題樣式 (含半透明背板) --- */
+        .hero-overlay {
+            position: absolute;
+            top: 20%; /* 稍微往下調整，避免太貼頂 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%; /* 手機版寬度 */
+            max-width: 800px; /* 電腦版最大寬度 */
+            text-align: center;
+            z-index: 20;
+            pointer-events: none;
+            
+            /* 新增：半透明毛玻璃背板 */
+            background-color: rgba(0, 0, 0, 0.4); /* 40% 黑色背景 */
+            backdrop-filter: blur(4px); /* 毛玻璃模糊效果 */
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 極細微邊框增加質感 */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-title-main {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem; 
+            font-weight: 700;
+            color: #bfa384; 
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .hero-subtitle {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        @media (min-width: 768px) {
+            .hero-title-main { font-size: 3rem; }
+            .hero-subtitle { font-size: 1.2rem; }
+        }
+
+        /* --- 原有報告 UI --- */
+        #progress-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 6px;
+            background: transparent; z-index: 50;
         }
         #progress-bar {
-            height: 100%;
-            background: #2F5D40;
-            width: 0%;
-            transition: width 0.1s;
+            height: 100%; background: #2F5D40; width: 0%; transition: width 0.1s;
         }
 
-        /* 參考文獻懸掛縮排 (Hanging Indent) */
-        .hanging-indent {
-            padding-left: 2em;
-            text-indent: -2em;
-            margin-bottom: 0.5em;
-        }
-
-        /* 圖片燈箱過渡效果 */
-        .lightbox-overlay {
-            transition: opacity 0.3s ease;
-        }
+        .hanging-indent { padding-left: 2em; text-indent: -2em; margin-bottom: 0.5em; }
+        .lightbox-overlay { transition: opacity 0.3s ease; }
+        img { max-width: 100%; height: auto; border-radius: 4px; }
+        #back-to-top:focus { outline: 4px solid #8D6E63; outline-offset: 2px; }
         
-        /* 手機版優化：圖片不切邊 */
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-
-        /* 回到頂部按鈕的焦點樣式 */
-        #back-to-top:focus {
-            outline: 4px solid #8D6E63; 
-            outline-offset: 2px;
-            box-shadow: 0 0 0 2px rgba(47, 93, 64, 0.5); 
-        }
-
-        /* PDF 嵌入容器樣式 */
         .pdf-viewer {
-            width: 100%;
-            height: 700px; /* 設定預覽高度 */
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            width: 100%; height: 700px;
+            border: 1px solid #ccc; border-radius: 6px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-     /* --- 修改後的時序地圖樣式 (解決圖例消失與閃爍問題版) --- */
         .timelapse-wrapper {
-            position: relative;
-            width: 100%;
-            /* 16:9 比例 (56.25%) */
-            padding-bottom: 56.25%; 
-            background-color: #d8e3e6; 
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative; width: 100%; padding-bottom: 56.25%; 
+            background-color: #d8e3e6; border-radius: 0.5rem;
+            overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
-        /* 修正點：只針對有 .tl-frame class 的圖片進行全螢幕拉伸與隱藏 */
         .timelapse-wrapper img.tl-frame {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            
-            /* 預設隱藏 */
-            opacity: 0;
-            z-index: 1; /* 預設層級 */
-            
-            /* 移除 transition (解決閃爍) */
-            transition: none; 
-            
-            /* 效能優化 */
-            will-change: opacity;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; z-index: 1; 
+            transition: none; will-change: opacity;
         }
-
-        .timelapse-wrapper img.tl-frame.active {
-            /* 顯示時 */
-            opacity: 1;
-            z-index: 10; /* 確保顯示的圖永遠壓在舊圖上面 */
-        }
+        .timelapse-wrapper img.tl-frame.active { opacity: 1; z-index: 10; }
         
-        /* 自定義滑桿樣式 */
-        input[type=range] {
-            -webkit-appearance: none; 
-            background: transparent; 
-        }
-        
+        input[type=range] { -webkit-appearance: none; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #2F5D40; 
-            cursor: pointer;
-            margin-top: -8px; 
-            border: 2px solid #F9F7F2;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            -webkit-appearance: none; height: 20px; width: 20px;
+            border-radius: 50%; background: #2F5D40; 
+            cursor: pointer; margin-top: -8px; 
+            border: 2px solid #F9F7F2; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #d1d5db;
-            border-radius: 2px;
+            width: 100%; height: 4px; cursor: pointer;
+            background: #d1d5db; border-radius: 2px;
         }
     </style>
 </head>
@@ -161,18 +151,24 @@
         <div id="progress-bar"></div>
     </div>
 
-    <main class="max-w-3xl mx-auto px-6 py-12 md:py-20">
-
-        <header class="mb-12 text-center border-b-2 border-forest pb-8">
-            <h1 class="font-serif text-3xl md:text-5xl font-bold text-forest mb-4 leading-tight">
+    <div id="hero-container">
+        <div class="hero-overlay">
+            <h1 class="hero-title-main">
                 阿里山林業鐵路<br>選址策略與災害潛勢分析
             </h1>
-            <div class="text-soil font-serif text-base md:text-lg space-y-2">
-                <p class="font-bold">國立嘉義大學數位學習設計與管理學系</p>
-                <p>作者：葉怡嫻、朱書靚、劉芷瑩</p>
-                <p>指導教授：李佩倫 教授</p>
+            <div class="hero-subtitle">
+                <p>國立嘉義大學數位學習設計與管理學系</p>
+                <div class="mt-4 border-t border-white/20 pt-4 flex flex-col md:flex-row justify-center gap-2 md:gap-6 text-sm md:text-base opacity-90">
+                    <p>作者：葉怡嫻、朱書靚、劉芷瑩</p>
+                    <p>指導教授：李佩倫 教授</p>
+                </div>
             </div>
-        </header>
+        </div>
+        
+        <canvas id="hero-canvas"></canvas>
+    </div>
+
+    <main class="max-w-3xl mx-auto px-6 py-12 relative z-10 -mt-32 md:-mt-48">
 
         <section class="mb-12">
             <h2 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-6 border-l-4 border-soil pl-4">壹、林鐵選址與土地利用</h2>
@@ -422,69 +418,337 @@
     </div>
 
     <script>
+        // ----------------------------------------------------
+        // Part A: 阿里山火車 Canvas 動畫邏輯 (極簡優化版)
+        // ----------------------------------------------------
+        (function() {
+            const canvas = document.getElementById('hero-canvas');
+            const container = document.getElementById('hero-container');
+            const ctx = canvas.getContext('2d', { alpha: true });
+
+            let w, h;
+            let frame = 0;
+            let time = 0;
+
+            const PI = Math.PI;
+            const TWO_PI = PI * 2;
+
+            function random(min, max) { return Math.random() * (max - min) + min; }
+            function noise(x, seed) {
+                return Math.sin(x * 0.01 + seed) * 1.0 + 
+                       Math.sin(x * 0.03 + seed * 2) * 0.5 + 
+                       Math.sin(x * 0.1 + seed * 3) * 0.25;
+            }
+
+            const CONFIG = {
+                color: {
+                    skyTop: '#0B1026', skyHori: '#632B26', sun: '#F2C94C',
+                    mountains: ['#080A10', '#121621', '#1D2536', '#252F42', '#182012'],
+                    alishanRed: '#B92B27', alishanYellow: '#F2C94C',
+                },
+                speed: 1.2,
+                groundY: 0.6, 
+                whiteSpaceH: 0.25,
+                sakuraCount: 100 
+            };
+
+            // 粒子與物件類別 (保持不變)
+            class Sakura {
+                constructor() { this.reset(true); }
+                reset(initial = false) {
+                    this.x = initial ? random(0, w) : random(w, w + 200);
+                    this.y = random(0, h * (1 - CONFIG.whiteSpaceH)); 
+                    this.z = random(0.5, 2.0);
+                    this.size = random(3, 6);
+                    this.vx = random(-1.5, -0.5) * this.z * CONFIG.speed;
+                    this.vy = random(0.2, 0.8) * this.z;
+                    this.angleX = random(0, TWO_PI); this.angleY = random(0, TWO_PI);
+                    this.velRotX = random(0.01, 0.05); this.velRotY = random(0.01, 0.05);
+                    this.color = `rgba(255, ${Math.floor(random(180, 220))}, ${Math.floor(random(200, 240))}, ${random(0.6, 0.9)})`;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    this.angleX += this.velRotX; this.angleY += this.velRotY;
+                    this.x += Math.sin(time * 0.002 + this.y * 0.01) * 0.5;
+                    if (this.x < -20 || this.y > h * (1 - CONFIG.whiteSpaceH)) this.reset();
+                }
+                draw() {
+                    let scaleX = Math.abs(Math.cos(this.angleX));
+                    let scaleY = Math.abs(Math.sin(this.angleY));
+                    ctx.save(); ctx.translate(this.x, this.y); ctx.fillStyle = this.color;
+                    if (this.z > 1.5) { ctx.shadowBlur = 5; ctx.shadowColor = this.color; }
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size * scaleX * this.z, this.size * scaleY * this.z, Math.PI/4, 0, TWO_PI);
+                    ctx.fill(); ctx.restore();
+                }
+            }
+
+            class Steam {
+                constructor(x, y, vx) {
+                    this.x = x; this.y = y; this.vx = vx + random(-0.5, 0.5);
+                    this.vy = random(-1, -2); this.life = 1.0; this.decay = random(0.005, 0.01);
+                    this.size = random(5, 15); this.grow = random(0.2, 0.4);
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy; this.vx *= 0.98;
+                    this.size += this.grow; this.life -= this.decay; this.vy *= 0.99;
+                }
+                draw() {
+                    if (this.life <= 0) return;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.life * 0.25})`;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, TWO_PI); ctx.fill();
+                }
+            }
+
+            class Carriage {
+                constructor(offsetX) {
+                    this.baseOffsetX = offsetX; 
+                    this.width = 160; this.height = 70;
+                }
+                draw(locoX, locoY, wheelRot) {
+                    const cx = locoX + this.baseOffsetX; const cy = locoY;
+                    ctx.save(); ctx.translate(cx, cy);
+                    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.filter = 'blur(8px)'; ctx.fillRect(10, -5, this.width-20, 15); ctx.filter = 'none';
+                    const drawBogie = (bx) => {
+                        ctx.save(); ctx.translate(bx, -15);
+                        ctx.fillStyle = '#222'; ctx.fillRect(-25, -5, 50, 10);
+                        const drawWheel = (wx) => {
+                            ctx.save(); ctx.translate(wx, 0); ctx.rotate(wheelRot);
+                            ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0,0,14,0,TWO_PI); ctx.fill();
+                            ctx.strokeStyle = '#444'; ctx.lineWidth=2; ctx.beginPath();
+                            for(let i=0; i<4; i++) { ctx.rotate(PI/2); ctx.moveTo(0,0); ctx.lineTo(14,0); }
+                            ctx.stroke(); ctx.restore();
+                        };
+                        drawWheel(-18); drawWheel(18); ctx.restore();
+                    };
+                    drawBogie(40); drawBogie(this.width - 40);
+                    ctx.fillStyle = CONFIG.color.alishanRed; ctx.fillRect(0, -15 - this.height, this.width, this.height);
+                    ctx.fillStyle = CONFIG.color.alishanYellow; ctx.fillRect(0, -15 - this.height/2, this.width, 5);
+                    ctx.fillStyle = '#2C3E50'; const windowWidth = 25; const gap = 10;
+                    for(let i=0; i<4; i++) {
+                        ctx.fillRect(15 + i*(windowWidth+gap), -15 - this.height + 15, windowWidth, 20);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.strokeRect(15 + i*(windowWidth+gap), -15 - this.height + 15, windowWidth, 20);
+                    }
+                    ctx.fillStyle = '#111'; ctx.fillRect(5, -15 - this.height - 5, this.width - 10, 5);
+                    ctx.fillStyle = '#333'; ctx.fillRect(this.width/2 - 10, -15 - this.height - 10, 20, 5);
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.width, -25, 20, 8);
+                    ctx.restore();
+                }
+            }
+
+            class ShayLocomotive {
+                constructor() {
+                    this.x = w * 0.5; this.y = h * CONFIG.groundY;
+                    this.wheelRot = 0; this.steamParticles = [];
+                    this.carriages = [ new Carriage(-180), new Carriage(-360), new Carriage(-540) ];
+                }
+                update() {
+                    this.bump = Math.sin(time * 0.8) * 1.2;
+                    this.drawY = this.y + this.bump;
+                    this.wheelRot += 0.15 * CONFIG.speed;
+                    if (frame % 3 === 0) { this.steamParticles.push(new Steam(this.x + 130, this.drawY - 95, -CONFIG.speed * 2)); }
+                    for (let i = this.steamParticles.length - 1; i >= 0; i--) { let s = this.steamParticles[i]; s.update(); if (s.life <= 0) this.steamParticles.splice(i, 1); }
+                }
+                draw() {
+                    this.steamParticles.forEach(s => s.draw());
+                    for(let i = this.carriages.length - 1; i >= 0; i--) { this.carriages[i].draw(this.x, this.drawY, this.wheelRot); }
+                    ctx.save(); ctx.translate(this.x, this.drawY);
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.filter = 'blur(10px)'; ctx.fillRect(-10, -5, 320, 20); ctx.filter = 'none';
+                    const drawWheel = (wx, rot) => {
+                        ctx.save(); ctx.translate(wx, -15); ctx.rotate(rot);
+                        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, TWO_PI); ctx.fill();
+                        ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.stroke();
+                        ctx.strokeStyle = '#333'; ctx.lineWidth = 2; for(let i=0; i<3; i++) { ctx.rotate(PI*2/3); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(18,0); ctx.stroke(); }
+                        ctx.restore(); ctx.fillStyle = '#222'; ctx.fillRect(wx - 8, -15 - 8, 16, 16);
+                    };
+                    drawWheel(30, this.wheelRot); drawWheel(75, this.wheelRot); drawWheel(220, this.wheelRot); drawWheel(265, this.wheelRot);
+                    ctx.strokeStyle = '#888'; ctx.lineWidth = 6; ctx.lineCap = 'round'; let shaftOffset = Math.sin(this.wheelRot) * 5; ctx.beginPath(); ctx.moveTo(30, -15 + shaftOffset); ctx.lineTo(265, -15 + shaftOffset); ctx.stroke();
+                    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(190, -70, 30, 50); ctx.fillStyle = CONFIG.color.alishanRed; ctx.fillRect(195, -65, 20, 40); let pistonY = Math.sin(this.wheelRot) * 10; ctx.fillStyle = '#AAA'; ctx.fillRect(202, -25, 6, 25 + pistonY);
+                    const ar = CONFIG.color.alishanRed;
+                    ctx.fillStyle = ar; ctx.fillRect(0, -90, 100, 75); ctx.fillStyle = '#000'; ctx.fillRect(-5, -95, 110, 10); ctx.fillStyle = '#2C3E50'; ctx.fillRect(10, -75, 30, 30); ctx.fillRect(50, -75, 30, 30);
+                    ctx.fillStyle = ar; ctx.fillRect(-60, -60, 60, 45); ctx.fillStyle = CONFIG.color.alishanYellow; ctx.fillRect(-60, -30, 60, 5);
+                    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.rect(100, -70, 180, 55); ctx.fill(); ctx.fillStyle = ar; ctx.fillRect(100, -45, 180, 5);
+                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.moveTo(250, -70); ctx.lineTo(245, -110); ctx.lineTo(265, -110); ctx.lineTo(260, -70); ctx.fill();
+                    ctx.fillStyle = ar; ctx.fillRect(243, -115, 24, 5);
+                    ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(150, -70, 12, PI, 0); ctx.fill(); ctx.beginPath(); ctx.arc(180, -70, 12, PI, 0); ctx.fill();
+                    ctx.fillStyle = '#Bfa384'; ctx.beginPath(); ctx.arc(280, -42, 10, 0, TWO_PI); ctx.fill(); ctx.fillStyle = '#000'; ctx.font = 'bold 8px Arial'; ctx.fillText('28', 274, -40);
+                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.moveTo(280, -15); ctx.lineTo(310, -5); ctx.lineTo(280, -5); ctx.fill();
+                    ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(275, -90, 8, 0, TWO_PI); ctx.fill(); ctx.globalCompositeOperation = 'screen'; let grad = ctx.createRadialGradient(275, -90, 5, 275, -90, 60); grad.addColorStop(0, 'rgba(255, 255, 200, 0.8)'); grad.addColorStop(1, 'rgba(255, 255, 200, 0)'); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(275, -90, 60, 0, TWO_PI); ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+                    ctx.restore();
+                }
+            }
+
+            class Landscape {
+                constructor() {
+                    this.layers = [
+                        { color: CONFIG.color.mountains[0], y: 0.35, amp: 150, speed: 0.1 },
+                        { color: CONFIG.color.mountains[1], y: 0.45, amp: 100, speed: 0.2 },
+                        { color: CONFIG.color.mountains[2], y: 0.55, amp: 60,  speed: 0.4 },
+                        { color: CONFIG.color.mountains[3], y: 0.65, amp: 40,  speed: 0.8 }
+                    ];
+                }
+                draw(limitY) {
+                    this.layers.forEach((layer, index) => {
+                        ctx.fillStyle = layer.color;
+                        ctx.beginPath(); ctx.moveTo(0, limitY); 
+                        let offset = time * layer.speed * CONFIG.speed;
+                        for (let x = 0; x <= w; x += 5) {
+                            let nx = (x + offset * 100) * 0.003;
+                            let hOffset = noise(nx, index * 100) * layer.amp;
+                            ctx.lineTo(x, h * layer.y - hOffset);
+                        }
+                        ctx.lineTo(w, limitY); ctx.fill();
+                        if (index < 3) { ctx.fillStyle = `rgba(180, 150, 150, ${0.1 - index * 0.02})`; ctx.fill(); }
+                    });
+                }
+            }
+
+            class Foreground {
+                constructor() {
+                    this.trees = [];
+                    for(let i=0; i<6; i++) this.trees.push({ x: random(0, w) });
+                }
+                draw(limitY) {
+                    let speed = CONFIG.speed * 8;
+                    ctx.fillStyle = '#05070a';
+                    this.trees.forEach((t) => {
+                        t.x -= speed; if(t.x < -200) t.x = w + random(0, 500);
+                        ctx.save(); ctx.translate(t.x, limitY); 
+                        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(20, -h*0.4); ctx.lineTo(50, 0); ctx.fill();
+                        ctx.beginPath(); ctx.arc(20, -h*0.4, 60, 0, TWO_PI); ctx.arc(-20, -h*0.3, 50, 0, TWO_PI); ctx.arc(50, -h*0.35, 55, 0, TWO_PI); ctx.fill();
+                        ctx.restore();
+                    });
+                }
+            }
+
+            function drawSky(limitY) {
+                let grd = ctx.createLinearGradient(0, 0, 0, limitY);
+                grd.addColorStop(0, CONFIG.color.skyTop); grd.addColorStop(0.6, '#3E2028'); grd.addColorStop(1, CONFIG.color.skyHori);
+                ctx.fillStyle = grd; ctx.fillRect(0, 0, w, limitY);
+
+                let sunX = w * 0.65; 
+                let sunY = h * 0.18; 
+                
+                ctx.save();
+                ctx.fillStyle = CONFIG.color.sun; ctx.shadowBlur = 50; ctx.shadowColor = CONFIG.color.sun;
+                ctx.beginPath(); ctx.arc(sunX, sunY, 40, 0, TWO_PI); ctx.fill(); ctx.shadowBlur = 0;
+                let glow = ctx.createRadialGradient(sunX, sunY, 40, sunX, sunY, 400);
+                glow.addColorStop(0, 'rgba(242, 201, 76, 0.4)'); glow.addColorStop(0.5, 'rgba(196, 77, 86, 0.2)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = glow; ctx.globalCompositeOperation = 'screen';
+                ctx.beginPath(); ctx.arc(sunX, sunY, 400, 0, TWO_PI); ctx.fill();
+                ctx.globalCompositeOperation = 'source-over'; ctx.restore();
+            }
+
+            function applyFilters(limitY) {
+                let grad = ctx.createRadialGradient(w/2, limitY/2, w*0.3, w/2, limitY/2, w*0.8);
+                grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.6)');
+                ctx.fillStyle = grad; ctx.fillRect(0,0,w,limitY);
+            }
+
+            // 優化後的融合濾鏡：只作用在最底部，避免把樹切斷
+            function applyBottomFade(limitY) {
+                // 漸層高度：只佔畫面的 20%
+                let fadeHeight = h * 0.2; 
+                let fadeStart = h - fadeHeight; 
+
+                // 為了安全起見，如果 limitY 比較高（螢幕很寬的時候），我們確保漸層至少蓋住 limitY
+                // 但為了自然感，主要還是靠底部漸層
+                
+                let fadeGrad = ctx.createLinearGradient(0, fadeStart, 0, h);
+                // 使用米黃色 #F9F7F2 (249, 247, 242)
+                fadeGrad.addColorStop(0, 'rgba(249, 247, 242, 0)');   
+                fadeGrad.addColorStop(0.6, 'rgba(249, 247, 242, 0.8)'); 
+                fadeGrad.addColorStop(1, 'rgba(249, 247, 242, 1)');     
+
+                ctx.fillStyle = fadeGrad;
+                ctx.fillRect(0, fadeStart, w, fadeHeight);
+            }
+
+            let landscape, fullTrain, sakuras, foreground;
+            let borderY; 
+
+            function init() {
+                w = canvas.width = container.offsetWidth;
+                h = canvas.height = container.offsetHeight;
+                borderY = h * (1 - CONFIG.whiteSpaceH); 
+                
+                landscape = new Landscape();
+                fullTrain = new ShayLocomotive();
+                sakuras = Array.from({length: CONFIG.sakuraCount}, () => new Sakura());
+                foreground = new Foreground();
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, w, h);
+                time += 0.05; frame++;
+                
+                drawSky(borderY);
+                landscape.draw(borderY);
+                fullTrain.update(); 
+                fullTrain.draw();   
+                sakuras.forEach(s => { s.update(); s.draw(); });
+                
+                ctx.filter = 'blur(3px)'; foreground.draw(borderY); ctx.filter = 'none';
+                
+                applyFilters(borderY);
+                applyBottomFade(borderY);
+
+                requestAnimationFrame(render);
+            }
+
+            window.addEventListener('resize', init);
+            init();
+            render();
+        })();
+
+        // ----------------------------------------------------
+        // Part B: 報告功能邏輯
+        // ----------------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             
-            /* ========================================= */
-            /* 1. 時序地圖 (Timelapse Map) 邏輯           */
-            /* ========================================= */
+            // 1. Timelapse
             const tlContainer = document.getElementById('tl-imageContainer');
             const tlSlider = document.getElementById('tl-slider');
             const tlPlayBtn = document.getElementById('tl-playBtn');
             const tlCurrentIdxDisplay = document.getElementById('tl-currentIdx');
             const tlLoadingText = document.getElementById('tl-loadingText');
 
-            // 設定區：根據需求修改為 png 檔名
             const config = {
-                folder: 'TimeMap',  // 資料夾名稱
-                total: 49,          // 0000 到 0048 共 49 張
-                ext: '.png',        // 這裡設定為 png
-                speed: 150          // 播放速度
+                folder: 'TimeMap',  
+                total: 49,          
+                ext: '.png',        
+                speed: 150          
             };
 
             let tlImages = [];
             let isPlaying = false;
             let playInterval = null;
 
-            // 產生路徑並預載入
             function initTimelapse() {
                 let loadedCount = 0;
-                
                 for (let i = 0; i < config.total; i++) {
-                    // 將數字轉為 4 位數格式 (例如 0 -> 0000, 1 -> 0001)
                     const numStr = String(i).padStart(4, '0');
                     const path = `${config.folder}/${numStr}${config.ext}`;
-
                     const img = document.createElement('img');
                     img.src = path;
                     img.alt = `Time Point ${numStr}`;
-                    
-                    /* 修正關鍵：加入 class 讓 CSS 辨識這是地圖影格 */
                     img.classList.add('tl-frame');
-                    
                     if (i === 0) img.classList.add('active');
-
                     img.onload = () => {
                         loadedCount++;
                         if (loadedCount === config.total) {
-                            tlLoadingText.style.display = 'none';
+                            if(tlLoadingText) tlLoadingText.style.display = 'none';
                         }
                     };
-                    
-                    img.onerror = () => {
-                        console.warn(`找不到圖片: ${path}`);
-                    }
-
-                    tlContainer.appendChild(img);
+                    img.onerror = () => { console.warn(`找不到圖片: ${path}`); }
+                    if(tlContainer) tlContainer.appendChild(img);
                     tlImages.push(img);
                 }
             }
 
             function updateFrame(index) {
-                // 移除舊的 active
                 const currentActive = tlContainer.querySelector('.active');
                 if (currentActive) currentActive.classList.remove('active');
-                
-                // 加上新的 active
                 if (tlImages[index]) {
                     tlImages[index].classList.add('active');
                     tlCurrentIdxDisplay.textContent = String(index).padStart(4, '0');
@@ -508,111 +772,81 @@
                 }
             }
 
-            // 事件監聽
-            tlSlider.addEventListener('input', (e) => {
-                // 拖動時暫停播放，避免干擾
-                if (isPlaying) togglePlay();
-                updateFrame(parseInt(e.target.value));
-            });
+            if(tlSlider) {
+                tlSlider.addEventListener('input', (e) => {
+                    if (isPlaying) togglePlay();
+                    updateFrame(parseInt(e.target.value));
+                });
+            }
+            if(tlPlayBtn) tlPlayBtn.addEventListener('click', togglePlay);
+            if(tlContainer) initTimelapse();
 
-            tlPlayBtn.addEventListener('click', togglePlay);
-
-            // 啟動時序地圖
-            initTimelapse();
-
-
-            /* ========================================= */
-            /* 2. 原有的 UI 邏輯 (進度條、燈箱等)          */
-            /* ========================================= */
-            
-            // 閱讀進度條
+            // 2. UI
             const progressBar = document.getElementById('progress-bar');
             window.addEventListener('scroll', () => {
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                 const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 const scrollPercent = (scrollTop / scrollHeight) * 100;
-                progressBar.style.width = scrollPercent + '%';
+                if(progressBar) progressBar.style.width = scrollPercent + '%';
             });
 
-            // 回到頂部按鈕
             const backToTopBtn = document.getElementById('back-to-top');
             const checkScrollPosition = () => {
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.remove('opacity-0');
                     backToTopBtn.setAttribute('tabindex', '0'); 
+                    backToTopBtn.classList.remove('hidden'); 
                 } else {
                     backToTopBtn.classList.add('opacity-0');
                     backToTopBtn.setAttribute('tabindex', '-1');
                 }
             };
-            backToTopBtn.setAttribute('tabindex', '-1'); 
-            window.addEventListener('scroll', checkScrollPosition);
-            window.addEventListener('load', checkScrollPosition); 
+            if(backToTopBtn) {
+                backToTopBtn.setAttribute('tabindex', '-1'); 
+                window.addEventListener('scroll', checkScrollPosition);
+                window.addEventListener('load', checkScrollPosition); 
+                backToTopBtn.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
 
-            backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
-            // Lightbox (燈箱)
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
             const lightboxCaption = document.getElementById('lightbox-caption');
             const closeBtn = document.getElementById('lightbox-close');
-            
-            // 注意：這裡只選擇 main figure 下的 img，這樣就不會選到 timelapse 的圖片
             const contentImages = document.querySelectorAll('main figure img');
 
             const openLightbox = (src, alt) => {
                 lightboxImg.src = src;
                 lightboxCaption.textContent = alt;
                 lightbox.classList.remove('hidden');
-                requestAnimationFrame(() => {
-                    lightbox.classList.remove('opacity-0');
-                });
-                document.body.style.overflow = 'hidden'; 
-                closeBtn.focus(); 
+                requestAnimationFrame(() => { lightbox.classList.remove('opacity-0'); });
+                document.body.style.overflow = 'hidden'; closeBtn.focus(); 
             };
-
             const closeLightbox = () => {
                 lightbox.classList.add('opacity-0');
-                setTimeout(() => {
-                    lightbox.classList.add('hidden');
-                    lightboxImg.src = '';
-                }, 300); 
+                setTimeout(() => { lightbox.classList.add('hidden'); lightboxImg.src = ''; }, 300); 
                 document.body.style.overflow = '';
             };
 
             contentImages.forEach(img => {
                 const figure = img.closest('figure');
-                if(!figure) return; // 安全檢查
-
-                figure.addEventListener('click', (e) => { 
-                    e.stopPropagation(); 
-                    openLightbox(img.src, img.alt);
-                });
-                
-                figure.setAttribute('tabindex', '0');
-                figure.setAttribute('role', 'button');
+                if(!figure) return; 
+                figure.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src, img.alt); });
+                figure.setAttribute('tabindex', '0'); figure.setAttribute('role', 'button');
                 figure.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        openLightbox(img.src, img.alt);
-                    }
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img.src, img.alt); }
                 });
             });
 
-            closeBtn.addEventListener('click', closeLightbox);
-            
-            lightbox.addEventListener('click', (e) => {
-                if (e.target === lightbox && e.target !== lightboxImg) {
-                    closeLightbox();
-                }
-            });
-
+            if(closeBtn) closeBtn.addEventListener('click', closeLightbox);
+            if(lightbox) {
+                lightbox.addEventListener('click', (e) => {
+                    if (e.target === lightbox && e.target !== lightboxImg) { closeLightbox(); }
+                });
+            }
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
-                    closeLightbox();
-                }
+                if (e.key === 'Escape' && lightbox && !lightbox.classList.contains('hidden')) { closeLightbox(); }
             });
         });
     </script>
