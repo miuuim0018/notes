@@ -90,13 +90,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- 時序地圖專用樣式 (新增) --- */
+     /* --- 修改後的時序地圖樣式 (解決閃爍版) --- */
         .timelapse-wrapper {
             position: relative;
             width: 100%;
-            /* 如果圖片比例不同，可調整此處 padding-bottom (56.25% = 16:9) */
+            /* 16:9 比例 (56.25%) */
             padding-bottom: 56.25%; 
-            background-color: #e5e5e5; 
+            /* 關鍵修改：將背景色改成跟地圖海洋一樣的顏色 (稍微偏藍灰)，
+               這樣萬一真的載入慢了，閃一下也不會那麼明顯是白色 */
+            background-color: #d8e3e6; 
             border-radius: 0.5rem;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -109,16 +111,23 @@
             width: 100%;
             height: 100%;
             object-fit: cover; 
+            
+            /* 預設隱藏 */
             opacity: 0;
-            transition: opacity 0.1s ease-in-out;
-            /* 確保這些圖片不會被通用樣式影響太多 */
-            max-width: none; 
+            z-index: 1; /* 預設層級 */
+            
+            /* 關鍵修改：移除 transition (淡入淡出)，改成 none */
+            transition: none; 
+            
+            /* 效能優化 */
+            will-change: opacity;
         }
 
         .timelapse-wrapper img.active {
+            /* 顯示時 */
             opacity: 1;
+            z-index: 10; /* 確保顯示的圖永遠壓在舊圖上面 */
         }
-
         /* 自定義滑桿樣式 */
         input[type=range] {
             -webkit-appearance: none; 
