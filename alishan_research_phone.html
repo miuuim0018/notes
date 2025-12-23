@@ -17,9 +17,9 @@
                 extend: {
                     colors: {
                         paper: '#F9F7F2',       // 米黃色背景 (紙張質感)
-                        forest: '#2F5D40',     // 深森林綠 (主色)
-                        soil: '#8D6E63',       // 土壤棕 (強調色/圖說)
-                        ink: '#2D2D2D',        // 深灰 (內文)
+                        forest: '#2F5D40',      // 深森林綠 (主色)
+                        soil: '#8D6E63',        // 土壤棕 (強調色/圖說)
+                        ink: '#2D2D2D',         // 深灰 (內文)
                     },
                     fontFamily: {
                         serif: ['"Noto Serif TC"', 'serif'], // 標題用襯線體
@@ -88,6 +88,61 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- 時序地圖專用樣式 (新增) --- */
+        .timelapse-wrapper {
+            position: relative;
+            width: 100%;
+            /* 如果圖片比例不同，可調整此處 padding-bottom (56.25% = 16:9) */
+            padding-bottom: 56.25%; 
+            background-color: #e5e5e5; 
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .timelapse-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            opacity: 0;
+            transition: opacity 0.1s ease-in-out;
+            /* 確保這些圖片不會被通用樣式影響太多 */
+            max-width: none; 
+        }
+
+        .timelapse-wrapper img.active {
+            opacity: 1;
+        }
+
+        /* 自定義滑桿樣式 */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2F5D40; 
+            cursor: pointer;
+            margin-top: -8px; 
+            border: 2px solid #F9F7F2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #d1d5db;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -158,6 +213,35 @@
             </figure>
         </section>
 
+        <section class="mb-16 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 flex items-center">
+                <span class="mr-2">⏱️</span> 時序地貌變遷模擬
+            </h3>
+            <p class="mb-4 text-base text-gray-600">
+                透過下方的時間軸滑桿，您可以動態觀察該區域隨時間推移的地貌變化。
+            </p>
+            
+            <div class="viewer-container w-full">
+                <div class="timelapse-wrapper mb-4" id="tl-imageContainer">
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-500 z-10" id="tl-loadingText">
+                        影像載入中...
+                    </div>
+                    </div>
+
+                <div class="controls flex flex-col gap-4">
+                    <input type="range" id="tl-slider" min="0" max="48" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    
+                    <div class="flex justify-between items-center">
+                        <button id="tl-playBtn" class="bg-forest hover:bg-[#234a31] text-white font-medium py-2 px-6 rounded transition-colors flex items-center gap-2 shadow-md">
+                            <span>▶ 播放</span>
+                        </button>
+                        <div class="text-soil font-serif font-bold text-lg">
+                            <span id="tl-currentIdx">0000</span> / 0048
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section class="mb-12">
             <h3 class="font-serif text-xl md:text-2xl font-bold text-forest mb-4 mt-8">二、選線工法與經營策略的轉變</h3>
             
@@ -326,9 +410,106 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            /* --- 1. 閱讀進度條邏輯 --- */
-            const progressBar = document.getElementById('progress-bar');
+            /* ========================================= */
+            /* 1. 時序地圖 (Timelapse Map) 邏輯           */
+            /* ========================================= */
+            const tlContainer = document.getElementById('tl-imageContainer');
+            const tlSlider = document.getElementById('tl-slider');
+            const tlPlayBtn = document.getElementById('tl-playBtn');
+            const tlCurrentIdxDisplay = document.getElementById('tl-currentIdx');
+            const tlLoadingText = document.getElementById('tl-loadingText');
+
+            // 設定區：根據需求修改為 png 檔名
+            const config = {
+                folder: 'TimeMap',  // 資料夾名稱
+                total: 49,          // 0000 到 0048 共 49 張
+                ext: '.png',        // 這裡設定為 png
+                speed: 150          // 播放速度
+            };
+
+            let tlImages = [];
+            let isPlaying = false;
+            let playInterval = null;
+
+            // 產生路徑並預載入
+            function initTimelapse() {
+                let loadedCount = 0;
+                
+                for (let i = 0; i < config.total; i++) {
+                    // 將數字轉為 4 位數格式 (例如 0 -> 0000, 1 -> 0001)
+                    const numStr = String(i).padStart(4, '0');
+                    const path = `${config.folder}/${numStr}${config.ext}`;
+
+                    const img = document.createElement('img');
+                    img.src = path;
+                    img.alt = `Time Point ${numStr}`;
+                    
+                    if (i === 0) img.classList.add('active');
+
+                    img.onload = () => {
+                        loadedCount++;
+                        if (loadedCount === config.total) {
+                            tlLoadingText.style.display = 'none';
+                        }
+                    };
+                    
+                    img.onerror = () => {
+                        console.warn(`找不到圖片: ${path}`);
+                    }
+
+                    tlContainer.appendChild(img);
+                    tlImages.push(img);
+                }
+            }
+
+            function updateFrame(index) {
+                // 移除舊的 active
+                const currentActive = tlContainer.querySelector('.active');
+                if (currentActive) currentActive.classList.remove('active');
+                
+                // 加上新的 active
+                if (tlImages[index]) {
+                    tlImages[index].classList.add('active');
+                    tlCurrentIdxDisplay.textContent = String(index).padStart(4, '0');
+                }
+            }
+
+            function togglePlay() {
+                if (isPlaying) {
+                    clearInterval(playInterval);
+                    tlPlayBtn.innerHTML = '<span>▶ 播放</span>';
+                    isPlaying = false;
+                } else {
+                    tlPlayBtn.innerHTML = '<span>❚❚ 暫停</span>';
+                    isPlaying = true;
+                    playInterval = setInterval(() => {
+                        let nextVal = parseInt(tlSlider.value) + 1;
+                        if (nextVal >= config.total) nextVal = 0;
+                        tlSlider.value = nextVal;
+                        updateFrame(nextVal);
+                    }, config.speed);
+                }
+            }
+
+            // 事件監聽
+            tlSlider.addEventListener('input', (e) => {
+                // 拖動時暫停播放，避免干擾
+                if (isPlaying) togglePlay();
+                updateFrame(parseInt(e.target.value));
+            });
+
+            tlPlayBtn.addEventListener('click', togglePlay);
+
+            // 啟動時序地圖
+            initTimelapse();
+
+
+            /* ========================================= */
+            /* 2. 原有的 UI 邏輯 (進度條、燈箱等)          */
+            /* ========================================= */
             
+            // 閱讀進度條
+            const progressBar = document.getElementById('progress-bar');
             window.addEventListener('scroll', () => {
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                 const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -336,9 +517,8 @@
                 progressBar.style.width = scrollPercent + '%';
             });
 
-            /* --- 2. 回到頂部按鈕邏輯 --- */
+            // 回到頂部按鈕
             const backToTopBtn = document.getElementById('back-to-top');
-            
             const checkScrollPosition = () => {
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.remove('opacity-0');
@@ -348,26 +528,21 @@
                     backToTopBtn.setAttribute('tabindex', '-1');
                 }
             };
-
             backToTopBtn.setAttribute('tabindex', '-1'); 
-
             window.addEventListener('scroll', checkScrollPosition);
             window.addEventListener('load', checkScrollPosition); 
 
             backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-                document.querySelector('h1').focus(); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            /* --- 3. Lightbox (燈箱) 邏輯 --- */
+            // Lightbox (燈箱)
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
             const lightboxCaption = document.getElementById('lightbox-caption');
             const closeBtn = document.getElementById('lightbox-close');
             
+            // 注意：這裡只選擇 main figure 下的 img，這樣就不會選到 timelapse 的圖片
             const contentImages = document.querySelectorAll('main figure img');
 
             const openLightbox = (src, alt) => {
@@ -390,15 +565,15 @@
                 document.body.style.overflow = '';
             };
 
-            // 為每張圖片添加點擊事件及鍵盤無障礙處理
             contentImages.forEach(img => {
                 const figure = img.closest('figure');
+                if(!figure) return; // 安全檢查
+
                 figure.addEventListener('click', (e) => { 
                     e.stopPropagation(); 
                     openLightbox(img.src, img.alt);
                 });
                 
-                // 鍵盤無障礙：使其可聚焦並用 Enter 鍵開啟燈箱
                 figure.setAttribute('tabindex', '0');
                 figure.setAttribute('role', 'button');
                 figure.addEventListener('keydown', (e) => {
@@ -409,17 +584,14 @@
                 });
             });
 
-            // 關閉事件綁定
             closeBtn.addEventListener('click', closeLightbox);
             
-            // 點擊背景關閉
             lightbox.addEventListener('click', (e) => {
                 if (e.target === lightbox && e.target !== lightboxImg) {
                     closeLightbox();
                 }
             });
 
-            // ESC 鍵關閉
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
                     closeLightbox();
