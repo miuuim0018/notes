@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案管理全方位深度筆記 (PMP Essence)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --sidebar-width: 280px;
+            --border-color: #e9ecef;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --important-bg: #fff3cd;
+            --important-text: #856404;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 側邊導航欄 */
+        nav {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            z-index: 100;
+        }
+
+        nav h1 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-weight: 700;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            margin-bottom: 0.8rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #666;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            display: block;
+            padding: 0.3rem 0;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        /* 主要內容區域 */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 3rem 4rem;
+            max-width: 1200px;
+        }
+
+        /* 章節樣式 */
+        section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2.5rem;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.3rem;
+        }
+
+        h4 {
+            color: #555;
+            margin: 1rem 0 0.5rem;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        /* 列表樣式 */
+        ul {
+            list-style-position: inside;
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        /* 數學公式區塊 */
+        .formula-box {
+            background-color: #f8f9fa;
+            border: 1px dashed var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        /* 重點提示 */
+        .highlight-box {
+            background-color: var(--important-bg);
+            color: var(--important-text);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .highlight-box strong {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            nav {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>專案管理深度筆記</h1>
+        <ul>
+            <li><a href="#intro">首頁說明</a></li>
+            <li><a href="#cost">一、專案成本管理</a></li>
+            <li><a href="#procurement">二、專案採購管理</a></li>
+            <li><a href="#quality">三、專案品質管理</a></li>
+            <li><a href="#risk">四、專案風險管理</a></li>
+            <li><a href="#execution">五、專案執行</a></li>
+            <li><a href="#monitoring">六、專案監控 (EVM)</a></li>
+            <li><a href="#termination">七、專案終止</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="intro">
+            <h2>筆記說明</h2>
+            <p>這是一份經過專業整合與梳理的專案管理全方位深度筆記。筆記結構依照專案管理的邏輯流（規劃 &rarr; 執行 &rarr; 監控 &rarr; 結案）編排，並整合了關鍵概念、計算公式（EVM、PERT、溝通管道）及考試重點。</p>
+        </section>
+
+        <section id="cost">
+            <h2>一、專案成本管理 (Project Cost Management)</h2>
+            <p><strong>核心目標：</strong>確保專案在核准的預算內完成。</p>
+
+            <h3>1. 成本類型與關鍵觀念</h3>
+            <p>在進行估算前，必須釐清不同的成本屬性：</p>
+            <ul>
+                <li><strong>直接成本 (Direct Costs)：</strong>可直接歸屬於專案產出的成本（如專案團隊薪資、原料）。</li>
+                <li><strong>間接成本 (Indirect Costs)：</strong>由多個專案共享，難以直接歸屬的成本（如公司房租、水電、管理費）。</li>
+                <li><strong>固定成本 (Fixed Costs)：</strong>不隨生產量變動的成本（如設備租賃費）。</li>
+                <li><strong>變動成本 (Variable Costs)：</strong>隨生產量變動的成本（如燃料、耗材）。</li>
+                <li><strong>生命週期成本 (Life Cycle Costing)：</strong>決策時需考慮「開發成本」加上未來的「維運成本」。</li>
+            </ul>
+
+            <div class="highlight-box">
+                <strong>重要考點 - 隱沒成本 (Sunk Costs)</strong>
+                指過去已投入且無法回收的成本。在進行未來投資決策時，絕不應將隱沒成本納入考量，應只看未來的效益。
+            </div>
+
+            <h3>2. 成本估算技術</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法</th>
+                        <th>定義與特徵</th>
+                        <th>精確度</th>
+                        <th>適用時機</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>專家判斷</td>
+                        <td>依賴專家經驗與直覺 (含德爾菲法)。</td>
+                        <td>低</td>
+                        <td>資訊模糊、專案初期。</td>
+                    </tr>
+                    <tr>
+                        <td>類比估算</td>
+                        <td>參考過去類似專案的實際成本 (由上而下)。</td>
+                        <td>低至中</td>
+                        <td>資訊不足、需快速估算時。</td>
+                    </tr>
+                    <tr>
+                        <td>參數估算</td>
+                        <td>利用統計模型 (如迴歸分析、COCOMO)。</td>
+                        <td>中至高</td>
+                        <td>有歷史數據與參數模型支持時。</td>
+                    </tr>
+                    <tr>
+                        <td>由下而上估算</td>
+                        <td>將 WBS 工作包逐一估算後累加。</td>
+                        <td>最高</td>
+                        <td>需要高精確度，但最耗時、成本高。</td>
+                    </tr>
+                    <tr>
+                        <td>三點估算 (PERT)</td>
+                        <td>考量不確定性，使用加權平均。</td>
+                        <td>高</td>
+                        <td>處理風險較高的活動時。</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="formula-box">
+                <h4>PERT 計算公式</h4>
+                $$C_E = \frac{C_O + 4C_M + C_P}{6}$$
+                <p style="font-size: 0.9em; margin-top: 10px;">
+                    \(C_E\)：預期成本 | \(C_O\)：樂觀 | \(C_M\)：最可能 | \(C_P\)：悲觀
+                </p>
+            </div>
+
+            <h3>3. 預算編列結構 (由下而上堆疊)</h3>
+            <ul>
+                <li><strong>工作成本估算</strong>：最底層的活動成本。</li>
+                <li>+ <strong>應變儲備 (Contingency Reserves)</strong>：應對「已知風險 (Known-Unknowns)」。包含在成本基線 (Cost Baseline) 中，PM 可直接動用。</li>
+                <li>+ <strong>管理儲備 (Management Reserves)</strong>：應對「未知風險 (Unknown-Unknowns)」。不包含在成本基線中，但屬於專案總預算。動用需經高層核准。</li>
+                <li>= <strong>專案總預算 (Total Budget)</strong>。</li>
+            </ul>
+        </section>
+
+        <section id="procurement">
+            <h2>二、專案採購管理 (Project Procurement Management)</h2>
+            <p><strong>核心目標：</strong>從外部獲取產品或服務，並管理合約風險。</p>
+
+            <h3>1. 自製或外購 (Make or Buy) 分析</h3>
+            <p>決策標準：成本、產能、保密性、技術能力。需計算損益平衡點 (Break-even point)。</p>
+
+            <h3>2. 合約類型與風險承擔</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>合約類型</th>
+                        <th>描述</th>
+                        <th>風險承擔</th>
+                        <th>適用情境</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>固定價款 (FP)</td>
+                        <td>總價固定 (如 FFP, FPIF)。</td>
+                        <td>賣方風險最高<br>買方風險最低</td>
+                        <td>範疇明確定義完整時。</td>
+                    </tr>
+                    <tr>
+                        <td>成本償還 (CR)</td>
+                        <td>實報實銷 (如 CPFF, CPIF)。</td>
+                        <td>買方風險最高<br>賣方風險最低</td>
+                        <td>範疇不明確、探索性專案。</td>
+                    </tr>
+                    <tr>
+                        <td>工料計價 (T&M)</td>
+                        <td>混合型，約定單價但總量未定。</td>
+                        <td>中等</td>
+                        <td>無法快速定義範疇、短期支援。</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="formula-box">
+                <h4>總概括承受點 (PTA) 計算 (針對 FPIF 合約)</h4>
+                <p>當成本超過此點，賣方需自行吸收所有超支。</p>
+                $$PTA = \frac{(價格上限 - 目標價格)}{買方分攤比例} + 目標成本$$
+            </div>
+
+            <h3>3. 關鍵採購文件</h3>
+            <ul>
+                <li><strong>SOW (工作說明書)：</strong>詳細描述規格、數量、品質。</li>
+                <li><strong>RFP (邀標書)：</strong>徵求建議書 (Proposal)，看廠商「如何做」。</li>
+                <li><strong>RFQ (報價單)：</strong>徵求報價 (Quote)，看廠商「多少錢」。</li>
+            </ul>
+        </section>
+
+        <section id="quality">
+            <h2>三、專案品質管理 (Project Quality Management)</h2>
+            <p><strong>核心目標：</strong>確保產出符合需求且適用。預防勝於治療。</p>
+
+            <h3>1. 核心區辨</h3>
+            <ul>
+                <li><strong>品質 (Quality) vs. 等級 (Grade)：</strong>品質是「符合需求的程度」；等級是「功能的類別」。<br><em>結論：等級低不是問題，但品質低（有瑕疵）一定是問題。</em></li>
+                <li><strong>精確度 (Precision) vs. 準確度 (Accuracy)：</strong>精確是指結果集中、穩定；準確是指結果接近目標值。</li>
+                <li><strong>QA vs. QC：</strong>
+                    <ul>
+                        <li>QA (品質保證)：管「過程」，預防缺陷（Process-oriented）。</li>
+                        <li>QC (品質管制)：管「結果」，檢查缺陷（Product-oriented）。</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>2. 品質成本 (COQ)</h3>
+            <ul>
+                <li><strong>一致性成本 (預防成本)：</strong>預防失敗的投資（培訓、測試設備）。趨勢是增加此項以降低失敗成本。</li>
+                <li><strong>非一致性成本 (失敗成本)：</strong>
+                    <ul>
+                        <li>內部失敗：出貨前發現（重工、報廢）。</li>
+                        <li>外部失敗：出貨後發現（退貨、賠償、商譽損失），代價最高。</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>3. 品質管制七大工具 (QC 7 Tools)</h3>
+            <ul>
+                <li><strong>因果圖 (魚骨圖)：</strong>尋找問題的根本原因 (Root Cause)，常用 5 Whys。</li>
+                <li><strong>柏拉圖 (Pareto Chart)：</strong>80/20 法則，找出造成 80% 問題的 20% 主要原因（優先處理）。</li>
+                <li><strong>管制圖 (Control Charts)：</strong>監控製程是否穩定。</li>
+                <li style="margin-left: 20px; color: #d35400;"><strong>七點法則 (Seven Run Rule)：</strong>若連續 7 點落在平均值的同一側，或呈現連續上升/下降趨勢，視為非隨機的異常，需介入調查。</li>
+                <li><strong>散佈圖：</strong>分析兩變數相關性。</li>
+                <li><strong>直方圖：</strong>顯示數據分佈型態。</li>
+                <li><strong>檢查表：</strong>收集數據。</li>
+                <li><strong>流程圖：</strong>找出流程瓶頸。</li>
+            </ul>
+        </section>
+
+        <section id="risk">
+            <h2>四、專案風險管理 (Project Risk Management)</h2>
+            <p><strong>核心目標：</strong>極大化正面機會，極小化負面威脅。</p>
+
+            <h3>1. 風險定義與公式</h3>
+            <p>風險 = 機率 (Probability) × 衝擊 (Impact)。</p>
+            <p>風險效用：分為風險趨避者、風險中立者、風險追尋者。</p>
+
+            <h3>2. 管理流程</h3>
+            <ul>
+                <li><strong>識別：</strong>產出風險登錄表 (Risk Register)，使用腦力激盪、SWOT 分析。</li>
+                <li><strong>定性分析：</strong>評估 P 與 I，製作矩陣並排序（如十大風險）。</li>
+                <li><strong>定量分析：</strong>量化財務影響。
+                    <ul>
+                        <li>EMV (預期貨幣值)：決策樹分析。</li>
+                        <li>蒙地卡羅模擬：模擬多種可能性分佈。</li>
+                    </ul>
+                </li>
+                <li><strong>規劃應對：</strong>
+                    <ul>
+                        <li>負面風險策略：規避 (Avoid)、轉移 (Transfer/Insurance)、減輕 (Mitigate)、接受 (Accept)。</li>
+                    </ul>
+                </li>
+                <li><strong>其他風險：</strong>
+                    <ul>
+                        <li>殘餘風險：應對後剩下的風險。</li>
+                        <li>次級風險：因應對措施而衍生的新風險。</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <section id="execution">
+            <h2>五、專案執行 (Project Execution)</h2>
+            <p><strong>核心目標：</strong>依計畫執行工作，消耗最多資源的階段。</p>
+
+            <h3>1. 團隊發展 (Tuckman 模型)</h3>
+            <ol>
+                <li><strong>形成期 (Forming)：</strong>禮貌、觀察。</li>
+                <li><strong>風暴期 (Storming)：</strong>衝突、爭執（生產力最低）。</li>
+                <li><strong>規範期 (Norming)：</strong>建立共識與習慣。</li>
+                <li><strong>執行期 (Performing)：</strong>高效運作、解決問題。</li>
+                <li><strong>解散期 (Adjourning)：</strong>任務結束。</li>
+            </ol>
+
+            <h3>2. 溝通管理</h3>
+            <div class="formula-box">
+                <h4>溝通管道數公式</h4>
+                $$Channels = \frac{N \times (N-1)}{2}$$
+                <p>N 為利害關係人人數。<br>例：5 人團隊有 10 條管道；增至 8 人則變為 28 條（呈指數上升）。</p>
+            </div>
+        </section>
+
+        <section id="monitoring">
+            <h2>六、專案監控 (Project Monitoring & Control)</h2>
+            <p><strong>核心目標：</strong>追蹤績效，識別差異，管理變更。</p>
+
+            <h3>1. 實獲值管理 (EVM) - 必考重點</h3>
+            <p>整合範疇、時間、成本的最客觀績效測量工具。</p>
+
+            <h4>基礎參數</h4>
+            <ul>
+                <li><strong>PV (計畫值)：</strong>預定要完成工作的預算。</li>
+                <li><strong>EV (實獲值)：</strong>實際已完成工作的預算價值（最重要參數）。</li>
+                <li><strong>AC (實際成本)：</strong>實際花掉的錢。</li>
+            </ul>
+
+            <h4>績效指標與判讀</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>指標</th>
+                        <th>公式</th>
+                        <th>判讀意義</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>時程差異 (SV)</td>
+                        <td>\(SV = EV - PV\)</td>
+                        <td>\(>0\)：進度超前 (Good)<br>\(<0\)：進度落後 (Bad)</td>
+                    </tr>
+                    <tr>
+                        <td>成本差異 (CV)</td>
+                        <td>\(CV = EV - AC\)</td>
+                        <td>\(>0\)：成本節省 (Good)<br>\(<0\)：成本超支 (Bad)</td>
+                    </tr>
+                    <tr>
+                        <td>時程績效指數 (SPI)</td>
+                        <td>\(SPI = \frac{EV}{PV}\)</td>
+                        <td>\(>1\)：進度超前 (效率高)<br>\(<1\)：進度落後</td>
+                    </tr>
+                    <tr>
+                        <td>成本績效指數 (CPI)</td>
+                        <td>\(CPI = \frac{EV}{AC}\)</td>
+                        <td>\(>1\)：成本節省 (效率高)<br>\(<1\)：成本超支</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="formula-box">
+                <h4>預測公式</h4>
+                <p><strong>完工預估成本 (EAC)：</strong>若目前績效持續，最終會花多少錢。</p>
+                $$EAC = \frac{BAC (總預算)}{CPI}$$
+                <p><strong>完工變異 (VAC)：</strong>\(VAC = BAC - EAC\)（正值代表最終會有結餘）。</p>
+            </div>
+
+            <h3>2. 變更管制 (Change Control)</h3>
+            <p>所有變更（無論大小）皆需正式書面提出。</p>
+            <p><strong>流程：</strong>提出 &rarr; 分析影響 (範疇/時間/成本/品質) &rarr; CCB (變更管制委員會) 審核 &rarr; 批准/拒絕 &rarr; 更新計畫 &rarr; 通知。</p>
+            <p><strong>目的：</strong>防止範疇蔓延 (Scope Creep)。</p>
+        </section>
+
+        <section id="termination">
+            <h2>七、專案終止 (Project Termination)</h2>
+            <p><strong>核心目標：</strong>正式結束專案，轉移成果，保存知識。</p>
+
+            <h3>1. 終止類型</h3>
+            <ul>
+                <li><strong>正常結束：</strong>目標達成。</li>
+                <li><strong>提前中止：</strong>因不可行、需求消失或資源抽離。</li>
+            </ul>
+
+            <h3>2. 結案兩大程序</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="highlight-box" style="border-left-color: #3498db; background-color: #e8f6fc; color: #333;">
+                    <strong>契約收尾 (Contract Closure)</strong>
+                    <ul>
+                        <li>確認產品驗收。</li>
+                        <li>解決未決爭議。</li>
+                        <li>最終付款與財務結算。</li>
+                    </ul>
+                </div>
+                <div class="highlight-box" style="border-left-color: #27ae60; background-color: #eafaf1; color: #333;">
+                    <strong>行政收尾 (Administrative Closure)</strong>
+                    <ul>
+                        <li>釋放資源、團隊解散歸建。</li>
+                        <li>撰寫結案報告（分析成敗）。</li>
+                        <li><strong>經驗學習 (Lessons Learned)：</strong>將知識歸檔成為組織資產。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
