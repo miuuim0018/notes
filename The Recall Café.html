@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回溯咖啡館 The Recall Café</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* --- 溫馨配色盤 --- */
+            --bg-cream: #f9f7f2;        /* 米白紙張色 */
+            --card-white: #ffffff;      /* 純白卡片 */
+            --text-coffee: #4a3b32;     /* 深咖啡文字 */
+            --text-light: #8c7b70;      /* 淺咖註釋 */
+            --accent-gold: #cfa874;     /* 暖金點綴 */
+            --shadow-warm: 0 10px 30px rgba(139, 69, 19, 0.08); /* 暖色陰影 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-cream);
+            color: var(--text-coffee);
+            font-family: 'Zen Maru Gothic', sans-serif; /* 全站圓體，更親切 */
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Noto Serif TC', serif;
+            color: var(--text-coffee);
+        }
+
+        /* --- 1. 頂部 Hero --- */
+        .hero-section {
+            height: 90vh; 
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: var(--bg-cream);
+        }
+
+        .hero-frame {
+            position: absolute;
+            width: 90%;
+            height: 85%;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: var(--shadow-warm);
+        }
+
+        .hero-bg {
+            width: 100%;
+            height: 100%;
+            /* 修正：移除 images/ */
+            background: url('bg cafe_rain.png') no-repeat center center;
+            background-size: cover;
+            transition: transform 10s ease; 
+        }
+        
+        .hero-section:hover .hero-bg {
+            transform: scale(1.05); 
+        }
+
+        .hero-card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 60px 80px;
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            max-width: 600px;
+            animation: floatUp 1.2s ease-out;
+            border: 1px solid #efebe6;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+            color: var(--text-coffee);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* --- 通用區塊 --- */
+        .section {
+            padding: 60px 10%; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- 2. 故事區 --- */
+        .notebook-layout {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            background: var(--card-white);
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-warm);
+        }
+
+        .notebook-text { flex: 1; }
+        
+        .notebook-text h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .notebook-text h2::after {
+            content: '';
+            position: absolute;
+            bottom: 5px; left: 0; width: 100%; height: 8px;
+            background: rgba(207, 168, 116, 0.3);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .notebook-img { flex: 1; position: relative; }
+
+        .polaroid {
+            background: #fff;
+            padding: 15px 15px 50px 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: rotate(-3deg);
+            transition: transform 0.3s;
+        }
+        
+        .polaroid:hover { transform: rotate(0deg) scale(1.02); }
+
+        .polaroid img { width: 100%; border-radius: 2px; display: block; }
+
+        /* --- 3. 角色介紹 --- */
+        .char-section { text-align: center; padding-bottom: 20px; }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 40px; 
+            color: var(--text-coffee);
+        }
+
+        .char-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .char-card {
+            background: var(--card-white);
+            width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-warm);
+            transition: transform 0.3s;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .char-card:hover { transform: translateY(-10px); }
+
+        .char-img-area {
+            height: 450px;
+            width: 100%;
+            background: linear-gradient(to top, #fffdf9, #f4f0ea);
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .char-img-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+        }
+
+        .char-info { padding: 25px; text-align: left; }
+
+        .char-name { font-size: 1.5rem; font-weight: 700; color: var(--text-coffee); }
+        .char-desc { font-size: 0.95rem; color: var(--text-light); margin-top: 10px; }
+
+        /* --- 4. 規則介紹 (手寫菜單) --- */
+        .menu-section {
+            background: #fffbf0;
+            border: 2px dashed #dccab0;
+            padding: 50px;
+            border-radius: 20px;
+            max-width: 800px;
+            margin: 0 auto; 
+            position: relative;
+        }
+
+        .tape {
+            position: absolute;
+            top: -15px; left: 50%;
+            transform: translateX(-50%);
+            width: 120px; height: 35px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transform: translateX(-50%) rotate(-2deg);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .menu-item h4 {
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .menu-item p { font-size: 0.95rem; color: #666; }
+
+        /* --- 特調配方卡片區 (Recipes) --- */
+        .recipe-section {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        /* 強制 2x2 網格 */
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 30px;
+            margin-top: 40px;
+            max-width: 1000px; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .recipe-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            height: 100%; 
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .recipe-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 5px; height: 100%;
+            background: var(--accent-gold);
+        }
+
+        .recipe-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text-coffee);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recipe-desc {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-style: italic;
+            min-height: 45px; 
+        }
+
+        .recipe-detail {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            border-bottom: 1px dotted #eee;
+            padding-bottom: 5px;
+        }
+
+        .recipe-detail strong {
+            color: var(--accent-gold);
+            margin-right: 5px;
+        }
+
+        /* --- 店規便利貼 --- */
+        .rules-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .sticky-note {
+            width: 250px;
+            height: 250px;
+            background: #fff8dc;
+            padding: 30px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            font-family: 'Zen Maru Gothic', sans-serif;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .sticky-note:nth-child(1) { transform: rotate(-3deg); background: #fff8dc; }
+        .sticky-note:nth-child(2) { transform: rotate(2deg); background: #f0f8ff; }
+        .sticky-note:nth-child(3) { transform: rotate(-1deg); background: #ffe4e1; }
+
+        .sticky-note:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 10; }
+
+        /* Footer */
+        footer {
+            background: #eaddcf; 
+            padding: 40px;
+            text-align: center;
+            color: var(--text-coffee);
+        }
+
+        @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* RWD */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero-card { padding: 30px; width: 85%; }
+            .notebook-layout { flex-direction: column; padding: 30px; }
+            .polaroid { transform: rotate(0deg); width: 100%; }
+            /* 手機版改回單欄，不然會太擠 */
+            .recipe-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <div class="hero-frame">
+            <div class="hero-bg"></div>
+        </div>
+        <div class="hero-card">
+            <h1 class="hero-title">回溯咖啡館</h1>
+            <p class="hero-subtitle">The Recall Café</p>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+            <p style="color: #666;">如果當時我不那麼說，<br>結局會不會不一樣？</p>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="notebook-layout">
+            <div class="notebook-text">
+                <span class="handwritten">Story Intro</span>
+                <h2>雨夜的獨白</h2>
+                <p>這座城市的雨，似乎永遠都不會停。</p>
+                <br>
+                <p>有人說，雨水能沖刷掉城市的灰塵。但有些東西，是沖不掉的。比如後悔，比如遺憾。</p>
+                <br>
+                <p>身為店長的你，掌握著神祕的「回溯特調」。透過水溫、研磨度與魔法添加物的調配，你將引導客人的情緒，給予她勇氣或冷靜，改寫那段遺憾的記憶。</p>
+            </div>
+            <div class="notebook-img">
+                <div class="polaroid">
+                    <img src="cg coffee_brewing.png" alt="溫暖的手沖咖啡">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section char-section">
+        <h2 class="section-title">今日訪客</h2>
+        
+        <div class="char-container">
+            <div class="char-card">
+                <div class="char-img-area">
+                    <img src="yu smile.png" alt="小雨">
+                </div>
+                <div class="char-info">
+                    <span class="handwritten">The Guest</span>
+                    <div class="char-name">小雨 (Yu)</div>
+                    <p class="char-desc">24歲，行政助理。<br>因為一時衝動提了分手，現在正處於極度後悔之中。她需要的或許不是時光機，而是一份坦率的勇氣。</p>
+                </div>
+            </div>
+
+            <div class="char-card">
+                <div class="char-img-area">
+                    <img src="boy cold.png" alt="阿傑">
+                </div>
+                <div class="char-info">
+                    <span class="handwritten">The Boyfriend</span>
+                    <div class="char-name">阿傑 (Jay)</div>
+                    <p class="char-desc">26歲，工程師。<br>沈默寡言，深愛女友卻疲於應對她的情緒起伏。在那場雨夜的爭吵中，他的冷漠是心死的訊號嗎？</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="menu-section">
+            <div class="tape"></div> 
+            <h2 style="text-align: center; font-size: 1.8rem;">店長特調手冊</h2>
+            <p style="text-align: center; color: #888; font-size: 0.9rem;">The Special Menu</p>
+            
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <h4>01. 水溫控制</h4>
+                    <p>95°C 的滾水能激發野性與衝動，88°C 的溫水則能帶來理智與溫柔。溫度決定了回憶的基調。</p>
+                </div>
+                <div class="menu-item">
+                    <h4>02. 研磨刻度</h4>
+                    <p>極細研磨帶來強烈的苦味與清醒，中度研磨則保留了酸與苦的平衡。這決定了思緒的清晰度。</p>
+                </div>
+                <div class="menu-item">
+                    <h4>03. 魔法添加</h4>
+                    <p>一滴白蘭地增加勇氣，還是薄荷糖漿強效冷靜？一點點的調味，足以改變命運的走向。</p>
+                </div>
+                <div class="menu-item">
+                    <h4>04. 付款方式</h4>
+                    <p>本店不收現金。我們只收客人的「決心」與「不再後悔的勇氣」。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section recipe-section">
+        <h2 class="section-title">店長推薦配方</h2>
+        <p style="color: #888; margin-top: -30px;">針對不同情緒的客人，我們提供量身打造的解藥。</p>
+
+        <div class="recipe-grid">
+            <div class="recipe-card">
+                <div class="recipe-title">☕ 雨過天晴</div>
+                <div class="recipe-desc">針對心情焦慮、後悔的客人，推薦這款能找回平衡的配方。</div>
+                <div class="recipe-detail"><strong>水溫：</strong>88°C</div>
+                <div class="recipe-detail"><strong>研磨：</strong>中度研磨</div>
+                <div class="recipe-detail"><strong>添加：</strong>一滴白蘭地</div>
+            </div>
+
+            <div class="recipe-card">
+                <div class="recipe-title">❄️ 冰點理智</div>
+                <div class="recipe-desc">怒火攻心時，需要的不是勇氣，而是絕對的降溫。</div>
+                <div class="recipe-detail"><strong>水溫：</strong>88°C</div>
+                <div class="recipe-detail"><strong>研磨：</strong>中度研磨</div>
+                <div class="recipe-detail"><strong>添加：</strong>大量薄荷糖漿</div>
+            </div>
+
+            <div class="recipe-card">
+                <div class="recipe-title">🔥 野性呼喚</div>
+                <div class="recipe-desc">針對過度怯懦、猶豫不決的人，喚醒求生本能。</div>
+                <div class="recipe-detail"><strong>水溫：</strong>95°C</div>
+                <div class="recipe-detail"><strong>研磨：</strong>極細研磨</div>
+                <div class="recipe-detail"><strong>添加：</strong>一滴白蘭地</div>
+            </div>
+            
+            <div class="recipe-card">
+                <div class="recipe-title">🌱 初心</div>
+                <div class="recipe-desc">被複雜謊言糾纏時，只需要看清最原本的自己。</div>
+                <div class="recipe-detail"><strong>水溫：</strong>88°C</div>
+                <div class="recipe-detail"><strong>研磨：</strong>中度研磨</div>
+                <div class="recipe-detail"><strong>添加：</strong>什麼都不加</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" style="text-align: center;">店內須知</h2>
+        <div class="rules-container">
+            <div class="sticky-note">
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Rule No.1</h3>
+                <p>只有真的想要<br>「後悔」的人<br>才能看見這間店。</p>
+            </div>
+            <div class="sticky-note">
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Rule No.2</h3>
+                <p>回溯的時間只有<br>短短十分鐘。<br>請把握機會。</p>
+            </div>
+            <div class="sticky-note">
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Rule No.3</h3>
+                <p>無論結果如何，<br>咖啡冷了就該喝完。<br>生活也是。</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Copyright © 2025 The Recall Café Project.</p>
+        <p style="font-size: 0.9rem; opacity: 0.7;">Made with Warmth</p>
+    </footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.notebook-layout, .char-card, .menu-section, .sticky-note, .recipe-card').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
