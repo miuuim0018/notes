@@ -109,35 +109,43 @@
             padding: 5px 10px;
             border-radius: 20px;
         }
-        /* 特別為史迪奇卡片設計的標籤顏色 */
+        
+        /* === 標籤樣式區 === */
+        
+        /* 史迪奇卡片 (放鬆綠) */
         .card-badge.relax {
             background: #dcfce7;
             color: #166534;
         }
-        /* 特別為日文卡片設計的標籤顏色 (粉色系) */
+        /* 日文卡片 (粉色系) */
         .card-badge.lang {
             background: #fce7f3;
             color: #9d174d;
         }
-        /* 特別為地理/地圖卡片設計的標籤顏色 (橘色系) */
+        /* 地理/地圖卡片 (橘色系) */
         .card-badge.geo {
             background: #ffedd5;
             color: #c2410c;
         }
-        /* 特別為 APP 專案設計的標籤顏色 (科技青) */
+        /* APP 專案 (科技青) */
         .card-badge.tech {
             background: #ccfbf1;
             color: #0f766e;
         }
-        /* 新增：特別為期末考/重點筆記設計的標籤顏色 (警示紅) */
+        /* 期末考/重點筆記 (警示紅) */
         .card-badge.final {
             background: #fee2e2;
             color: #991b1b;
         }
-        /* 新增：特別為回溯咖啡館設計的標籤顏色 (拿鐵/深咖色系) */
+        /* 回溯咖啡館 (拿鐵/深咖色系) */
         .card-badge.cafe {
-            background: #f5ebe0; /* 淺米色 */
-            color: #8b4513;       /* 深咖啡色 */
+            background: #f5ebe0;
+            color: #8b4513;
+        }
+        /* 新增：阿里山研究專題 (森林/土壤色系) */
+        .card-badge.forest {
+            background: #e6f4ea; /* 淺森林綠 */
+            color: #2F5D40;       /* 引用專題頁面的主色 */
         }
 
         .btn-enter {
@@ -172,6 +180,14 @@
 
         <main class="grid">
             
+            <a href="alishan_research.html" class="card">
+                <span class="card-badge forest">Research</span>
+                <div class="card-icon">🚂</div>
+                <h2>阿里山林鐵災害分析</h2>
+                <p>數位學習學系專題。探討選址策略與地質潛勢，內含 3D 地形分析與地貌變遷模擬動畫。</p>
+                <div class="btn-enter">閱讀專題 →</div>
+            </a>
+
             <a href="The Recall Café.html" class="card">
                 <span class="card-badge cafe">Story Game</span>
                 <div class="card-icon">☕</div>
@@ -208,7 +224,7 @@
                 <span class="card-badge">Midterm</span>
                 <div class="card-icon">🏥</div>
                 <h2>運動醫學</h2>
-                <p>點擊此處將連結到您的運動醫學複習筆記頁面。</p>
+                <p>(尚未建立檔案) 點擊此處將連結到您的運動醫學複習筆記頁面。</p>
                 <div class="btn-enter">進入複習 →</div>
             </a>
 
