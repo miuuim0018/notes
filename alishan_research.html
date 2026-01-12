@@ -384,7 +384,7 @@
         <section class="mb-20">
             <h2 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-8 border-l-4 border-soil pl-4">肆、專題成果展示與下載</h2>
             
-            <div class="space-y-12">
+            <div class="space-y-12 mb-16">
                 <div class="bg-paper p-6 rounded-lg shadow-xl border border-forest/20">
                     <h3 class="font-serif text-xl font-bold text-forest mb-4">專題文檔（完整版 PDF 預覽）</h3>
                     <p class="text-sm text-soil mb-4">
@@ -425,18 +425,50 @@
                     </div>
                 </div>
             </div>
-<div class="mb-12 bg-forest/10 p-8 rounded-lg border border-forest border-dashed text-center">
-    <h3 class="font-serif text-2xl font-bold text-forest mb-4">✨ 互動專區：林鐵知識大考驗</h3>
-    <p class="mb-6 text-gray-700">
-        閱讀完報告後，想知道自己吸收了多少嗎？<br>
-        我們準備了 5 題關於林鐵選址與災害的小測驗，歡迎來挑戰！
-    </p>
-    <a href="quiz.html" class="inline-flex items-center gap-2 bg-forest hover:bg-[#234a31] text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105">
-        <span class="text-xl">👉</span>
-        <span>前往挑戰測驗</span>
-    </a>
-</div>
-        </section>
+
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-forest to-soil opacity-20 blur-lg rounded-2xl group-hover:opacity-30 transition duration-500"></div>
+                
+                <div class="relative bg-white rounded-xl shadow-2xl border border-forest/10 overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gold/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-forest/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="flex flex-col md:flex-row items-center justify-between p-8 md:p-12 gap-8">
+                        
+                        <div class="flex-1 text-center md:text-left z-10">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest/10 text-forest mb-5 md:hidden">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            </div>
+
+                            <h3 class="font-serif text-2xl md:text-3xl font-bold text-forest mb-4 flex items-center justify-center md:justify-start gap-4">
+                                <span class="hidden md:inline-flex items-center justify-center w-12 h-12 rounded-full bg-forest text-white shadow-md transform -rotate-6">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </span>
+                                <span>互動專區：林鐵知識大考驗</span>
+                            </h3>
+                            <p class="text-gray-600 text-lg leading-relaxed">
+                                閱讀完報告後，想知道自己吸收了多少嗎？<br class="hidden md:block">
+                                我們準備了 <span class="font-bold text-soil border-b-2 border-soil/30 px-1">5 題</span> 關於林鐵選址與災害的小測驗，等你來挑戰滿分！
+                            </p>
+                        </div>
+
+                        <div class="flex-shrink-0 z-10 w-full md:w-auto">
+                            <a href="quiz.html" class="group/btn relative w-full md:w-auto inline-flex items-center justify-center gap-3 bg-forest hover:bg-[#234a31] text-white font-serif font-bold py-4 px-10 rounded-lg shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-in-out"></div>
+                                
+                                <span class="text-xl tracking-wider">👉 前往挑戰測驗</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </a>
+                            <p class="text-xs text-center text-gray-400 mt-3 font-medium tracking-wider">
+                                預計測驗時間：3 分鐘
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </section>
         <footer class="text-center text-sm text-gray-500 py-8 border-t border-gray-300">
             <p>© 2024 國立嘉義大學數位學習設計與管理學系專題製作</p>
         </footer>
