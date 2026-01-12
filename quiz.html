@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>林鐵知識大考驗 - 阿里山林業鐵路專題</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#F9F7F2',       // 米黃色背景
+                        forest: '#2F5D40',      // 深森林綠
+                        soil: '#8D6E63',        // 土壤棕
+                        ink: '#2D2D2D',         // 深灰
+                        gold: '#bfa384',        // 阿里山金
+                        correct: '#388E3C',     // 正確綠
+                        wrong: '#D32F2F',       // 錯誤紅
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'], 
+                        sans: ['"Noto Sans TC"', 'sans-serif'], 
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F9F7F2;
+            color: #2D2D2D;
+            -webkit-font-smoothing: antialiased;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateX(5px);
+            background-color: rgba(47, 93, 64, 0.1);
+        }
+        .option-btn:disabled {
+            cursor: default;
+        }
+    </style>
+</head>
+<body class="font-sans text-lg flex flex-col min-h-screen">
+
+    <header class="bg-forest text-white py-4 px-6 shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="font-serif font-bold text-lg">回到專題首頁</span>
+            </a>
+            <h1 class="text-gold font-serif font-bold hidden md:block">阿里山林鐵選址與災害潛勢分析</h1>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-6 w-full max-w-3xl mx-auto">
+
+        <div id="quiz-container" class="w-full bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden min-h-[500px] flex flex-col relative">
+            
+            <div class="w-full h-2 bg-gray-200">
+                <div id="progress-bar" class="h-full bg-gold transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <div id="start-screen" class="p-8 md:p-12 flex flex-col items-center justify-center text-center flex-grow fade-in">
+                <div class="mb-6 text-6xl">🚂</div>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-forest mb-4">林鐵知識大挑戰</h2>
+                <p class="text-gray-600 mb-8 leading-relaxed">
+                    您真的了解阿里山林鐵的選址秘密與災害原因嗎？<br>
+                    完成 5 題挑戰，測試您是否已經掌握了這份專題的核心精髓！
+                </p>
+                <button onclick="quizApp.startQuiz()" class="bg-forest hover:bg-[#234a31] text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105">
+                    開始測驗
+                </button>
+            </div>
+
+            <div id="question-screen" class="hidden p-6 md:p-10 flex-col h-full fade-in">
+                <div class="flex justify-between items-center mb-6 text-sm text-soil font-bold font-serif">
+                    <span>QUESTION <span id="q-current">1</span> / <span id="q-total">5</span></span>
+                    <span class="bg-paper px-3 py-1 rounded-full border border-soil/20">得分: <span id="score-display">0</span></span>
+                </div>
+
+                <h3 id="question-text" class="text-xl md:text-2xl font-bold text-ink mb-8 leading-snug min-h-[4rem]">
+                    題目載入中...
+                </h3>
+
+                <div id="options-container" class="flex flex-col gap-4 mb-6">
+                    </div>
+
+                <div id="feedback-area" class="hidden mt-4 p-4 bg-paper rounded-lg border-l-4 border-gray-300 text-base">
+                    <h4 id="feedback-title" class="font-bold mb-2"></h4>
+                    <p id="feedback-text" class="text-gray-700"></p>
+                    <button onclick="quizApp.nextQuestion()" class="mt-4 bg-soil text-white px-6 py-2 rounded hover:bg-opacity-90 transition float-right">
+                        下一題 →
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden p-8 md:p-12 flex-col items-center justify-center text-center flex-grow fade-in">
+                <div id="result-icon" class="text-6xl mb-4">🏆</div>
+                <h2 class="text-3xl font-serif font-bold text-forest mb-2">測驗完成！</h2>
+                <p class="text-lg text-gray-600 mb-6">您的得分是：</p>
+                
+                <div class="text-5xl font-black text-soil mb-6">
+                    <span id="final-score">0</span> / 100
+                </div>
+
+                <p id="result-comment" class="text-ink font-medium mb-8 p-4 bg-paper rounded-lg max-w-md">
+                    </p>
+
+                <div class="flex gap-4">
+                    <button onclick="quizApp.restart()" class="border-2 border-forest text-forest font-bold py-2 px-6 rounded-full hover:bg-forest hover:text-white transition">
+                        重新挑戰
+                    </button>
+                    <a href="index.html" class="bg-forest text-white font-bold py-2 px-6 rounded-full hover:bg-[#234a31] transition shadow-md">
+                        返回首頁
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 py-6 border-t border-gray-300 bg-white">
+        <p>© 2024 國立嘉義大學數位學習設計與管理學系專題製作 - 互動測驗區</p>
+    </footer>
+
+    <script>
+        const quizApp = (function() {
+            // 題目資料庫 (根據您的 PDF 內容編寫)
+            const questions = [
+                {
+                    q: "阿里山林鐵最初的選址規劃中，為何放棄了路徑較短的「清水溪路線」？",
+                    options: [
+                        "因為清水溪水量過大，無法興建橋樑",
+                        "因為遇到大塔山斷崖與極大的海拔落差，地形過於險峻",
+                        "因為該路線經過原住民部落，溝通困難",
+                        "因為日本政府經費不足，無法開鑿隧道"
+                    ],
+                    answer: 1, // Index 1 is correct
+                    explanation: "根據地形分析，清水溪路線雖然距離較短，但末端遇到大塔山斷崖，幾乎呈垂直爬升，且腹地不足無法進行展線，因此被迫放棄。"
+                },
+                {
+                    q: "林鐵在獨立山路段採用了「螺旋線」工法盤旋而上，主要的資源考量是什麼？",
+                    options: [
+                        "為了經過低海拔的樟腦林，便於運輸",
+                        "為了讓遊客欣賞多角度的風景",
+                        "為了避開地下的水源保護區",
+                        "為了配合當時的風水地理位置"
+                    ],
+                    answer: 0,
+                    explanation: "研究指出，林鐵路線涵蓋了低海拔的樟腦林與高海拔的檜木林。獨立山螺旋線的設計除了克服坡度，也是為了配合當時該區域樟腦產業的運輸需求。"
+                },
+                {
+                    q: "二萬坪車站附近的「之字形」路段，長期以來面臨最大的地質危機是什麼？",
+                    options: [
+                        "位於活火山口附近",
+                        "位於斷層破碎帶且無植被覆蓋",
+                        "位於大規模的「順向坡」山崩地滑敏感區",
+                        "位於地下溶洞上方，有塌陷風險"
+                    ],
+                    answer: 2,
+                    explanation: "二萬坪地區座落在順向坡上，岩層傾向與坡面一致。當年為了利用平緩地形快速興建之字形軌道，卻忽視了順向坡一旦失去支撐極易發生大規模滑動的風險。"
+                },
+                {
+                    q: "阿里山林鐵從單純的伐木運輸轉型為觀光鐵路，關鍵的「黃金交叉」（客運收入大於貨運）發生在何時？",
+                    options: [
+                        "1912 年通車時",
+                        "1931 年",
+                        "1945 年二戰結束後",
+                        "1980 年代阿里山公路通車後"
+                    ],
+                    answer: 1,
+                    explanation: "隨著伐木成本增加與觀光價值提升，1931 年林鐵的客運收入首次超越貨運收入，標誌著林鐵正式轉型為具備觀光價值的鐵道。"
+                },
+                {
+                    q: "在獨立山路段，除了先天脆弱的地質外，哪項「人為因素」加劇了邊坡的不穩定性？",
+                    options: [
+                        "遊客過多導致地層下陷",
+                        "大量種植淺根系的檳榔樹，降低抓地力",
+                        "過度興建溫泉飯店",
+                        "鐵路班次過於密集產生震動"
+                    ],
+                    answer: 1,
+                    explanation: "GIS 疊圖分析顯示，獨立山地質敏感區與檳榔種植範圍高度重疊。檳榔樹屬於淺根系植物，截留雨水能力差，大幅削弱了邊坡的抗災能力。"
+                }
+            ];
+
+            let currentIdx = 0;
+            let score = 0;
+            const scorePerQ = 100 / questions.length;
+
+            // DOM Elements
+            const els = {
+                bar: document.getElementById('progress-bar'),
+                screens: {
+                    start: document.getElementById('start-screen'),
+                    quiz: document.getElementById('question-screen'),
+                    result: document.getElementById('result-screen')
+                },
+                qCurrent: document.getElementById('q-current'),
+                qTotal: document.getElementById('q-total'),
+                qText: document.getElementById('question-text'),
+                optContainer: document.getElementById('options-container'),
+                scoreDisplay: document.getElementById('score-display'),
+                feedback: {
+                    area: document.getElementById('feedback-area'),
+                    title: document.getElementById('feedback-title'),
+                    text: document.getElementById('feedback-text')
+                },
+                finalScore: document.getElementById('final-score'),
+                resultComment: document.getElementById('result-comment'),
+                resultIcon: document.getElementById('result-icon')
+            };
+
+            function showScreen(name) {
+                Object.values(els.screens).forEach(el => el.classList.add('hidden'));
+                els.screens[name].classList.remove('hidden');
+                els.screens[name].classList.remove('fade-in');
+                void els.screens[name].offsetWidth; // trigger reflow
+                els.screens[name].classList.add('fade-in');
+            }
+
+            function startQuiz() {
+                currentIdx = 0;
+                score = 0;
+                els.scoreDisplay.textContent = '0';
+                els.qTotal.textContent = questions.length;
+                loadQuestion();
+                showScreen('quiz');
+            }
+
+            function loadQuestion() {
+                const q = questions[currentIdx];
+                els.qCurrent.textContent = currentIdx + 1;
+                els.bar.style.width = `${((currentIdx) / questions.length) * 100}%`;
+                
+                els.qText.textContent = q.q;
+                els.optContainer.innerHTML = '';
+                els.feedback.area.classList.add('hidden');
+
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:border-forest hover:bg-white bg-white text-ink font-medium shadow-sm';
+                    btn.textContent = opt;
+                    btn.onclick = () => checkAnswer(idx, btn);
+                    els.optContainer.appendChild(btn);
+                });
+            }
+
+            function checkAnswer(selectedIdx, btnElement) {
+                // Disable all buttons
+                const buttons = els.optContainer.querySelectorAll('button');
+                buttons.forEach(b => b.disabled = true);
+
+                const q = questions[currentIdx];
+                const isCorrect = selectedIdx === q.answer;
+
+                // Style buttons
+                if (isCorrect) {
+                    btnElement.classList.add('bg-[#E8F5E9]', 'border-correct', 'text-correct');
+                    score += scorePerQ;
+                    els.scoreDisplay.textContent = Math.round(score);
+                    els.feedback.title.textContent = "✅ 回答正確！";
+                    els.feedback.title.className = "font-bold mb-2 text-correct";
+                    els.feedback.area.className = "mt-4 p-4 bg-[#E8F5E9] rounded-lg border-l-4 border-correct text-base fade-in";
+                } else {
+                    btnElement.classList.add('bg-[#FFEBEE]', 'border-wrong', 'text-wrong');
+                    // Highlight correct one
+                    buttons[q.answer].classList.add('bg-[#E8F5E9]', 'border-correct', 'text-correct', 'ring-2', 'ring-correct');
+                    els.feedback.title.textContent = "❌ 回答錯誤";
+                    els.feedback.title.className = "font-bold mb-2 text-wrong";
+                    els.feedback.area.className = "mt-4 p-4 bg-[#FFEBEE] rounded-lg border-l-4 border-wrong text-base fade-in";
+                }
+
+                els.feedback.text.textContent = q.explanation;
+                els.feedback.area.classList.remove('hidden');
+            }
+
+            function nextQuestion() {
+                currentIdx++;
+                if (currentIdx < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }
+
+            function showResult() {
+                els.bar.style.width = '100%';
+                els.finalScore.textContent = Math.round(score);
+                
+                let comment = "";
+                let icon = "";
+                if (score === 100) {
+                    icon = "🚂🌟";
+                    comment = "太厲害了！您簡直是林鐵系教授！您已經完全掌握了這份專題的所有細節。";
+                } else if (score >= 80) {
+                    icon = "🌲✨";
+                    comment = "優秀！您對阿里山林鐵有相當深入的了解，只差一點點就滿分囉！";
+                } else if (score >= 60) {
+                    icon = "🛤️";
+                    comment = "還不錯喔！建議您可以再回頭閱讀一下專題報告中的「地質與災害」章節，會有更多收穫！";
+                } else {
+                    icon = "📚";
+                    comment = "別灰心！這份報告包含了很多專業的選址與地質知識，歡迎回到首頁再仔細閱讀一次吧！";
+                }
+                
+                els.resultIcon.textContent = icon;
+                els.resultComment.textContent = comment;
+                showScreen('result');
+            }
+
+            function restart() {
+                startQuiz();
+            }
+
+            return {
+                startQuiz,
+                checkAnswer,
+                nextQuestion,
+                restart
+            };
+        })();
+    </script>
+</body>
+</html>
