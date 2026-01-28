@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鞋庫掌門人 Pro - 極速完全版</title>
+    <title>鞋庫 - 儀表板版</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -30,7 +30,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-dark);
-            padding-bottom: 90px;
+            padding-bottom: 100px;
         }
 
         /* 頂部標題區 */
@@ -59,12 +59,12 @@
         }
 
         /* 搜尋區塊 */
-        .search-box {
+        .search-container {
             background: var(--card-bg);
             padding: 0.75rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             position: sticky;
             top: 60px;
             z-index: 90;
@@ -79,12 +79,95 @@
             outline: none;
             transition: all 0.2s;
             background: #f9fafb;
+            margin-bottom: 8px;
         }
 
         .search-input:focus {
             border-color: var(--primary-color);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* 搜尋過濾器 (Scope Filters) */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.85rem;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* 庫存儀表板 (Summary Dashboard) */
+        .summary-board {
+            display: none; /* 預設隱藏，有資料才顯示 */
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+
+        .summary-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .summary-total {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .summary-sizes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .size-badge {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .size-badge strong {
+            color: var(--primary-color);
         }
 
         /* 頁面切換控制 */
@@ -136,7 +219,6 @@
             margin-bottom: 0;
         }
         
-        /* 快捷鍵樣式 */
         .prefix-group {
             display: flex;
             gap: 6px;
@@ -151,13 +233,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.1s;
         }
 
         .prefix-btn:active {
             background: var(--primary-color);
             color: white;
-            transform: scale(0.95);
         }
 
         .form-control {
@@ -174,361 +254,109 @@
             outline: none;
         }
 
-        /* 尺碼矩陣選擇器 */
-        .size-matrix-container {
-            margin-top: 10px;
-        }
-
-        .size-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+        /* 尺碼矩陣 */
+        .size-matrix-container { margin-top: 10px; }
+        .size-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
         .eraser-btn {
-            background: white;
-            border: 1px solid var(--border-color);
-            color: var(--text-dark);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: white; border: 1px solid var(--border-color); color: var(--text-dark);
+            padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s;
         }
         
         .eraser-btn.active {
-            background-color: var(--danger-color);
-            color: white;
-            border-color: var(--danger-color);
+            background-color: var(--danger-color); color: white; border-color: var(--danger-color);
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
         }
 
-        .matrix-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .matrix-grid.eraser-mode .size-btn {
-            border-color: #fca5a5;
-            background-color: #fff1f2;
-        }
-        
-        .matrix-grid.eraser-mode .size-btn.has-count {
-            background-color: var(--danger-bg);
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-        }
-        
-        .matrix-grid.eraser-mode .size-btn.has-count .count-badge {
-            background-color: var(--danger-color);
-        }
+        .matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .matrix-grid.eraser-mode .size-btn { border-color: #fca5a5; background-color: #fff1f2; }
+        .matrix-grid.eraser-mode .size-btn.has-count { background-color: var(--danger-bg); border-color: var(--danger-color); color: var(--danger-color); }
+        .matrix-grid.eraser-mode .size-btn.has-count .count-badge { background-color: var(--danger-color); }
 
         .size-btn {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 4px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.1s;
-            user-select: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 64px;
+            background: white; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 12px 4px; text-align: center; cursor: pointer; position: relative;
+            user-select: none; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 64px;
         }
-
-        .size-btn:active {
-            transform: scale(0.95);
-        }
-
-        .size-btn .size-label {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--text-dark);
-        }
-
+        .size-btn:active { transform: scale(0.95); }
+        .size-btn .size-label { font-weight: 600; font-size: 1.1rem; color: var(--text-dark); }
         .size-btn .count-badge {
-            margin-top: 4px;
-            font-size: 0.8rem;
-            background: #e5e7eb;
-            color: #6b7280;
-            padding: 2px 8px;
-            border-radius: 10px;
-            min-width: 24px;
+            margin-top: 4px; font-size: 0.8rem; background: #e5e7eb; color: #6b7280;
+            padding: 2px 8px; border-radius: 10px; min-width: 24px;
         }
+        .size-btn.has-count { background-color: var(--secondary-color); border-color: var(--primary-color); }
+        .size-btn.has-count .size-label { color: var(--primary-color); }
+        .size-btn.has-count .count-badge { background: var(--primary-color); color: white; font-weight: bold; }
 
-        .size-btn.has-count {
-            background-color: var(--secondary-color);
-            border-color: var(--primary-color);
-        }
-
-        .size-btn.has-count .size-label {
-            color: var(--primary-color);
-        }
-
-        .size-btn.has-count .count-badge {
-            background: var(--primary-color);
-            color: white;
-            font-weight: bold;
-        }
-
-        /* 按鈕樣式 */
+        /* 按鈕通用 */
         .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.1s, opacity 0.2s;
+            width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-        }
-
-        .btn-secondary {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            color: var(--text-dark);
-            padding: 6px 12px;
-        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+        .btn-secondary { background-color: white; border: 1px solid var(--border-color); color: var(--text-dark); padding: 6px 12px; }
         
         /* 庫存列表 */
-        .inventory-list {
-            list-style: none;
-            padding-bottom: 60px;
-        }
-
+        .inventory-list { list-style: none; padding-bottom: 60px; }
         .inventory-item {
-            background: var(--card-bg);
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            display: flex;
-            align-items: center;
-            border-left: 5px solid var(--accent-color);
-            transition: transform 0.2s;
+            background: var(--card-bg); padding: 1rem; margin-bottom: 0.75rem; border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center;
+            border-left: 5px solid var(--accent-color); transition: transform 0.2s;
         }
+        .manage-mode .inventory-item { padding-left: 0.5rem; border-left: none; }
+        .item-checkbox { display: none; width: 24px; height: 24px; margin-right: 12px; margin-left: 8px; accent-color: var(--primary-color); }
+        .manage-mode .item-checkbox { display: block; }
         
-        .manage-mode .inventory-item {
-            padding-left: 0.5rem;
-            border-left: none;
-        }
-
-        .item-checkbox {
-            display: none;
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            margin-left: 8px;
-            accent-color: var(--primary-color);
-        }
-
-        .manage-mode .item-checkbox {
-            display: block;
-        }
+        .item-content-wrapper { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+        .item-info h3 { font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 700; }
+        .tag-size { background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 5px; }
+        .item-details { color: var(--text-light); font-size: 0.85rem; margin-top: 4px; }
+        .item-price { font-weight: 700; color: var(--primary-color); font-size: 1.1rem; text-align: right; }
         
-        .item-content-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            font-weight: 700;
-        }
-        
-        .tag-size {
-            background: #ecfdf5;
-            color: #059669;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-
-        .item-details {
-            color: var(--text-light);
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-
-        .item-price {
-            font-weight: 700;
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            text-align: right;
-        }
-
         .delete-btn {
-            background: #fee2e2;
-            border: none;
-            color: var(--danger-color);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 1.2rem;
+            background: #fee2e2; border: none; color: var(--danger-color); width: 32px; height: 32px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; cursor: pointer; font-size: 1.2rem;
         }
-        
-        .manage-mode .delete-btn {
-            display: none;
-        }
+        .manage-mode .delete-btn { display: none; }
 
-        /* 底部導航列 */
+        /* 底部導航 */
         nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem;
-            z-index: 200;
-            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; padding: 0.5rem; z-index: 200;
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
         }
-
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            padding: 6px;
-            color: #9ca3af;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: color 0.2s;
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-            background-color: var(--secondary-color);
-        }
-
-        .nav-icon {
-            font-size: 1.5rem;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .nav-label {
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
+        .nav-item { flex: 1; text-align: center; padding: 6px; color: #9ca3af; cursor: pointer; border-radius: 12px; }
+        .nav-item.active { color: var(--primary-color); background-color: var(--secondary-color); }
+        .nav-icon { font-size: 1.5rem; display: block; margin-bottom: 2px; }
+        .nav-label { font-size: 0.75rem; font-weight: 500; }
         
-        /* 批量操作浮動欄 */
+        /* 批量操作欄 */
         .batch-actions-bar {
-            position: fixed;
-            bottom: -100px;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 1rem;
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-            border-top: 1px solid #e5e7eb;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
-            z-index: 300;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed; bottom: -100px; left: 0; right: 0; background: white; padding: 1rem;
+            padding-bottom: max(1rem, env(safe-area-inset-bottom)); border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 300; display: flex; justify-content: space-between;
+            align-items: center; gap: 10px; transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .batch-actions-bar.show { bottom: 0; }
 
-        .batch-actions-bar.show {
-            bottom: 0;
-        }
-
-        /* 通知視窗 */
+        /* Toast */
         .toast {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(31, 41, 55, 0.95);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 500;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s;
-            z-index: 1000;
-            text-align: center;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(31, 41, 55, 0.95); color: white; padding: 16px 24px; border-radius: 12px;
+            font-size: 1rem; font-weight: 500; opacity: 0; pointer-events: none; transition: all 0.2s;
+            z-index: 1000; text-align: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        
-        .toast.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        .stats-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 0.5rem 1rem 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-
+        .stats-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem 0.5rem 0.5rem; font-size: 0.85rem; color: var(--text-light); }
         .manage-toggle {
-            background: #f3f4f6;
-            padding: 4px 12px;
-            border-radius: 15px;
-            color: var(--text-dark);
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            background: #f3f4f6; padding: 4px 12px; border-radius: 15px; color: var(--text-dark);
+            font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 4px;
         }
-
-        .manage-toggle.active {
-            background: var(--text-dark);
-            color: white;
-            border-color: var(--text-dark);
-        }
-        
-        .hint-text {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-top: 5px;
-            text-align: center;
-        }
+        .manage-toggle.active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
+        .hint-text { font-size: 0.8rem; color: var(--text-light); margin-top: 5px; text-align: center; }
     </style>
 </head>
 <body>
@@ -538,12 +366,18 @@
     </header>
 
     <div id="view-search" class="view-section active container">
-        <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 輸入鞋號 (如 41336) 或尺碼..." inputmode="text">
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 輸入內容..." inputmode="text">
+            
+            <div class="filter-row">
+                <button class="filter-btn active" onclick="ui.setFilter('all')">全部</button>
+                <button class="filter-btn" onclick="ui.setFilter('id')">搜鞋號 (ID)</button>
+                <button class="filter-btn" onclick="ui.setFilter('size')">搜尺碼 (Size)</button>
+            </div>
         </div>
         
         <div class="stats-bar">
-            <span>總數: <strong id="totalCount" style="color:var(--text-dark)">0</strong></span>
+            <span>結果總數: <strong id="totalCount" style="color:var(--text-dark)">0</strong></span>
             
             <div style="display:flex; gap:10px;">
                 <span class="manage-toggle" id="manageToggleBtn" onclick="deleteUI.toggleManageMode()">
@@ -555,6 +389,9 @@
             </div>
         </div>
 
+        <div id="summaryBoard" class="summary-board">
+            </div>
+
         <ul id="resultsList" class="inventory-list">
             </ul>
         
@@ -565,7 +402,7 @@
         
         <div id="welcomeState" style="text-align:center; padding: 3rem; color:#9ca3af;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">👆</div>
-            <p>輸入上方鞋號開始找鞋</p>
+            <p>輸入查詢內容<br><small>可切換搜尋模式 (鞋號/尺碼)</small></p>
         </div>
     </div>
 
@@ -670,28 +507,22 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro - 邏輯核心 (V5 完全版)
+         * 鞋庫掌門人 Pro - 儀表板版 (V6)
          */
         
-        // 資料管理模組
         const dataManager = {
-            STORAGE_KEY: 'shoe_inventory_pro_v5', 
+            STORAGE_KEY: 'shoe_inventory_pro_v6', 
             items: [],
 
             init() {
                 const stored = localStorage.getItem(this.STORAGE_KEY);
                 if (stored) {
-                    try {
-                        this.items = JSON.parse(stored);
-                    } catch (e) {
-                        this.items = [];
-                    }
+                    try { this.items = JSON.parse(stored); } catch (e) { this.items = []; }
                 }
             },
 
             save() {
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.items));
-                this.updateTotalCount();
             },
 
             add(item) {
@@ -707,41 +538,44 @@
                 this.save();
             },
 
-            search(query) {
+            // V6 升級：支援 mode 參數 (all, id, size)
+            search(query, mode = 'all') {
                 if (!query) return [];
                 const q = query.toLowerCase().trim();
+                
                 return this.items.filter(item => {
-                    return (
-                        item.id.toLowerCase().includes(q) ||
-                        item.size.toLowerCase().includes(q) ||
-                        item.price.toString().includes(q) ||
-                        (item.note && item.note.toLowerCase().includes(q))
-                    );
+                    const idMatch = item.id.toLowerCase().includes(q);
+                    
+                    // 關鍵修改：尺碼搜尋若為數字，採用精確比對，避免 "22" 搜到 "22.5"
+                    // 若 mode 是 size，強制精確比對
+                    const sizeMatch = (mode === 'size') 
+                        ? item.size.toLowerCase() === q 
+                        : (item.size.toLowerCase() === q); // 在 All 模式下，數字尺碼也建議精確比對，或依需求調整
+
+                    const noteMatch = item.note && item.note.toLowerCase().includes(q);
+
+                    if (mode === 'id') return idMatch;
+                    if (mode === 'size') return sizeMatch;
+                    
+                    // All 模式：
+                    // 如果輸入的是純數字且很短(像尺碼)，我們優先精確比對尺碼
+                    // 但也要保留 ID 搜尋 (如 41336)
+                    return idMatch || sizeMatch || noteMatch;
                 });
             },
 
             clearAll() {
-                if(confirm("⚠️ 警告：這會刪除所有庫存資料！確定要清空嗎？")) {
-                    this.items = [];
-                    this.save();
-                    location.reload();
+                if(confirm("⚠️ 警告：這會刪除所有庫存資料！")) {
+                    this.items = []; this.save(); location.reload();
                 }
             },
             
             exportData() {
                 const dataStr = JSON.stringify(this.items);
-                navigator.clipboard.writeText(dataStr).then(() => {
-                    ui.showToast("✅ 資料已複製！請貼到筆記本備份");
-                });
-            },
-
-            updateTotalCount() {
-                const el = document.getElementById('totalCount');
-                if(el) el.innerText = this.items.length;
+                navigator.clipboard.writeText(dataStr).then(() => { ui.showToast("✅ 資料已複製！"); });
             }
         };
 
-        // 批量管理與刪除 UI
         const deleteUI = {
             isManageMode: false,
 
@@ -786,112 +620,60 @@
 
             deleteSelected() {
                 const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
-                if (checkedBoxes.length === 0) {
-                    ui.showToast("請先勾選要刪除的項目");
-                    return;
-                }
-
-                if (confirm(`確定要刪除選取的 ${checkedBoxes.length} 筆資料嗎？`)) {
-                    checkedBoxes.forEach(cb => {
-                        dataManager.remove(cb.value);
-                    });
-                    
-                    const currentQuery = document.getElementById('searchInput').value;
-                    ui.renderResults(currentQuery);
-                    dataManager.updateTotalCount();
-                    ui.showToast(`已刪除 ${checkedBoxes.length} 筆資料`);
+                if (checkedBoxes.length === 0) { ui.showToast("請先勾選項目"); return; }
+                if (confirm(`確定要刪除 ${checkedBoxes.length} 筆資料？`)) {
+                    checkedBoxes.forEach(cb => dataManager.remove(cb.value));
+                    ui.refreshSearch();
+                    ui.showToast(`已刪除 ${checkedBoxes.length} 筆`);
                     this.updateSelectedCount();
-                    
-                    if (dataManager.search(currentQuery).length === 0) {
-                        this.toggleManageMode();
-                    }
+                    if (dataManager.items.length === 0) this.toggleManageMode();
                 }
             }
         };
 
-        // 批量輸入 UI
         const batchUI = {
-            selectedSizes: {}, 
-            isEraserMode: false,
-            
-            defaultSizes: [
-                "19", "19.5", "20", "20.5", "21", "21.5", "22", "22.5", 
-                "23", "23.5", "24", "24.5", "25", "25.5", "26", "26.5", 
-                "27", "27.5", "28", "29", "30"
-            ],
+            selectedSizes: {}, isEraserMode: false,
+            defaultSizes: ["19","19.5","20","20.5","21","21.5","22","22.5","23","23.5","24","24.5","25","25.5","26","26.5","27","27.5","28","29","30"],
 
-            init() {
-                this.renderGrid();
-                this.updateBadge();
-            },
+            init() { this.renderGrid(); this.updateBadge(); },
 
             renderGrid() {
                 const grid = document.getElementById('sizeGrid');
                 grid.innerHTML = '';
-                this.defaultSizes.forEach(size => {
-                    this.createSizeButton(grid, size);
-                });
+                this.defaultSizes.forEach(size => { this.createSizeButton(grid, size); });
             },
 
             createSizeButton(container, size) {
                 const count = this.selectedSizes[size] || 0;
                 const btn = document.createElement('div');
                 btn.className = `size-btn ${count > 0 ? 'has-count' : ''}`;
-                
-                btn.onclick = () => {
-                    if (this.isEraserMode) {
-                        this.decrementSize(size);
-                    } else {
-                        this.incrementSize(size);
-                    }
-                };
-                
-                btn.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    this.decrementSize(size);
-                };
-
-                btn.innerHTML = `
-                    <span class="size-label">${size}</span>
-                    <span class="count-badge">${count}</span>
-                `;
+                btn.onclick = () => { this.isEraserMode ? this.decrementSize(size) : this.incrementSize(size); };
+                btn.oncontextmenu = (e) => { e.preventDefault(); this.decrementSize(size); };
+                btn.innerHTML = `<span class="size-label">${size}</span><span class="count-badge">${count}</span>`;
                 container.appendChild(btn);
             },
 
             setPrefix(prefix) {
                 const input = document.getElementById('batchId');
-                input.value = prefix;
-                input.focus();
-                ui.showToast(`已填入 ${prefix}...`);
+                input.value = prefix; input.focus(); ui.showToast(`已填入 ${prefix}...`);
             },
             
-            // 備註快捷功能 (新增)
             setNote(val) {
                 const input = document.getElementById('batchNote');
-                input.value = val;
-                // 視覺回饋
-                ui.showToast(`已標記為：${val}`);
+                input.value = val; ui.showToast(`已標記：${val}`);
             },
 
             toggleEraser() {
                 this.isEraserMode = !this.isEraserMode;
                 const btn = document.getElementById('eraserBtn');
                 const grid = document.getElementById('sizeGrid');
-                
-                if (this.isEraserMode) {
-                    btn.classList.add('active');
-                    grid.classList.add('eraser-mode');
-                    ui.showToast("🧽 橡皮擦開啟");
-                } else {
-                    btn.classList.remove('active');
-                    grid.classList.remove('eraser-mode');
-                }
+                if (this.isEraserMode) { btn.classList.add('active'); grid.classList.add('eraser-mode'); ui.showToast("🧽 橡皮擦開啟"); }
+                else { btn.classList.remove('active'); grid.classList.remove('eraser-mode'); }
             },
 
             incrementSize(size) {
                 if (!this.selectedSizes[size]) this.selectedSizes[size] = 0;
-                this.selectedSizes[size]++;
-                this.refreshGridState();
+                this.selectedSizes[size]++; this.refreshGridState();
             },
 
             decrementSize(size) {
@@ -899,9 +681,7 @@
                     this.selectedSizes[size]--;
                     if (this.selectedSizes[size] === 0) delete this.selectedSizes[size];
                     this.refreshGridState();
-                } else if (this.isEraserMode) {
-                    ui.showToast("數量已經是 0 了");
-                }
+                } else if (this.isEraserMode) { ui.showToast("數量為 0"); }
             },
 
             addCustomSize() {
@@ -910,29 +690,18 @@
                 if(val && !this.defaultSizes.includes(val)) {
                     this.defaultSizes.push(val);
                     this.defaultSizes.sort((a,b) => parseFloat(a) - parseFloat(b));
-                    this.renderGrid();
-                    this.incrementSize(val);
-                    input.value = '';
+                    this.renderGrid(); this.incrementSize(val); input.value = '';
                 } else if (this.defaultSizes.includes(val)) {
-                    this.incrementSize(val);
-                    input.value = '';
-                    ui.showToast(`尺碼 ${val} 已存在`);
+                    this.incrementSize(val); input.value = ''; ui.showToast("尺碼已存在");
                 }
             },
 
             refreshGridState() {
-                const btns = document.querySelectorAll('.size-btn');
-                btns.forEach(btn => {
+                document.querySelectorAll('.size-btn').forEach(btn => {
                     const size = btn.querySelector('.size-label').innerText;
                     const count = this.selectedSizes[size] || 0;
-                    const badge = btn.querySelector('.count-badge');
-                    
-                    badge.innerText = count;
-                    if(count > 0) {
-                        btn.classList.add('has-count');
-                    } else {
-                        btn.classList.remove('has-count');
-                    }
+                    btn.querySelector('.count-badge').innerText = count;
+                    count > 0 ? btn.classList.add('has-count') : btn.classList.remove('has-count');
                 });
                 this.updateBadge();
             },
@@ -943,8 +712,7 @@
             },
 
             resetCounts() {
-                this.selectedSizes = {};
-                this.refreshGridState();
+                this.selectedSizes = {}; this.refreshGridState();
                 if (this.isEraserMode) this.toggleEraser();
             },
 
@@ -952,66 +720,118 @@
                 const id = document.getElementById('batchId').value.trim();
                 const price = document.getElementById('batchPrice').value.trim();
                 const note = document.getElementById('batchNote').value.trim();
-                
-                if (!id) { ui.showToast("⚠️ 請輸入鞋款編號 ID"); return; }
-                if (!price) { ui.showToast("⚠️ 請輸入價格"); return; }
+                if (!id || !price) { ui.showToast("⚠️ 請輸入 ID 和價格"); return; }
                 
                 const totalItems = Object.values(this.selectedSizes).reduce((a,b)=>a+b, 0);
-                if (totalItems === 0) { ui.showToast("⚠️ 請至少點選一個尺碼"); return; }
+                if (totalItems === 0) { ui.showToast("⚠️ 請選尺碼"); return; }
 
-                let savedCount = 0;
                 Object.entries(this.selectedSizes).forEach(([size, count]) => {
-                    for(let i=0; i<count; i++) {
-                        dataManager.add({
-                            id: id,
-                            size: size,
-                            price: parseInt(price),
-                            note: note
-                        });
-                        savedCount++;
-                    }
+                    for(let i=0; i<count; i++) dataManager.add({ id, size, price: parseInt(price), note });
                 });
 
-                ui.showToast(`🎉 成功入庫 ${savedCount} 雙！`);
+                ui.showToast(`🎉 入庫成功！`);
                 this.resetCounts();
             }
         };
 
-        // 一般 UI
         const ui = {
+            currentFilter: 'all', // all, id, size
+
             init() {
                 const searchInput = document.getElementById('searchInput');
-                searchInput.addEventListener('input', (e) => this.renderResults(e.target.value));
-                dataManager.updateTotalCount();
+                searchInput.addEventListener('input', () => this.refreshSearch());
+                // 預設顯示全部資料
+                // this.refreshSearch(); 
+            },
+
+            setFilter(mode) {
+                this.currentFilter = mode;
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                // 根據模式修改 placeholder 提示
+                const input = document.getElementById('searchInput');
+                if(mode === 'id') input.placeholder = "🔍 輸入鞋號 (如 41336)...";
+                else if(mode === 'size') input.placeholder = "🔍 輸入尺碼 (如 23.5)...";
+                else input.placeholder = "🔍 輸入內容...";
+                
+                this.refreshSearch();
+            },
+
+            refreshSearch() {
+                const query = document.getElementById('searchInput').value;
+                this.renderResults(query);
             },
 
             renderResults(query) {
                 const listEl = document.getElementById('resultsList');
                 const welcomeEl = document.getElementById('welcomeState');
                 const emptyEl = document.getElementById('emptyState');
+                const totalEl = document.getElementById('totalCount');
+                const summaryEl = document.getElementById('summaryBoard');
                 
                 listEl.innerHTML = '';
+                summaryEl.innerHTML = ''; // 清空儀表板
 
                 if (!query) {
-                    welcomeEl.style.display = 'block';
-                    emptyEl.style.display = 'none';
+                    welcomeEl.style.display = 'block'; emptyEl.style.display = 'none'; summaryEl.style.display = 'none';
+                    totalEl.innerText = dataManager.items.length;
                     return;
                 }
 
                 welcomeEl.style.display = 'none';
-                const results = dataManager.search(query);
+                
+                // 執行搜尋 (帶入過濾模式)
+                const results = dataManager.search(query, this.currentFilter);
+                totalEl.innerText = results.length;
 
                 if (results.length === 0) {
-                    emptyEl.style.display = 'block';
+                    emptyEl.style.display = 'block'; summaryEl.style.display = 'none';
                     return;
                 }
-
                 emptyEl.style.display = 'none';
 
+                // --- V6 核心：生成庫存儀表板 ---
+                summaryEl.style.display = 'block';
+                const grouped = {}; // { '41336': { total: 0, sizes: { '23': 2 } } }
+                
+                results.forEach(item => {
+                    if (!grouped[item.id]) grouped[item.id] = { total: 0, sizes: {} };
+                    grouped[item.id].total++;
+                    if (!grouped[item.id].sizes[item.size]) grouped[item.id].sizes[item.size] = 0;
+                    grouped[item.id].sizes[item.size]++;
+                });
+
+                Object.keys(grouped).forEach(id => {
+                    const data = grouped[id];
+                    // 將尺碼排序
+                    const sortedSizes = Object.keys(data.sizes).sort((a,b) => parseFloat(a) - parseFloat(b));
+                    
+                    const card = document.createElement('div');
+                    card.className = 'summary-card';
+                    
+                    let sizeHtml = '';
+                    sortedSizes.forEach(size => {
+                        sizeHtml += `<span class="size-badge">${size} <strong>(${data.sizes[size]})</strong></span>`;
+                    });
+
+                    card.innerHTML = `
+                        <div class="summary-header">
+                            <span class="summary-title">${id}</span>
+                            <span class="summary-total">共 ${data.total} 雙</span>
+                        </div>
+                        <div class="summary-sizes">
+                            ${sizeHtml}
+                        </div>
+                    `;
+                    summaryEl.appendChild(card);
+                });
+                // -----------------------------
+
+                // 渲染原本的列表 (供管理/刪除用)
                 results.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'inventory-item';
-                    
                     li.innerHTML = `
                         <input type="checkbox" class="item-checkbox" value="${item._uid}" onchange="deleteUI.updateSelectedCount()">
                         <div class="item-content-wrapper">
@@ -1031,60 +851,34 @@
                     listEl.appendChild(li);
                 });
                 
-                if (deleteUI.isManageMode) {
-                    listEl.classList.add('manage-mode');
-                }
+                if (deleteUI.isManageMode) listEl.classList.add('manage-mode');
             },
 
             showToast(msg) {
                 const toast = document.getElementById('toast');
-                toast.innerText = msg;
-                toast.classList.add('show');
+                toast.innerText = msg; toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 2000);
             }
         };
 
-        // App 主控
         const app = {
-            init() {
-                dataManager.init();
-                ui.init();
-                batchUI.init();
-            },
-
+            init() { dataManager.init(); ui.init(); batchUI.init(); },
             switchTab(tabName) {
-                if (deleteUI.isManageMode) {
-                    deleteUI.toggleManageMode();
-                }
-
+                if (deleteUI.isManageMode) deleteUI.toggleManageMode();
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 event.currentTarget.classList.add('active');
-
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
                 document.getElementById(`view-${tabName}`).classList.add('active');
-                
-                if (tabName === 'search') {
-                    const currentVal = document.getElementById('searchInput').value;
-                    if(currentVal) ui.renderResults(currentVal);
-                    dataManager.updateTotalCount();
-                }
+                if (tabName === 'search') ui.refreshSearch();
             },
-
             deleteItem(uid) {
-                if(confirm('確認移除此紀錄？')) {
-                    dataManager.remove(uid);
-                    const currentQuery = document.getElementById('searchInput').value;
-                    ui.renderResults(currentQuery);
-                    ui.showToast('已移除');
-                    dataManager.updateTotalCount();
+                if(confirm('確認移除？')) {
+                    dataManager.remove(uid); ui.refreshSearch(); ui.showToast('已移除');
                 }
             }
         };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
-
+        window.addEventListener('DOMContentLoaded', () => { app.init(); });
     </script>
 </body>
 </html>
