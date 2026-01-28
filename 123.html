@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鞋庫掌門人 Pro - 速填版</title>
+    <title>鞋庫掌門人 Pro - 極速完全版</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -64,7 +64,7 @@
             padding: 0.75rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             position: sticky;
             top: 60px;
             z-index: 90;
@@ -122,7 +122,6 @@
             flex: 1;
         }
 
-        /* 改良後的標籤列，包含快捷按鈕 */
         .label-row {
             display: flex;
             justify-content: space-between;
@@ -148,7 +147,7 @@
             border: 1px solid #bfdbfe;
             color: var(--primary-color);
             font-size: 0.8rem;
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
@@ -187,7 +186,6 @@
             margin-bottom: 10px;
         }
 
-        /* 橡皮擦按鈕樣式 */
         .eraser-btn {
             background: white;
             border: 1px solid var(--border-color);
@@ -320,6 +318,7 @@
         /* 庫存列表 */
         .inventory-list {
             list-style: none;
+            padding-bottom: 60px;
         }
 
         .inventory-item {
@@ -329,9 +328,34 @@
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             display: flex;
-            justify-content: space-between;
             align-items: center;
             border-left: 5px solid var(--accent-color);
+            transition: transform 0.2s;
+        }
+        
+        .manage-mode .inventory-item {
+            padding-left: 0.5rem;
+            border-left: none;
+        }
+
+        .item-checkbox {
+            display: none;
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            margin-left: 8px;
+            accent-color: var(--primary-color);
+        }
+
+        .manage-mode .item-checkbox {
+            display: block;
+        }
+        
+        .item-content-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .item-info h3 {
@@ -376,6 +400,10 @@
             cursor: pointer;
             font-size: 1.2rem;
         }
+        
+        .manage-mode .delete-btn {
+            display: none;
+        }
 
         /* 底部導航列 */
         nav {
@@ -418,6 +446,29 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
+        
+        /* 批量操作浮動欄 */
+        .batch-actions-bar {
+            position: fixed;
+            bottom: -100px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            z-index: 300;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .batch-actions-bar.show {
+            bottom: 0;
+        }
 
         /* 通知視窗 */
         .toast {
@@ -447,9 +498,29 @@
         .stats-bar {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 0 0.5rem 1rem 0.5rem;
             font-size: 0.85rem;
             color: var(--text-light);
+        }
+
+        .manage-toggle {
+            background: #f3f4f6;
+            padding: 4px 12px;
+            border-radius: 15px;
+            color: var(--text-dark);
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .manage-toggle.active {
+            background: var(--text-dark);
+            color: white;
+            border-color: var(--text-dark);
         }
         
         .hint-text {
@@ -472,12 +543,20 @@
         </div>
         
         <div class="stats-bar">
-            <span>總庫存: <strong id="totalCount" style="color:var(--text-dark)">0</strong> 雙</span>
-            <span onclick="dataManager.exportData()" style="color:var(--primary-color); cursor:pointer;">📤 備份資料</span>
+            <span>總數: <strong id="totalCount" style="color:var(--text-dark)">0</strong></span>
+            
+            <div style="display:flex; gap:10px;">
+                <span class="manage-toggle" id="manageToggleBtn" onclick="deleteUI.toggleManageMode()">
+                    🔧 管理
+                </span>
+                <span onclick="dataManager.exportData()" style="padding:4px; color:var(--primary-color); cursor:pointer;">
+                    📤 備份
+                </span>
+            </div>
         </div>
 
-        <div id="resultsList" class="inventory-list">
-            </div>
+        <ul id="resultsList" class="inventory-list">
+            </ul>
         
         <div id="emptyState" style="text-align:center; padding: 3rem; display:none; color:#9ca3af;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
@@ -488,6 +567,18 @@
             <div style="font-size: 3rem; margin-bottom: 1rem;">👆</div>
             <p>輸入上方鞋號開始找鞋</p>
         </div>
+    </div>
+
+    <div id="batchActions" class="batch-actions-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button onclick="deleteUI.toggleSelectAll()" class="btn btn-secondary" style="width:auto; padding: 10px 16px;">
+                <span id="selectAllText">全選</span>
+            </button>
+            <span style="font-size:0.9rem; font-weight:600;">已選 <span id="selectedCount" style="color:var(--primary-color)">0</span> 筆</span>
+        </div>
+        <button onclick="deleteUI.deleteSelected()" class="btn btn-danger" style="background-color: var(--danger-color); width:auto; padding: 10px 20px;">
+            🗑️ 刪除選取
+        </button>
     </div>
 
     <div id="view-add" class="view-section container">
@@ -516,7 +607,6 @@
             <div class="size-matrix-container">
                 <div class="size-controls">
                     <label class="form-label" style="margin:0;">尺碼選擇</label>
-                    
                     <button type="button" id="eraserBtn" class="eraser-btn" onclick="batchUI.toggleEraser()">
                         <span>🧽 橡皮擦</span>
                     </button>
@@ -539,8 +629,14 @@
             </div>
 
             <div class="form-group" style="margin-top: 1rem;">
-                <label class="form-label">備註 (選填)</label>
-                <input type="text" id="batchNote" class="form-control" placeholder="例如: 零碼區/B架">
+                <div class="label-row">
+                    <label class="form-label">備註 (位置)</label>
+                    <div class="prefix-group">
+                        <button type="button" class="prefix-btn" onclick="batchUI.setNote('庫存')">📦 庫存</button>
+                        <button type="button" class="prefix-btn" onclick="batchUI.setNote('架上')">👟 架上</button>
+                    </div>
+                </div>
+                <input type="text" id="batchNote" class="form-control" placeholder="例: 庫存/架上">
             </div>
 
             <div style="margin-top: 1.5rem;">
@@ -559,7 +655,7 @@
         </div>
     </div>
 
-    <nav>
+    <nav id="mainNav">
         <div class="nav-item active" onclick="app.switchTab('search')">
             <span class="nav-icon">🔍</span>
             <span class="nav-label">找庫存</span>
@@ -574,12 +670,12 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro - 邏輯核心
+         * 鞋庫掌門人 Pro - 邏輯核心 (V5 完全版)
          */
         
         // 資料管理模組
         const dataManager = {
-            STORAGE_KEY: 'shoe_inventory_pro_v3', // 升級版本號
+            STORAGE_KEY: 'shoe_inventory_pro_v5', 
             items: [],
 
             init() {
@@ -645,7 +741,75 @@
             }
         };
 
-        // 批量輸入 UI 邏輯
+        // 批量管理與刪除 UI
+        const deleteUI = {
+            isManageMode: false,
+
+            toggleManageMode() {
+                this.isManageMode = !this.isManageMode;
+                const list = document.getElementById('resultsList');
+                const btn = document.getElementById('manageToggleBtn');
+                const actionBar = document.getElementById('batchActions');
+                const nav = document.getElementById('mainNav');
+
+                if (this.isManageMode) {
+                    list.classList.add('manage-mode');
+                    btn.classList.add('active');
+                    btn.innerHTML = '✅ 完成';
+                    actionBar.classList.add('show');
+                    nav.style.display = 'none';
+                    this.updateSelectedCount();
+                } else {
+                    list.classList.remove('manage-mode');
+                    btn.classList.remove('active');
+                    btn.innerHTML = '🔧 管理';
+                    actionBar.classList.remove('show');
+                    nav.style.display = 'flex';
+                    document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = false);
+                }
+            },
+
+            updateSelectedCount() {
+                const count = document.querySelectorAll('.item-checkbox:checked').length;
+                document.getElementById('selectedCount').innerText = count;
+            },
+
+            toggleSelectAll() {
+                const checkboxes = document.querySelectorAll('.item-checkbox');
+                if (checkboxes.length === 0) return;
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+                const btnText = document.getElementById('selectAllText');
+                btnText.innerText = !allChecked ? "取消全選" : "全選";
+                this.updateSelectedCount();
+            },
+
+            deleteSelected() {
+                const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    ui.showToast("請先勾選要刪除的項目");
+                    return;
+                }
+
+                if (confirm(`確定要刪除選取的 ${checkedBoxes.length} 筆資料嗎？`)) {
+                    checkedBoxes.forEach(cb => {
+                        dataManager.remove(cb.value);
+                    });
+                    
+                    const currentQuery = document.getElementById('searchInput').value;
+                    ui.renderResults(currentQuery);
+                    dataManager.updateTotalCount();
+                    ui.showToast(`已刪除 ${checkedBoxes.length} 筆資料`);
+                    this.updateSelectedCount();
+                    
+                    if (dataManager.search(currentQuery).length === 0) {
+                        this.toggleManageMode();
+                    }
+                }
+            }
+        };
+
+        // 批量輸入 UI
         const batchUI = {
             selectedSizes: {}, 
             isEraserMode: false,
@@ -664,7 +828,6 @@
             renderGrid() {
                 const grid = document.getElementById('sizeGrid');
                 grid.innerHTML = '';
-                
                 this.defaultSizes.forEach(size => {
                     this.createSizeButton(grid, size);
                 });
@@ -675,7 +838,6 @@
                 const btn = document.createElement('div');
                 btn.className = `size-btn ${count > 0 ? 'has-count' : ''}`;
                 
-                // 處理點擊事件
                 btn.onclick = () => {
                     if (this.isEraserMode) {
                         this.decrementSize(size);
@@ -684,7 +846,6 @@
                     }
                 };
                 
-                // 右鍵/長按輔助
                 btn.oncontextmenu = (e) => {
                     e.preventDefault();
                     this.decrementSize(size);
@@ -697,14 +858,19 @@
                 container.appendChild(btn);
             },
 
-            // 快捷鍵功能
             setPrefix(prefix) {
                 const input = document.getElementById('batchId');
                 input.value = prefix;
                 input.focus();
-                // 嘗試將游標移到最後
-                // 注意：某些手機瀏覽器行為可能不同，但這行能確保輸入狀態
                 ui.showToast(`已填入 ${prefix}...`);
+            },
+            
+            // 備註快捷功能 (新增)
+            setNote(val) {
+                const input = document.getElementById('batchNote');
+                input.value = val;
+                // 視覺回饋
+                ui.showToast(`已標記為：${val}`);
             },
 
             toggleEraser() {
@@ -715,7 +881,7 @@
                 if (this.isEraserMode) {
                     btn.classList.add('active');
                     grid.classList.add('eraser-mode');
-                    ui.showToast("🧽 橡皮擦開啟：點擊尺碼可減少數量");
+                    ui.showToast("🧽 橡皮擦開啟");
                 } else {
                     btn.classList.remove('active');
                     grid.classList.remove('eraser-mode');
@@ -733,8 +899,8 @@
                     this.selectedSizes[size]--;
                     if (this.selectedSizes[size] === 0) delete this.selectedSizes[size];
                     this.refreshGridState();
-                } else {
-                    if (this.isEraserMode) ui.showToast("數量已經是 0 了");
+                } else if (this.isEraserMode) {
+                    ui.showToast("數量已經是 0 了");
                 }
             },
 
@@ -811,7 +977,7 @@
             }
         };
 
-        // 一般 UI 控制
+        // 一般 UI
         const ui = {
             init() {
                 const searchInput = document.getElementById('searchInput');
@@ -845,21 +1011,29 @@
                 results.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'inventory-item';
+                    
                     li.innerHTML = `
-                        <div class="item-info">
-                            <h3>${item.id} <span class="tag-size">${item.size}</span></h3>
-                            <div class="item-details">
-                                ${item.note ? `📝 ${item.note}` : ''}
-                                <span style="margin-left:8px; opacity:0.6;">${item.timestamp.split(' ')[0]}</span>
+                        <input type="checkbox" class="item-checkbox" value="${item._uid}" onchange="deleteUI.updateSelectedCount()">
+                        <div class="item-content-wrapper">
+                            <div class="item-info">
+                                <h3>${item.id} <span class="tag-size">${item.size}</span></h3>
+                                <div class="item-details">
+                                    ${item.note ? `📍 ${item.note}` : ''}
+                                    <span style="margin-left:8px; opacity:0.6;">${item.timestamp.split(' ')[0]}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div style="display:flex; align-items:center;">
-                            <div class="item-price">$${item.price}</div>
-                            <button class="delete-btn" onclick="app.deleteItem('${item._uid}')">×</button>
+                            <div style="display:flex; align-items:center;">
+                                <div class="item-price">$${item.price}</div>
+                                <button class="delete-btn" onclick="app.deleteItem('${item._uid}')">×</button>
+                            </div>
                         </div>
                     `;
                     listEl.appendChild(li);
                 });
+                
+                if (deleteUI.isManageMode) {
+                    listEl.classList.add('manage-mode');
+                }
             },
 
             showToast(msg) {
@@ -879,6 +1053,10 @@
             },
 
             switchTab(tabName) {
+                if (deleteUI.isManageMode) {
+                    deleteUI.toggleManageMode();
+                }
+
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 event.currentTarget.classList.add('active');
 
