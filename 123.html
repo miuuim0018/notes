@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>童鞋庫存 Pro (V11 - 透視版)</title>
+    <title>童鞋庫存 Pro (V12 - 傳輸特別版)</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -202,7 +202,7 @@
         .gender-tag.girl { background: var(--girl-bg); color: var(--girl-color); border: 1px solid var(--girl-color); }
         .gender-tag.neutral { background: var(--neutral-bg); color: var(--neutral-color); border: 1px solid #d1d5db; }
 
-        /* 統計頁面樣式 (V11 Updated) */
+        /* 統計頁面樣式 */
         .stats-overview {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -270,7 +270,7 @@
         .rank-id { font-weight: 800; font-size: 1.15rem; }
         .rank-count { font-weight: 700; color: white; background: var(--primary-color); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem;}
 
-        /* V11 新增：排行榜內的尺碼明細 */
+        /* 排行榜內的尺碼明細 */
         .rank-details {
             position: relative;
             z-index: 1;
@@ -462,6 +462,7 @@
         .btn:active { transform: scale(0.98); }
         .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
         .btn-secondary { background-color: white; border: 1px solid var(--border-color); color: var(--text-dark); padding: 6px 12px; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
         
         /* 庫存列表 */
         .inventory-list { list-style: none; padding-bottom: 60px; }
@@ -522,12 +523,28 @@
         }
         .manage-toggle.active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
         .hint-text { font-size: 0.8rem; color: var(--text-light); margin-top: 5px; text-align: center; }
+
+        /* 分享頁面專用樣式 */
+        .share-textarea {
+            width: 100%;
+            height: 300px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            color: var(--text-dark);
+            resize: none;
+        }
+        .share-textarea:focus { border-color: var(--primary-color); outline: none; background: white; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>👟 童鞋庫存 Pro (V11)</h1>
+        <h1>👟 童鞋庫存 Pro (V12)</h1>
     </header>
 
     <div id="view-search" class="view-section active container">
@@ -547,12 +564,6 @@
             <div style="display:flex; gap:8px;">
                 <span class="manage-toggle" id="manageToggleBtn" onclick="deleteUI.toggleManageMode()">
                     🔧 管理
-                </span>
-                <span onclick="dataManager.exportData()" style="padding:4px 8px; color:var(--primary-color); cursor:pointer; background:#eff6ff; border-radius:8px; font-weight:600;">
-                    📤 備份
-                </span>
-                <span onclick="dataManager.importDataProcess()" style="padding:4px 8px; color:#059669; cursor:pointer; background:#ecfdf5; border-radius:8px; font-weight:600;">
-                    📥 讀取
                 </span>
             </div>
         </div>
@@ -608,7 +619,7 @@
 
         <h3 style="margin-bottom: 1rem; font-size: 1rem; color:var(--text-light);">🏆 庫存量排行榜 (含尺碼明細)</h3>
         <ul id="rankingList" class="ranking-list">
-            </ul>
+        </ul>
         
         <div id="noStatsState" style="text-align:center; padding: 2rem; display:none; color:#9ca3af;">
             <p>暫無庫存資料</p>
@@ -701,6 +712,26 @@
         </div>
     </div>
 
+    <div id="view-share" class="view-section container">
+        <div class="card">
+            <h2 style="margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">📤 資料傳輸中心</h2>
+            <p style="color:var(--text-light); margin-bottom:1rem; font-size:0.9rem;">
+                複製下方代碼傳給同事，或將同事給的代碼貼上來讀取。
+            </p>
+            
+            <textarea id="shareDataArea" class="share-textarea" placeholder="在此貼上資料碼..."></textarea>
+            
+            <div style="display:flex; gap:10px; flex-direction:column;">
+                <button onclick="shareUI.copyData()" class="btn btn-primary">
+                    📋 複製目前所有資料
+                </button>
+                <button onclick="shareUI.importData()" class="btn" style="background-color: #ecfdf5; color: #059669; border:1px solid #a7f3d0;">
+                    📥 讀取貼上的資料
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="batchActions" class="batch-actions-bar">
         <div style="display:flex; align-items:center; gap:10px;">
             <button onclick="deleteUI.toggleSelectAll()" class="btn btn-secondary" style="width:auto; padding: 10px 16px;">
@@ -724,7 +755,11 @@
         </div>
         <div class="nav-item" onclick="app.switchTab('add')">
             <span class="nav-icon">➕</span>
-            <span class="nav-label">批量登記</span>
+            <span class="nav-label">批量</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('share')">
+            <span class="nav-icon">📤</span>
+            <span class="nav-label">傳輸</span>
         </div>
     </nav>
 
@@ -732,28 +767,31 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro - 童鞋性別特化版 (V11 - 透視版)
+         * 鞋庫掌門人 Pro (V12 - 傳輸特別版)
          */
         
+        // 預載資料：這是您提供的資料，已直接寫死在程式裡作為預設值
+        const PRELOADED_DATA = [{"id":"41331","size":"21.5","price":490,"note":"庫存","gender":"M","_uid":"1769675338509x8xhjodq7","timestamp":"2026/1/29 下午4:28:58"},{"id":"41301","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769674567451fh7lgjhsa","timestamp":"2026/1/29 下午4:16:07"},{"id":"41331","size":"21","price":490,"note":"庫存","gender":"M","_uid":"1769674519629gwn2o9dm8","timestamp":"2026/1/29 下午4:15:19"},{"id":"41331","size":"19","price":490,"note":"庫存","gender":"M","_uid":"17696745196200kgzx3v02","timestamp":"2026/1/29 下午4:15:19"},{"id":"41295","size":"21.5","price":490,"note":"庫存","gender":"N","_uid":"17696738459462l7mcq9o6","timestamp":"2026/1/29 下午4:04:05"},{"id":"41506","size":"22.5","price":490,"note":"庫存","gender":"M","_uid":"17696715389391b1isiyy1","timestamp":"2026/1/29 下午3:25:38"},{"id":"41793","size":"19","price":490,"note":"庫存","gender":"F","_uid":"1769671124436ixof8ktl8","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"18","price":490,"note":"庫存","gender":"F","_uid":"1769671124435vihamieyl","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"18","price":490,"note":"庫存","gender":"F","_uid":"1769671124435zay6wlanz","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"18","price":490,"note":"庫存","gender":"F","_uid":"1769671124434xxawuy3z0","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"17","price":490,"note":"庫存","gender":"F","_uid":"176967112443417e8n9uav","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"17","price":490,"note":"庫存","gender":"F","_uid":"1769671124434jvi6yv6nb","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"16","price":490,"note":"庫存","gender":"F","_uid":"17696711244330kafk24rr","timestamp":"2026/1/29 下午3:18:44"},{"id":"41793","size":"16","price":490,"note":"庫存","gender":"F","_uid":"1769671124432jsy0y3u7l","timestamp":"2026/1/29 下午3:18:44"},{"id":"32328","size":"21.5","price":490,"note":"庫存","gender":"F","_uid":"1769671095998ktarvsuhg","timestamp":"2026/1/29 下午3:18:15"},{"id":"32328","size":"21","price":490,"note":"庫存","gender":"F","_uid":"17696710959981g33jh62a","timestamp":"2026/1/29 下午3:18:15"},{"id":"41336","size":"20","price":490,"note":"庫存","gender":"M","_uid":"1769671072595m9c5r8ru5","timestamp":"2026/1/29 下午3:17:52"},{"id":"41810","size":"22.5","price":490,"note":"庫存","gender":"M","_uid":"1769671057199yihoyfpyt","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"23","price":490,"note":"庫存","gender":"M","_uid":"1769671057198zsbi3swh9","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"23","price":490,"note":"庫存","gender":"M","_uid":"17696710571988xvbfwqe6","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"22","price":490,"note":"庫存","gender":"M","_uid":"17696710571982t72nkuaa","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"22","price":490,"note":"庫存","gender":"M","_uid":"1769671057197sejpvmji5","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"21","price":490,"note":"庫存","gender":"M","_uid":"1769671057197v1dmabv8r","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"20","price":490,"note":"庫存","gender":"M","_uid":"1769671057197oancf0w4d","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"20","price":490,"note":"庫存","gender":"M","_uid":"1769671057196pp2w3epeb","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"19","price":490,"note":"庫存","gender":"M","_uid":"1769671057196b6893rrll","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"19","price":490,"note":"庫存","gender":"M","_uid":"17696710571953uhkxjrib","timestamp":"2026/1/29 下午3:17:37"},{"id":"41810","size":"19","price":490,"note":"庫存","gender":"M","_uid":"1769671057195i7fi63ngz","timestamp":"2026/1/29 下午3:17:37"},{"id":"31897","size":"18","price":290,"note":"庫存","gender":"N","_uid":"1769670976838puneakr8r","timestamp":"2026/1/29 下午3:16:16"},{"id":"31897","size":"18","price":290,"note":"庫存","gender":"N","_uid":"1769670976838ca26hw0cl","timestamp":"2026/1/29 下午3:16:16"},{"id":"31897","size":"17","price":290,"note":"庫存","gender":"N","_uid":"1769670976838sqtstcffi","timestamp":"2026/1/29 下午3:16:16"},{"id":"31897","size":"16","price":290,"note":"庫存","gender":"N","_uid":"1769670976838kxrf666oj","timestamp":"2026/1/29 下午3:16:16"},{"id":"31897","size":"15","price":290,"note":"庫存","gender":"N","_uid":"17696709768375iqz70w93","timestamp":"2026/1/29 下午3:16:16"},{"id":"31897","size":"15","price":290,"note":"庫存","gender":"N","_uid":"17696709768371fnjedbeh","timestamp":"2026/1/29 下午3:16:16"},{"id":"31893","size":"19","price":590,"note":"庫存","gender":"F","_uid":"176967094311055eyodu88","timestamp":"2026/1/29 下午3:15:43"},{"id":"31893","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670943109oxgudfe4s","timestamp":"2026/1/29 下午3:15:43"},{"id":"31893","size":"18","price":590,"note":"庫存","gender":"F","_uid":"1769670943109aenoli9sx","timestamp":"2026/1/29 下午3:15:43"},{"id":"31893","size":"17","price":590,"note":"庫存","gender":"F","_uid":"1769670943108pn0e9hcjv","timestamp":"2026/1/29 下午3:15:43"},{"id":"31893","size":"16","price":590,"note":"庫存","gender":"F","_uid":"1769670943107rfcvd8uog","timestamp":"2026/1/29 下午3:15:43"},{"id":"41328","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"17696709161551bt02vc81","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769670916155zsvwk5rb9","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"22","price":590,"note":"庫存","gender":"M","_uid":"17696709161548rhbadpqg","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769670916154uabyqz82v","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769670916154arl5hd58f","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"20","price":590,"note":"庫存","gender":"M","_uid":"17696709161533v2ngz2d7","timestamp":"2026/1/29 下午3:15:16"},{"id":"41328","size":"20","price":590,"note":"庫存","gender":"M","_uid":"176967091615217yxf1at6","timestamp":"2026/1/29 下午3:15:16"},{"id":"41327","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670891602nmiq3g5cx","timestamp":"2026/1/29 下午3:14:51"},{"id":"41327","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670891601dfm4ypc1l","timestamp":"2026/1/29 下午3:14:51"},{"id":"41327","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670891601wbfy3p8ry","timestamp":"2026/1/29 下午3:14:51"},{"id":"41326","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769670872685qfe338p1i","timestamp":"2026/1/29 下午3:14:32"},{"id":"41326","size":"21","price":590,"note":"庫存","gender":"M","_uid":"17696708726843zksq44vi","timestamp":"2026/1/29 下午3:14:32"},{"id":"41326","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670872684odfxujj0l","timestamp":"2026/1/29 下午3:14:32"},{"id":"41326","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670872683sdkgi1uqw","timestamp":"2026/1/29 下午3:14:32"},{"id":"41326","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769670872683dn97bkh9a","timestamp":"2026/1/29 下午3:14:32"},{"id":"41325","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769670841935ukrnawe0h","timestamp":"2026/1/29 下午3:14:01"},{"id":"41325","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670841934f9yrwqi8l","timestamp":"2026/1/29 下午3:14:01"},{"id":"41322","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670797248aohtpios5","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"176967079724895ckbkz99","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"22.5","price":590,"note":"庫存","gender":"F","_uid":"17696707972488d936xpnk","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"22.5","price":590,"note":"庫存","gender":"F","_uid":"1769670797247991m9vomj","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670797247iapecom7o","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"22","price":590,"note":"庫存","gender":"F","_uid":"17696707972475t5ojtfg0","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"22","price":590,"note":"庫存","gender":"F","_uid":"17696707972478ql6h7scn","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"21","price":590,"note":"庫存","gender":"F","_uid":"17696707972468tc5uf8jo","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"21","price":590,"note":"庫存","gender":"F","_uid":"17696707972469a0sarx1e","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670797245i5py29ul0","timestamp":"2026/1/29 下午3:13:17"},{"id":"41322","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670797245vrbz45iq4","timestamp":"2026/1/29 下午3:13:17"},{"id":"41318","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670766429gyera7a9f","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670766429e3fi6efk2","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"22.5","price":590,"note":"庫存","gender":"F","_uid":"1769670766429sx6t7jl7w","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"22.5","price":590,"note":"庫存","gender":"F","_uid":"1769670766428mcfmpfap2","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670766428uzixzjpi1","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670766428u5arqsjgh","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"22","price":590,"note":"庫存","gender":"F","_uid":"17696707664280yt2hmwvs","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670766427wjigauna1","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670766427ndofrj1cs","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670766427ax5bremab","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670766426ojcmesftx","timestamp":"2026/1/29 下午3:12:46"},{"id":"41318","size":"19","price":590,"note":"庫存","gender":"F","_uid":"176967076642545cv68bqg","timestamp":"2026/1/29 下午3:12:46"},{"id":"41316","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"1769670730076bt0oj98aa","timestamp":"2026/1/29 下午3:12:10"},{"id":"41316","size":"20","price":590,"note":"庫存","gender":"M","_uid":"17696707300760w11dtify","timestamp":"2026/1/29 下午3:12:10"},{"id":"41316","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670730075ang9t3jvj","timestamp":"2026/1/29 下午3:12:10"},{"id":"41316","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769670730075erhp6bg4p","timestamp":"2026/1/29 下午3:12:10"},{"id":"41313","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670708644i8k2vpmr0","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"23","price":590,"note":"庫存","gender":"F","_uid":"1769670708644seq80i2fi","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"23","price":590,"note":"庫存","gender":"F","_uid":"1769670708643ph1mse0q0","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670708643typfb0zc4","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769670708642vyh15mvxz","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670708641q8w9uvola","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670708641vszex9bx8","timestamp":"2026/1/29 下午3:11:48"},{"id":"41313","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670708640nop8bcpb8","timestamp":"2026/1/29 下午3:11:48"},{"id":"41311","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670677703kv5xt5w0d","timestamp":"2026/1/29 下午3:11:17"},{"id":"41311","size":"20","price":590,"note":"庫存","gender":"F","_uid":"17696706777037lhr12bqp","timestamp":"2026/1/29 下午3:11:17"},{"id":"41311","size":"20","price":590,"note":"庫存","gender":"F","_uid":"17696706777022ug38i2ur","timestamp":"2026/1/29 下午3:11:17"},{"id":"41310","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"1769670629986v4i8vvwmf","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769670629986cjtdhlmod","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769670629985o85j8ythn","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769670629985czgjiouyp","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"21","price":590,"note":"庫存","gender":"M","_uid":"176967062998546z2zq1s3","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670629985nsj96u447","timestamp":"2026/1/29 下午3:10:29"},{"id":"41310","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769670629983ojxnx50nl","timestamp":"2026/1/29 下午3:10:29"},{"id":"41306","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"1769670596353j0g4qy9n4","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769670596353gwiuddwzx","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769670596353ugykov01o","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"20","price":590,"note":"庫存","gender":"M","_uid":"17696705963529kvu3yeb5","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769670596352sxfawqyav","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769670596352eb5cqjufk","timestamp":"2026/1/29 下午3:09:56"},{"id":"41306","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769670596351xh0rvslpu","timestamp":"2026/1/29 下午3:09:56"},{"id":"41301","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670542944swsx8niyi","timestamp":"2026/1/29 下午3:09:02"},{"id":"41301","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670542944e156az6k0","timestamp":"2026/1/29 下午3:09:02"},{"id":"41301","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670542943nn3ypgtab","timestamp":"2026/1/29 下午3:09:02"},{"id":"41517","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670479064lhcv3vs57","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670479063d450lldho","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670479063hab5azeao","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670479063niiivcnpo","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670479062zv3vmbn9a","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670479062kji3wnjgf","timestamp":"2026/1/29 下午3:07:59"},{"id":"41517","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769670479060aliaayone","timestamp":"2026/1/29 下午3:07:59"},{"id":"41513","size":"19","price":590,"note":"庫存","gender":"F","_uid":"176967025544567z27r3a3","timestamp":"2026/1/29 下午3:04:15"},{"id":"41515","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769670063986x1vohm8kn","timestamp":"2026/1/29 下午3:01:03"},{"id":"41515","size":"23","price":590,"note":"庫存","gender":"F","_uid":"1769670063986oiv83kc9k","timestamp":"2026/1/29 下午3:01:03"},{"id":"41515","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769670063986wyiez1de4","timestamp":"2026/1/29 下午3:01:03"},{"id":"41515","size":"20","price":590,"note":"庫存","gender":"F","_uid":"17696700639853tdiuzy0e","timestamp":"2026/1/29 下午3:01:03"},{"id":"41515","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769670063985afuptrzv3","timestamp":"2026/1/29 下午3:01:03"},{"id":"41515","size":"19","price":590,"note":"庫存","gender":"F","_uid":"17696700639840h21pjqe5","timestamp":"2026/1/29 下午3:01:03"},{"id":"41513","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"176966999952283fmasgv8","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769669999522fqkl15bd3","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"23","price":590,"note":"庫存","gender":"F","_uid":"1769669999521apl41r0b1","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769669999521j5fl4t87l","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"22","price":590,"note":"庫存","gender":"F","_uid":"17696699995218hp68yu1n","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769669999520178l8qnzz","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769669999520r3drcajjj","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"21","price":590,"note":"庫存","gender":"F","_uid":"1769669999520g4k2yyv3s","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769669999519qspg5dfn8","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"20","price":590,"note":"庫存","gender":"F","_uid":"17696699995193p2gg2jyf","timestamp":"2026/1/29 下午2:59:59"},{"id":"41513","size":"19","price":590,"note":"庫存","gender":"F","_uid":"17696699995181mhfx9yqw","timestamp":"2026/1/29 下午2:59:59"},{"id":"41510","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"1769669893739uaesd5qbi","timestamp":"2026/1/29 下午2:58:13"},{"id":"41510","size":"22","price":590,"note":"庫存","gender":"M","_uid":"17696698937389ftkrzm7l","timestamp":"2026/1/29 下午2:58:13"},{"id":"41510","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769669893738ls8ddjtyu","timestamp":"2026/1/29 下午2:58:13"},{"id":"41510","size":"22","price":590,"note":"庫存","gender":"M","_uid":"1769669893738pjpb8aemd","timestamp":"2026/1/29 下午2:58:13"},{"id":"41510","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769669893738xqtkk4666","timestamp":"2026/1/29 下午2:58:13"},{"id":"41510","size":"19","price":590,"note":"庫存","gender":"M","_uid":"1769669893738iptvvcjx2","timestamp":"2026/1/29 下午2:58:13"},{"id":"41508","size":"21.5","price":590,"note":"庫存","gender":"M","_uid":"1769669842069y1zdq9y4l","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"22.5","price":590,"note":"庫存","gender":"M","_uid":"1769669842069fos1cqhcp","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"23","price":590,"note":"庫存","gender":"M","_uid":"1769669842069a7w74ly8r","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"23","price":590,"note":"庫存","gender":"M","_uid":"1769669842069qr5ysnmec","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"21","price":590,"note":"庫存","gender":"M","_uid":"1769669842069ibab3w3hu","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769669842068n03o3hcxr","timestamp":"2026/1/29 下午2:57:22"},{"id":"41508","size":"19","price":590,"note":"庫存","gender":"M","_uid":"17696698420682i8cuww3x","timestamp":"2026/1/29 下午2:57:22"},{"id":"41507","size":"21.5","price":590,"note":"庫存","gender":"F","_uid":"1769669746973i5i9t9qfd","timestamp":"2026/1/29 下午2:55:46"},{"id":"41507","size":"23","price":590,"note":"庫存","gender":"F","_uid":"176966974697225xu6joyi","timestamp":"2026/1/29 下午2:55:46"},{"id":"41507","size":"22","price":590,"note":"庫存","gender":"F","_uid":"1769669746972jsh4wzcrq","timestamp":"2026/1/29 下午2:55:46"},{"id":"41507","size":"21","price":590,"note":"庫存","gender":"F","_uid":"176966974697149rcfqadc","timestamp":"2026/1/29 下午2:55:46"},{"id":"41507","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769669746971nsy6ty68z","timestamp":"2026/1/29 下午2:55:46"},{"id":"41507","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769669746970ljfjzuesa","timestamp":"2026/1/29 下午2:55:46"},{"id":"41506","size":"22.5","price":590,"note":"庫存","gender":"M","_uid":"1769669707650x7c05yov7","timestamp":"2026/1/29 下午2:55:07"},{"id":"41506","size":"23","price":590,"note":"庫存","gender":"M","_uid":"17696697076502odre4ixj","timestamp":"2026/1/29 下午2:55:07"},{"id":"41506","size":"20","price":590,"note":"庫存","gender":"M","_uid":"1769669707649csm46m2lz","timestamp":"2026/1/29 下午2:55:07"},{"id":"41506","size":"19","price":590,"note":"庫存","gender":"M","_uid":"17696697076495dhjss0x6","timestamp":"2026/1/29 下午2:55:07"},{"id":"41503","size":"20","price":590,"note":"庫存","gender":"F","_uid":"1769669678330yrfd4kuc1","timestamp":"2026/1/29 下午2:54:38"},{"id":"41503","size":"19","price":590,"note":"庫存","gender":"F","_uid":"1769669678329b5jfr5pji","timestamp":"2026/1/29 下午2:54:38"},{"id":"41502","size":"21.5","price":590,"note":"庫存","gender":"N","_uid":"1769669649054jahlfw576","timestamp":"2026/1/29 下午2:54:09"},{"id":"41502","size":"23","price":590,"note":"庫存","gender":"N","_uid":"17696696490543zw3jvnh2","timestamp":"2026/1/29 下午2:54:09"},{"id":"41502","size":"22","price":590,"note":"庫存","gender":"N","_uid":"1769669649054rqdpsv3zk","timestamp":"2026/1/29 下午2:54:09"},{"id":"41502","size":"22","price":590,"note":"庫存","gender":"N","_uid":"1769669649054hnb9wypes","timestamp":"2026/1/29 下午2:54:09"},{"id":"41502","size":"21","price":590,"note":"庫存","gender":"N","_uid":"17696696490538l640kdpm","timestamp":"2026/1/29 下午2:54:09"},{"id":"41502","size":"21","price":590,"note":"庫存","gender":"N","_uid":"1769669649047g6qzkvp9f","timestamp":"2026/1/29 下午2:54:09"}];
+
         const dataManager = {
-            STORAGE_KEY: 'shoe_inventory_pro_v11', // 升級key
+            STORAGE_KEY: 'shoe_inventory_pro_v12', // 升級key到v12
             items: [],
 
             init() {
                 const stored = localStorage.getItem(this.STORAGE_KEY);
                 if (stored) {
+                    // 如果瀏覽器已有資料，用瀏覽器的
                     try { this.items = JSON.parse(stored); } catch (e) { this.items = []; }
+                } else {
+                    // 如果是新的（例如同事剛打開），直接使用預載的資料
+                    this.items = PRELOADED_DATA;
+                    this.save(); // 馬上存入他們瀏覽器的 LocalStorage
                 }
                 
-                // 自動遷移 V10 資料
+                // 處理舊版資料遷移 (如果有的話)
                 if (this.items.length === 0) {
-                     const v10 = localStorage.getItem('shoe_inventory_pro_v10');
-                     if (v10) {
-                        try { 
-                            this.items = JSON.parse(v10);
-                            this.save();
-                        } catch(e) {}
-                     }
+                     const oldKey = localStorage.getItem('shoe_inventory_pro_v11');
+                     if (oldKey) { try { this.items = JSON.parse(oldKey); this.save(); } catch(e){} }
                 }
             },
 
@@ -802,54 +840,6 @@
                 if(confirm("⚠️ 警告：這會刪除所有庫存資料！")) {
                     this.items = []; this.save(); location.reload();
                 }
-            },
-            
-            exportData() {
-                const dataStr = JSON.stringify(this.items);
-                navigator.clipboard.writeText(dataStr).then(() => { ui.showToast("✅ 資料已複製到剪貼簿！"); });
-            },
-
-            importDataProcess() {
-                const input = prompt("請貼上您之前備份的文字資料：");
-                if (!input) return;
-
-                try {
-                    const parsedData = JSON.parse(input);
-                    if (!Array.isArray(parsedData)) {
-                        alert("❌ 資料格式錯誤：必須是陣列格式");
-                        return;
-                    }
-
-                    const validData = parsedData.filter(item => item.id && item.size).map(item => ({
-                        ...item,
-                        gender: item.gender || 'N',
-                        _uid: item._uid || (Date.now() + Math.random().toString(36).substr(2, 9)),
-                        timestamp: item.timestamp || new Date().toLocaleString()
-                    }));
-
-                    if (validData.length === 0) {
-                        alert("❌ 找不到有效資料");
-                        return;
-                    }
-
-                    if (confirm(`成功解析 ${validData.length} 筆資料。\n\n按【確定】將「覆蓋」現有資料 (現有資料會消失)。\n按【取消】將「追加」到現有資料後面。`)) {
-                        this.items = validData;
-                        this.save();
-                        ui.showToast(`✅ 已覆蓋 ${validData.length} 筆資料`);
-                    } else {
-                        if(confirm(`確定要將這 ${validData.length} 筆資料加入目前的清單嗎？`)) {
-                            const freshData = validData.map(item => ({...item, _uid: Date.now() + Math.random().toString(36).substr(2, 9) }));
-                            this.items = [...freshData, ...this.items];
-                            this.save();
-                            ui.showToast(`✅ 已追加 ${validData.length} 筆資料`);
-                        } else {
-                            return;
-                        }
-                    }
-                    setTimeout(() => location.reload(), 1000);
-                } catch (e) {
-                    alert("❌ 讀取失敗：資料格式不正確");
-                }
             }
         };
 
@@ -871,7 +861,7 @@
                 const totalValue = items.reduce((acc, curr) => acc + (parseInt(curr.price) || 0), 0);
                 
                 let boyCount = 0, girlCount = 0, neutralCount = 0;
-                const grouped = {}; // { '41336': { count: 0, gender: 'M', id: '...', sizeCounts: { '15': 3, '16': 1 } } }
+                const grouped = {}; 
 
                 items.forEach(item => {
                     // 計數
@@ -1115,6 +1105,71 @@
             }
         };
 
+        const shareUI = {
+            render() {
+                // 將目前的資料轉換成 JSON 字串顯示在 textarea
+                const dataStr = JSON.stringify(dataManager.items);
+                document.getElementById('shareDataArea').value = dataStr;
+            },
+
+            copyData() {
+                const textarea = document.getElementById('shareDataArea');
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); // 手機相容
+                
+                // 嘗試使用 Clipboard API
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    ui.showToast("✅ 資料已複製！");
+                }).catch(() => {
+                    // 如果 API 失敗，提示手動複製
+                    document.execCommand('copy');
+                    ui.showToast("✅ 已選取，請手動複製");
+                });
+            },
+
+            importData() {
+                const input = document.getElementById('shareDataArea').value.trim();
+                if (!input) { ui.showToast("⚠️ 請先貼上資料碼"); return; }
+
+                try {
+                    const parsedData = JSON.parse(input);
+                    if (!Array.isArray(parsedData)) {
+                        alert("❌ 資料格式錯誤：必須是陣列格式");
+                        return;
+                    }
+
+                    // 資料驗證與清理
+                    const validData = parsedData.filter(item => item.id && item.size).map(item => ({
+                        ...item,
+                        gender: item.gender || 'N',
+                        _uid: item._uid || (Date.now() + Math.random().toString(36).substr(2, 9)),
+                        timestamp: item.timestamp || new Date().toLocaleString()
+                    }));
+
+                    if (validData.length === 0) {
+                        alert("❌ 找不到有效資料");
+                        return;
+                    }
+
+                    if (confirm(`成功解析 ${validData.length} 筆資料。\n\n【確定】= 覆蓋現有資料 (目前的會消失)\n【取消】= 追加到後面`)) {
+                        dataManager.items = validData;
+                        dataManager.save();
+                        ui.showToast(`✅ 已覆蓋 ${validData.length} 筆資料`);
+                    } else {
+                        // 追加
+                         const freshData = validData.map(item => ({...item, _uid: Date.now() + Math.random().toString(36).substr(2, 9) }));
+                         dataManager.items = [...freshData, ...dataManager.items];
+                         dataManager.save();
+                         ui.showToast(`✅ 已追加 ${validData.length} 筆資料`);
+                    }
+                    setTimeout(() => location.reload(), 1000);
+
+                } catch (e) {
+                    alert("❌ 讀取失敗：資料格式不正確");
+                }
+            }
+        };
+
         const ui = {
             currentFilter: 'all', // all, id, size
 
@@ -1265,6 +1320,7 @@
                 // 切換分頁時的動作
                 if (tabName === 'search') ui.refreshSearch();
                 if (tabName === 'stats') statsUI.render();
+                if (tabName === 'share') shareUI.render(); // 新增：切換到分享頁面時渲染資料
             },
             deleteItem(uid) {
                 if(confirm('確認移除？')) {
