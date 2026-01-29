@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鞋庫 - 儀表板版</title>
+    <title>童鞋庫存 Pro (V11 - 透視版)</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -17,6 +17,19 @@
             --bg-color: #f3f4f6;
             --card-bg: #ffffff;
             --border-color: #e5e7eb;
+            
+            /* 性別專屬色 */
+            --boy-color: #3b82f6;
+            --boy-bg: #eff6ff;
+            --girl-color: #ec4899;
+            --girl-bg: #fdf2f8;
+            --neutral-color: #6b7280;
+            --neutral-bg: #f3f4f6;
+            
+            /* 統計圖表色 */
+            --gold: #f59e0b;
+            --silver: #94a3b8;
+            --bronze: #b45309;
         }
 
         * {
@@ -123,9 +136,13 @@
             border-radius: 12px;
             padding: 12px;
             margin-bottom: 8px;
-            border-left: 4px solid var(--primary-color);
+            border-left: 5px solid var(--neutral-color); /* 預設灰色 */
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
+
+        /* 性別樣式區分 */
+        .summary-card.boy { border-left-color: var(--boy-color); background: #fbfdff; }
+        .summary-card.girl { border-left-color: var(--girl-color); background: #fffbfd; }
 
         .summary-header {
             display: flex;
@@ -140,6 +157,9 @@
             font-size: 1.1rem;
             font-weight: 800;
             color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .summary-total {
@@ -169,6 +189,118 @@
         .size-badge strong {
             color: var(--primary-color);
         }
+        
+        /* 列表中的性別標籤 */
+        .gender-tag {
+            font-size: 0.75rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+            font-weight: bold;
+        }
+        .gender-tag.boy { background: var(--boy-bg); color: var(--boy-color); border: 1px solid var(--boy-color); }
+        .gender-tag.girl { background: var(--girl-bg); color: var(--girl-color); border: 1px solid var(--girl-color); }
+        .gender-tag.neutral { background: var(--neutral-bg); color: var(--neutral-color); border: 1px solid #d1d5db; }
+
+        /* 統計頁面樣式 (V11 Updated) */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            text-align: center;
+        }
+        
+        .stat-box.full-width { grid-column: span 2; display: flex; justify-content: space-around; align-items: center; }
+        
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 4px; }
+        .stat-label { font-size: 0.85rem; color: var(--text-light); }
+        
+        .gender-stat-group { display: flex; gap: 15px; }
+        .gs-item { text-align: center; }
+        .gs-val { font-weight: 700; font-size: 1.1rem; }
+        .gs-icon { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        
+        .ranking-list { list-style: none; }
+        .rank-item {
+            background: white;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+        
+        /* 排行榜條 */
+        .rank-bar {
+            position: absolute;
+            left: 0; bottom: 0; top: 0;
+            background: rgba(37, 99, 235, 0.03);
+            z-index: 0;
+            transition: width 0.5s;
+        }
+        
+        .rank-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+        
+        .rank-info { display: flex; align-items: center; gap: 10px; }
+        .rank-num { 
+            font-weight: 900; font-size: 1.1rem; color: #9ca3af; width: 24px; 
+            font-style: italic;
+        }
+        .rank-item:nth-child(1) .rank-num { color: var(--gold); }
+        .rank-item:nth-child(2) .rank-num { color: var(--silver); }
+        .rank-item:nth-child(3) .rank-num { color: var(--bronze); }
+        
+        .rank-id { font-weight: 800; font-size: 1.15rem; }
+        .rank-count { font-weight: 700; color: white; background: var(--primary-color); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem;}
+
+        /* V11 新增：排行榜內的尺碼明細 */
+        .rank-details {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding-top: 8px;
+            border-top: 1px dashed #e5e7eb;
+        }
+        
+        .rank-size-tag {
+            font-size: 0.85rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: var(--text-dark);
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .rank-size-tag.high-stock {
+            background-color: #ecfdf5; /* 量多的變綠色 */
+            border-color: #a7f3d0;
+        }
+        
+        .rank-size-tag strong { font-weight: 700; }
+        .rank-size-tag small { color: var(--text-light); font-weight: 600; font-size: 0.75rem; }
+        .rank-size-tag.high-stock small { color: #059669; }
 
         /* 頁面切換控制 */
         .view-section {
@@ -240,6 +372,39 @@
             color: white;
         }
 
+        /* 性別選擇器 */
+        .gender-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            background: #f9fafb;
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .gender-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: white;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .gender-btn.active { box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color); }
+        .gender-btn.boy.active { background: var(--boy-bg); color: var(--boy-color); border-color: var(--boy-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--boy-color); }
+        .gender-btn.girl.active { background: var(--girl-bg); color: var(--girl-color); border-color: var(--girl-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--girl-color); }
+        .gender-btn.neutral.active { background: var(--neutral-bg); color: var(--neutral-color); border-color: var(--neutral-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--neutral-color); }
+
         .form-control {
             width: 100%;
             padding: 12px;
@@ -310,9 +475,9 @@
         .manage-mode .item-checkbox { display: block; }
         
         .item-content-wrapper { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-        .item-info h3 { font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 700; }
+        .item-info h3 { font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 700; display:flex; align-items:center; }
         .tag-size { background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 5px; }
-        .item-details { color: var(--text-light); font-size: 0.85rem; margin-top: 4px; }
+        .item-details { color: var(--text-light); font-size: 0.85rem; margin-top: 4px; display:flex; gap:8px; align-items:center; }
         .item-price { font-weight: 700; color: var(--primary-color); font-size: 1.1rem; text-align: right; }
         
         .delete-btn {
@@ -362,7 +527,7 @@
 <body>
 
     <header>
-        <h1>👟 鞋庫掌門人 Pro</h1>
+        <h1>👟 童鞋庫存 Pro (V11)</h1>
     </header>
 
     <div id="view-search" class="view-section active container">
@@ -371,29 +536,30 @@
             
             <div class="filter-row">
                 <button class="filter-btn active" onclick="ui.setFilter('all')">全部</button>
-                <button class="filter-btn" onclick="ui.setFilter('id')">搜鞋號 (ID)</button>
-                <button class="filter-btn" onclick="ui.setFilter('size')">搜尺碼 (Size)</button>
+                <button class="filter-btn" onclick="ui.setFilter('id')">搜鞋號</button>
+                <button class="filter-btn" onclick="ui.setFilter('size')">搜尺碼</button>
             </div>
         </div>
         
         <div class="stats-bar">
             <span>結果總數: <strong id="totalCount" style="color:var(--text-dark)">0</strong></span>
             
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:8px;">
                 <span class="manage-toggle" id="manageToggleBtn" onclick="deleteUI.toggleManageMode()">
                     🔧 管理
                 </span>
-                <span onclick="dataManager.exportData()" style="padding:4px; color:var(--primary-color); cursor:pointer;">
+                <span onclick="dataManager.exportData()" style="padding:4px 8px; color:var(--primary-color); cursor:pointer; background:#eff6ff; border-radius:8px; font-weight:600;">
                     📤 備份
+                </span>
+                <span onclick="dataManager.importDataProcess()" style="padding:4px 8px; color:#059669; cursor:pointer; background:#ecfdf5; border-radius:8px; font-weight:600;">
+                    📥 讀取
                 </span>
             </div>
         </div>
 
-        <div id="summaryBoard" class="summary-board">
-            </div>
+        <div id="summaryBoard" class="summary-board"></div>
 
-        <ul id="resultsList" class="inventory-list">
-            </ul>
+        <ul id="resultsList" class="inventory-list"></ul>
         
         <div id="emptyState" style="text-align:center; padding: 3rem; display:none; color:#9ca3af;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
@@ -402,26 +568,70 @@
         
         <div id="welcomeState" style="text-align:center; padding: 3rem; color:#9ca3af;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">👆</div>
-            <p>輸入查詢內容<br><small>可切換搜尋模式 (鞋號/尺碼)</small></p>
+            <p>輸入查詢內容<br><small>可快速查看男女款</small></p>
         </div>
     </div>
 
-    <div id="batchActions" class="batch-actions-bar">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="deleteUI.toggleSelectAll()" class="btn btn-secondary" style="width:auto; padding: 10px 16px;">
-                <span id="selectAllText">全選</span>
-            </button>
-            <span style="font-size:0.9rem; font-weight:600;">已選 <span id="selectedCount" style="color:var(--primary-color)">0</span> 筆</span>
+    <div id="view-stats" class="view-section container">
+        <h2 style="margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">📊 庫存概況</h2>
+        
+        <div class="stats-overview">
+            <div class="stat-box">
+                <div class="stat-value" id="statTotalItems">0</div>
+                <div class="stat-label">總雙數</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statTotalModels">0</div>
+                <div class="stat-label">款數</div>
+            </div>
+            <div class="stat-box full-width">
+                <div class="gender-stat-group">
+                    <div class="gs-item" style="color:var(--boy-color)">
+                        <span class="gs-icon">👦</span>
+                        <span class="gs-val" id="statBoy">0</span>
+                    </div>
+                    <div class="gs-item" style="color:var(--girl-color)">
+                        <span class="gs-icon">👧</span>
+                        <span class="gs-val" id="statGirl">0</span>
+                    </div>
+                    <div class="gs-item" style="color:var(--neutral-color)">
+                        <span class="gs-icon">⚪</span>
+                        <span class="gs-val" id="statNeutral">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-box full-width" style="background: #fdfce8; border:1px solid #fef3c7;">
+                <div class="stat-value" style="color:#b45309" id="statTotalValue">$0</div>
+                <div class="stat-label">庫存總市值</div>
+            </div>
         </div>
-        <button onclick="deleteUI.deleteSelected()" class="btn btn-danger" style="background-color: var(--danger-color); width:auto; padding: 10px 20px;">
-            🗑️ 刪除選取
-        </button>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1rem; color:var(--text-light);">🏆 庫存量排行榜 (含尺碼明細)</h3>
+        <ul id="rankingList" class="ranking-list">
+            </ul>
+        
+        <div id="noStatsState" style="text-align:center; padding: 2rem; display:none; color:#9ca3af;">
+            <p>暫無庫存資料</p>
+        </div>
     </div>
 
     <div id="view-add" class="view-section container">
         <div class="card">
             <h2 style="margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">📦 批量入庫登記</h2>
             
+            <label class="form-label" style="margin-bottom:8px; display:block;">款式性別 (快捷鍵)</label>
+            <div class="gender-selector">
+                <button type="button" class="gender-btn boy" onclick="batchUI.setGender('M')" id="btnGenderM">
+                    👦 男款
+                </button>
+                <button type="button" class="gender-btn girl" onclick="batchUI.setGender('F')" id="btnGenderF">
+                    👧 女款
+                </button>
+                <button type="button" class="gender-btn neutral active" onclick="batchUI.setGender('N')" id="btnGenderN">
+                    ⚪ 中性
+                </button>
+            </div>
+
             <div class="form-row">
                 <div class="form-group" style="flex:2;">
                     <div class="label-row">
@@ -443,20 +653,19 @@
 
             <div class="size-matrix-container">
                 <div class="size-controls">
-                    <label class="form-label" style="margin:0;">尺碼選擇</label>
+                    <label class="form-label" style="margin:0;">尺碼選擇 (Max 23)</label>
                     <button type="button" id="eraserBtn" class="eraser-btn" onclick="batchUI.toggleEraser()">
                         <span>🧽 橡皮擦</span>
                     </button>
                 </div>
                 
-                <div id="sizeGrid" class="matrix-grid">
-                    </div>
+                <div id="sizeGrid" class="matrix-grid"></div>
                 
                 <div style="margin-top: 15px; padding-top:10px; border-top:1px dashed #eee;">
                     <div class="form-row" style="margin-bottom:0; align-items:flex-end;">
                         <div class="form-group">
                             <label class="form-label" style="font-size:0.8rem;">特殊尺碼</label>
-                            <input type="text" id="customSizeInput" class="form-control" placeholder="如 15.5">
+                            <input type="text" id="customSizeInput" class="form-control" placeholder="如 23.5">
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-secondary" onclick="batchUI.addCustomSize()">加入</button>
@@ -492,10 +701,26 @@
         </div>
     </div>
 
+    <div id="batchActions" class="batch-actions-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button onclick="deleteUI.toggleSelectAll()" class="btn btn-secondary" style="width:auto; padding: 10px 16px;">
+                <span id="selectAllText">全選</span>
+            </button>
+            <span style="font-size:0.9rem; font-weight:600;">已選 <span id="selectedCount" style="color:var(--primary-color)">0</span> 筆</span>
+        </div>
+        <button onclick="deleteUI.deleteSelected()" class="btn btn-danger" style="background-color: var(--danger-color); width:auto; padding: 10px 20px;">
+            🗑️ 刪除選取
+        </button>
+    </div>
+
     <nav id="mainNav">
         <div class="nav-item active" onclick="app.switchTab('search')">
             <span class="nav-icon">🔍</span>
             <span class="nav-label">找庫存</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('stats')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">統計</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('add')">
             <span class="nav-icon">➕</span>
@@ -507,17 +732,28 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro - 儀表板版 (V6)
+         * 鞋庫掌門人 Pro - 童鞋性別特化版 (V11 - 透視版)
          */
         
         const dataManager = {
-            STORAGE_KEY: 'shoe_inventory_pro_v6', 
+            STORAGE_KEY: 'shoe_inventory_pro_v11', // 升級key
             items: [],
 
             init() {
                 const stored = localStorage.getItem(this.STORAGE_KEY);
                 if (stored) {
                     try { this.items = JSON.parse(stored); } catch (e) { this.items = []; }
+                }
+                
+                // 自動遷移 V10 資料
+                if (this.items.length === 0) {
+                     const v10 = localStorage.getItem('shoe_inventory_pro_v10');
+                     if (v10) {
+                        try { 
+                            this.items = JSON.parse(v10);
+                            this.save();
+                        } catch(e) {}
+                     }
                 }
             },
 
@@ -528,6 +764,7 @@
             add(item) {
                 item._uid = Date.now() + Math.random().toString(36).substr(2, 9); 
                 item.timestamp = new Date().toLocaleString();
+                if (!item.gender) item.gender = 'N'; 
                 this.items.unshift(item); 
                 this.save();
                 return true;
@@ -538,29 +775,26 @@
                 this.save();
             },
 
-            // V6 升級：支援 mode 參數 (all, id, size)
             search(query, mode = 'all') {
                 if (!query) return [];
                 const q = query.toLowerCase().trim();
                 
                 return this.items.filter(item => {
                     const idMatch = item.id.toLowerCase().includes(q);
-                    
-                    // 關鍵修改：尺碼搜尋若為數字，採用精確比對，避免 "22" 搜到 "22.5"
-                    // 若 mode 是 size，強制精確比對
                     const sizeMatch = (mode === 'size') 
                         ? item.size.toLowerCase() === q 
-                        : (item.size.toLowerCase() === q); // 在 All 模式下，數字尺碼也建議精確比對，或依需求調整
+                        : (item.size.toLowerCase() === q);
 
                     const noteMatch = item.note && item.note.toLowerCase().includes(q);
+                    
+                    let genderMatch = false;
+                    if (q === '男' && item.gender === 'M') genderMatch = true;
+                    if (q === '女' && item.gender === 'F') genderMatch = true;
 
                     if (mode === 'id') return idMatch;
                     if (mode === 'size') return sizeMatch;
                     
-                    // All 模式：
-                    // 如果輸入的是純數字且很短(像尺碼)，我們優先精確比對尺碼
-                    // 但也要保留 ID 搜尋 (如 41336)
-                    return idMatch || sizeMatch || noteMatch;
+                    return idMatch || sizeMatch || noteMatch || genderMatch;
                 });
             },
 
@@ -572,7 +806,140 @@
             
             exportData() {
                 const dataStr = JSON.stringify(this.items);
-                navigator.clipboard.writeText(dataStr).then(() => { ui.showToast("✅ 資料已複製！"); });
+                navigator.clipboard.writeText(dataStr).then(() => { ui.showToast("✅ 資料已複製到剪貼簿！"); });
+            },
+
+            importDataProcess() {
+                const input = prompt("請貼上您之前備份的文字資料：");
+                if (!input) return;
+
+                try {
+                    const parsedData = JSON.parse(input);
+                    if (!Array.isArray(parsedData)) {
+                        alert("❌ 資料格式錯誤：必須是陣列格式");
+                        return;
+                    }
+
+                    const validData = parsedData.filter(item => item.id && item.size).map(item => ({
+                        ...item,
+                        gender: item.gender || 'N',
+                        _uid: item._uid || (Date.now() + Math.random().toString(36).substr(2, 9)),
+                        timestamp: item.timestamp || new Date().toLocaleString()
+                    }));
+
+                    if (validData.length === 0) {
+                        alert("❌ 找不到有效資料");
+                        return;
+                    }
+
+                    if (confirm(`成功解析 ${validData.length} 筆資料。\n\n按【確定】將「覆蓋」現有資料 (現有資料會消失)。\n按【取消】將「追加」到現有資料後面。`)) {
+                        this.items = validData;
+                        this.save();
+                        ui.showToast(`✅ 已覆蓋 ${validData.length} 筆資料`);
+                    } else {
+                        if(confirm(`確定要將這 ${validData.length} 筆資料加入目前的清單嗎？`)) {
+                            const freshData = validData.map(item => ({...item, _uid: Date.now() + Math.random().toString(36).substr(2, 9) }));
+                            this.items = [...freshData, ...this.items];
+                            this.save();
+                            ui.showToast(`✅ 已追加 ${validData.length} 筆資料`);
+                        } else {
+                            return;
+                        }
+                    }
+                    setTimeout(() => location.reload(), 1000);
+                } catch (e) {
+                    alert("❌ 讀取失敗：資料格式不正確");
+                }
+            }
+        };
+
+        const statsUI = {
+            render() {
+                const items = dataManager.items;
+                if (items.length === 0) {
+                    document.getElementById('noStatsState').style.display = 'block';
+                    document.querySelector('.stats-overview').style.display = 'none';
+                    document.getElementById('rankingList').innerHTML = '';
+                    return;
+                }
+                
+                document.getElementById('noStatsState').style.display = 'none';
+                document.querySelector('.stats-overview').style.display = 'grid';
+
+                // 1. 計算概況
+                const totalItems = items.length;
+                const totalValue = items.reduce((acc, curr) => acc + (parseInt(curr.price) || 0), 0);
+                
+                let boyCount = 0, girlCount = 0, neutralCount = 0;
+                const grouped = {}; // { '41336': { count: 0, gender: 'M', id: '...', sizeCounts: { '15': 3, '16': 1 } } }
+
+                items.forEach(item => {
+                    // 計數
+                    if (item.gender === 'M') boyCount++;
+                    else if (item.gender === 'F') girlCount++;
+                    else neutralCount++;
+
+                    // 分組
+                    if (!grouped[item.id]) {
+                        grouped[item.id] = { count: 0, gender: item.gender, id: item.id, sizeCounts: {} };
+                    }
+                    grouped[item.id].count++;
+                    
+                    // V11 新增：紀錄尺碼數量
+                    if (!grouped[item.id].sizeCounts[item.size]) {
+                        grouped[item.id].sizeCounts[item.size] = 0;
+                    }
+                    grouped[item.id].sizeCounts[item.size]++;
+                });
+
+                document.getElementById('statTotalItems').innerText = totalItems;
+                document.getElementById('statTotalModels').innerText = Object.keys(grouped).length;
+                document.getElementById('statTotalValue').innerText = `$${totalValue.toLocaleString()}`;
+                document.getElementById('statBoy').innerText = boyCount;
+                document.getElementById('statGirl').innerText = girlCount;
+                document.getElementById('statNeutral').innerText = neutralCount;
+
+                // 2. 生成排行榜 (含尺碼細節)
+                const rankingList = document.getElementById('rankingList');
+                rankingList.innerHTML = '';
+
+                // 排序鞋款：總數量大到小
+                const sortedGroups = Object.values(grouped).sort((a, b) => b.count - a.count);
+                const maxCount = sortedGroups.length > 0 ? sortedGroups[0].count : 1; 
+
+                sortedGroups.slice(0, 20).forEach((group, index) => { // 只顯示前20名
+                    const li = document.createElement('li');
+                    li.className = 'rank-item';
+                    
+                    const widthPercent = (group.count / maxCount) * 100;
+                    const genderIcon = group.gender === 'M' ? '👦' : (group.gender === 'F' ? '👧' : '⚪');
+                    const genderColor = group.gender === 'M' ? 'var(--boy-color)' : (group.gender === 'F' ? 'var(--girl-color)' : 'var(--neutral-color)');
+
+                    // 處理尺碼排序 (數量多到少)
+                    const sortedSizeEntries = Object.entries(group.sizeCounts).sort((a, b) => b[1] - a[1]);
+                    
+                    let sizesHtml = '';
+                    sortedSizeEntries.forEach(([size, count]) => {
+                        // 庫存大於等於3雙標示為高庫存
+                        const highStockClass = count >= 3 ? 'high-stock' : '';
+                        sizesHtml += `<span class="rank-size-tag ${highStockClass}"><strong>${size}</strong><small>x${count}</small></span>`;
+                    });
+
+                    li.innerHTML = `
+                        <div class="rank-bar" style="width: ${widthPercent}%"></div>
+                        <div class="rank-header">
+                            <div class="rank-info">
+                                <span class="rank-num">#${index + 1}</span>
+                                <span class="rank-id" style="color:${genderColor}">${genderIcon} ${group.id}</span>
+                            </div>
+                            <span class="rank-count">${group.count} 雙</span>
+                        </div>
+                        <div class="rank-details">
+                            ${sizesHtml}
+                        </div>
+                    `;
+                    rankingList.appendChild(li);
+                });
             }
         };
 
@@ -633,7 +1000,13 @@
 
         const batchUI = {
             selectedSizes: {}, isEraserMode: false,
-            defaultSizes: ["19","19.5","20","20.5","21","21.5","22","22.5","23","23.5","24","24.5","25","25.5","26","26.5","27","27.5","28","29","30"],
+            selectedGender: 'N', // 預設中性
+            defaultSizes: [
+                "15","15.5",
+                "16","16.5","17","17.5","18","18.5",
+                "19","19.5","20","20.5","21","21.5",
+                "22","22.5","23"
+            ],
 
             init() { this.renderGrid(); this.updateBadge(); },
 
@@ -661,6 +1034,12 @@
             setNote(val) {
                 const input = document.getElementById('batchNote');
                 input.value = val; ui.showToast(`已標記：${val}`);
+            },
+
+            setGender(gender) {
+                this.selectedGender = gender;
+                document.querySelectorAll('.gender-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`btnGender${gender}`).classList.add('active');
             },
 
             toggleEraser() {
@@ -720,16 +1099,18 @@
                 const id = document.getElementById('batchId').value.trim();
                 const price = document.getElementById('batchPrice').value.trim();
                 const note = document.getElementById('batchNote').value.trim();
+                const gender = this.selectedGender; 
+
                 if (!id || !price) { ui.showToast("⚠️ 請輸入 ID 和價格"); return; }
                 
                 const totalItems = Object.values(this.selectedSizes).reduce((a,b)=>a+b, 0);
                 if (totalItems === 0) { ui.showToast("⚠️ 請選尺碼"); return; }
 
                 Object.entries(this.selectedSizes).forEach(([size, count]) => {
-                    for(let i=0; i<count; i++) dataManager.add({ id, size, price: parseInt(price), note });
+                    for(let i=0; i<count; i++) dataManager.add({ id, size, price: parseInt(price), note, gender });
                 });
 
-                ui.showToast(`🎉 入庫成功！`);
+                ui.showToast(`🎉 入庫成功！(${gender === 'M' ? '男' : (gender === 'F' ? '女' : '中性')})`);
                 this.resetCounts();
             }
         };
@@ -740,8 +1121,6 @@
             init() {
                 const searchInput = document.getElementById('searchInput');
                 searchInput.addEventListener('input', () => this.refreshSearch());
-                // 預設顯示全部資料
-                // this.refreshSearch(); 
             },
 
             setFilter(mode) {
@@ -749,7 +1128,6 @@
                 document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
                 event.target.classList.add('active');
                 
-                // 根據模式修改 placeholder 提示
                 const input = document.getElementById('searchInput');
                 if(mode === 'id') input.placeholder = "🔍 輸入鞋號 (如 41336)...";
                 else if(mode === 'size') input.placeholder = "🔍 輸入尺碼 (如 23.5)...";
@@ -763,6 +1141,18 @@
                 this.renderResults(query);
             },
 
+            getGenderIcon(gender) {
+                if (gender === 'M') return '👦';
+                if (gender === 'F') return '👧';
+                return '⚪';
+            },
+
+            getGenderClass(gender) {
+                if (gender === 'M') return 'boy';
+                if (gender === 'F') return 'girl';
+                return 'neutral';
+            },
+
             renderResults(query) {
                 const listEl = document.getElementById('resultsList');
                 const welcomeEl = document.getElementById('welcomeState');
@@ -771,7 +1161,7 @@
                 const summaryEl = document.getElementById('summaryBoard');
                 
                 listEl.innerHTML = '';
-                summaryEl.innerHTML = ''; // 清空儀表板
+                summaryEl.innerHTML = ''; 
 
                 if (!query) {
                     welcomeEl.style.display = 'block'; emptyEl.style.display = 'none'; summaryEl.style.display = 'none';
@@ -781,7 +1171,6 @@
 
                 welcomeEl.style.display = 'none';
                 
-                // 執行搜尋 (帶入過濾模式)
                 const results = dataManager.search(query, this.currentFilter);
                 totalEl.innerText = results.length;
 
@@ -791,12 +1180,11 @@
                 }
                 emptyEl.style.display = 'none';
 
-                // --- V6 核心：生成庫存儀表板 ---
                 summaryEl.style.display = 'block';
-                const grouped = {}; // { '41336': { total: 0, sizes: { '23': 2 } } }
+                const grouped = {}; 
                 
                 results.forEach(item => {
-                    if (!grouped[item.id]) grouped[item.id] = { total: 0, sizes: {} };
+                    if (!grouped[item.id]) grouped[item.id] = { total: 0, sizes: {}, gender: item.gender || 'N' };
                     grouped[item.id].total++;
                     if (!grouped[item.id].sizes[item.size]) grouped[item.id].sizes[item.size] = 0;
                     grouped[item.id].sizes[item.size]++;
@@ -804,11 +1192,13 @@
 
                 Object.keys(grouped).forEach(id => {
                     const data = grouped[id];
-                    // 將尺碼排序
                     const sortedSizes = Object.keys(data.sizes).sort((a,b) => parseFloat(a) - parseFloat(b));
                     
                     const card = document.createElement('div');
-                    card.className = 'summary-card';
+                    const genderClass = this.getGenderClass(data.gender);
+                    const genderIcon = this.getGenderIcon(data.gender);
+                    
+                    card.className = `summary-card ${genderClass}`;
                     
                     let sizeHtml = '';
                     sortedSizes.forEach(size => {
@@ -817,7 +1207,7 @@
 
                     card.innerHTML = `
                         <div class="summary-header">
-                            <span class="summary-title">${id}</span>
+                            <span class="summary-title">${genderIcon} ${id}</span>
                             <span class="summary-total">共 ${data.total} 雙</span>
                         </div>
                         <div class="summary-sizes">
@@ -826,20 +1216,22 @@
                     `;
                     summaryEl.appendChild(card);
                 });
-                // -----------------------------
 
-                // 渲染原本的列表 (供管理/刪除用)
                 results.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'inventory-item';
+                    const gClass = this.getGenderClass(item.gender || 'N');
+                    const gText = item.gender === 'M' ? '男' : (item.gender === 'F' ? '女' : '中');
+                    
                     li.innerHTML = `
                         <input type="checkbox" class="item-checkbox" value="${item._uid}" onchange="deleteUI.updateSelectedCount()">
                         <div class="item-content-wrapper">
                             <div class="item-info">
                                 <h3>${item.id} <span class="tag-size">${item.size}</span></h3>
                                 <div class="item-details">
+                                    <span class="gender-tag ${gClass}">${gText}</span>
                                     ${item.note ? `📍 ${item.note}` : ''}
-                                    <span style="margin-left:8px; opacity:0.6;">${item.timestamp.split(' ')[0]}</span>
+                                    <span style="opacity:0.6;">${item.timestamp.split(' ')[0]}</span>
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center;">
@@ -869,7 +1261,10 @@
                 event.currentTarget.classList.add('active');
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
                 document.getElementById(`view-${tabName}`).classList.add('active');
+                
+                // 切換分頁時的動作
                 if (tabName === 'search') ui.refreshSearch();
+                if (tabName === 'stats') statsUI.render();
             },
             deleteItem(uid) {
                 if(confirm('確認移除？')) {
