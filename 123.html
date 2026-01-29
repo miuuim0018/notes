@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>童鞋庫存 Pro (V12 - 盤點大師版)</title>
+    <title>童鞋庫存 Pro (V13 - 盤點全覽版)</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -567,7 +567,7 @@
 <body>
 
     <header>
-        <h1>👟 童鞋庫存 Pro (V12)</h1>
+        <h1>👟 童鞋庫存 Pro (V13)</h1>
         <div style="position: absolute; right: 15px; top: 15px; cursor: pointer; color: white;" onclick="dataManager.fetchFromCloud()">
     🔄 更新
 </div>
@@ -617,13 +617,13 @@
 
     <div id="view-audit" class="view-section container">
         <div class="search-container" style="position: sticky; top: 60px; z-index: 99;">
-             <input type="text" id="auditSearchInput" class="search-input" placeholder="🔍 輸入鞋號盤點 (如 41336)..." inputmode="numeric">
+             <input type="text" id="auditSearchInput" class="search-input" placeholder="🔍 快速篩選鞋號..." inputmode="numeric">
              <div class="hint-text" style="text-align: left; padding-left: 4px;">💡 此模式下可直接按 + / - 調整庫存數量</div>
         </div>
         <div id="auditList" style="padding-bottom: 60px;"></div>
-        <div id="auditEmptyState" style="text-align:center; padding: 3rem; color:#9ca3af;">
+        <div id="auditEmptyState" style="text-align:center; padding: 3rem; color:#9ca3af; display: none;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-            <p>輸入鞋號開始盤點</p>
+            <p>目前沒有任何庫存資料</p>
         </div>
     </div>
 
@@ -791,7 +791,7 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro (V12 - 盤點大師版)
+         * 鞋庫掌門人 Pro (V13 - 盤點全覽版)
          */
         
         const dataManager = {
@@ -856,7 +856,7 @@
                 if(show) {
                     header.innerHTML = '👟 童鞋庫存 Pro (同步中...⏳)';
                 } else {
-                    header.innerHTML = '👟 童鞋庫存 Pro (V12)';
+                    header.innerHTML = '👟 童鞋庫存 Pro (V13)';
                 }
             },
 
@@ -1021,7 +1021,7 @@
             }
         };
 
-        /* V12: Audit UI (盤點模式邏輯) */
+        /* V13: Audit UI (盤點模式 - 預設全覽) */
         const auditUI = {
             render() {
                 const query = document.getElementById('auditSearchInput').value.trim().toLowerCase();
@@ -1030,7 +1030,8 @@
                 
                 container.innerHTML = '';
                 
-                if(!query) {
+                // 如果資料庫是空的
+                if(dataManager.items.length === 0) {
                     emptyState.style.display = 'block';
                     return;
                 }
@@ -1039,7 +1040,8 @@
                 // Group items by ID to create audit cards
                 const grouped = {};
                 dataManager.items.forEach(item => {
-                    if(item.id.toLowerCase().includes(query)) {
+                    // 關鍵修改：如果 query 為空，顯示全部；如果有輸入，則過濾
+                    if(query === '' || item.id.toLowerCase().includes(query)) {
                         if (!grouped[item.id]) {
                             grouped[item.id] = { 
                                 id: item.id, 
@@ -1059,7 +1061,11 @@
                      return;
                 }
 
-                Object.values(grouped).forEach(model => {
+                // 排序：讓 ID 排序，方便查找
+                const sortedKeys = Object.keys(grouped).sort();
+
+                sortedKeys.forEach(key => {
+                    const model = grouped[key];
                     const card = document.createElement('div');
                     card.className = 'audit-card';
                     
@@ -1454,7 +1460,7 @@
                 if (tabName === 'search') ui.refreshSearch();
                 if (tabName === 'stats') statsUI.render();
                 if (tabName === 'audit') {
-                    // 如果盤點搜尋框是空的，聚焦在上面方便輸入
+                    // 如果盤點搜尋框是空的，聚焦在上面方便輸入，且立即渲染全部
                     const auditInput = document.getElementById('auditSearchInput');
                     auditInput.focus();
                     auditUI.render();
