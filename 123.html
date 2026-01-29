@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>童鞋庫存 Pro (V11 - 透視版)</title>
+    <title>童鞋庫存 Pro (V12 - 盤點大師版)</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -522,12 +522,52 @@
         }
         .manage-toggle.active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
         .hint-text { font-size: 0.8rem; color: var(--text-light); margin-top: 5px; text-align: center; }
+
+        /* V12: Audit View Styles (盤點模式樣式) */
+        .audit-card {
+            background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;
+        }
+        .audit-header {
+            display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6; margin-bottom: 12px;
+        }
+        .audit-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+        .audit-info { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
+        
+        .audit-rows-container { display: flex; flex-direction: column; gap: 8px; }
+        .audit-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f9fafb; padding: 8px 12px; border-radius: 10px;
+        }
+        .audit-size-label { font-weight: 700; color: var(--text-dark); font-size: 1rem; width: 50px; }
+        
+        .stepper { display: flex; align-items: center; gap: 12px; background: white; padding: 4px; border-radius: 20px; border: 1px solid #e5e7eb; }
+        .stepper-btn {
+            width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            transition: all 0.1s;
+        }
+        .stepper-btn:active { transform: scale(0.9); }
+        .stepper-minus { background: #fee2e2; color: #ef4444; }
+        .stepper-plus { background: #dbeafe; color: #2563eb; }
+        .stepper-val { font-weight: 700; font-size: 1.1rem; width: 30px; text-align: center; }
+        
+        .add-size-row {
+            margin-top: 12px; text-align: center;
+        }
+        .btn-add-size {
+            background: transparent; border: 1px dashed #cbd5e1; color: var(--text-light);
+            padding: 8px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;
+        }
+        .btn-add-size:active { background: #f1f5f9; }
+
     </style>
 </head>
 <body>
 
     <header>
-        <h1>👟 童鞋庫存 Pro (V11)</h1>
+        <h1>👟 童鞋庫存 Pro (V12)</h1>
         <div style="position: absolute; right: 15px; top: 15px; cursor: pointer; color: white;" onclick="dataManager.fetchFromCloud()">
     🔄 更新
 </div>
@@ -572,6 +612,18 @@
         <div id="welcomeState" style="text-align:center; padding: 3rem; color:#9ca3af;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">👆</div>
             <p>輸入查詢內容<br><small>可快速查看男女款</small></p>
+        </div>
+    </div>
+
+    <div id="view-audit" class="view-section container">
+        <div class="search-container" style="position: sticky; top: 60px; z-index: 99;">
+             <input type="text" id="auditSearchInput" class="search-input" placeholder="🔍 輸入鞋號盤點 (如 41336)..." inputmode="numeric">
+             <div class="hint-text" style="text-align: left; padding-left: 4px;">💡 此模式下可直接按 + / - 調整庫存數量</div>
+        </div>
+        <div id="auditList" style="padding-bottom: 60px;"></div>
+        <div id="auditEmptyState" style="text-align:center; padding: 3rem; color:#9ca3af;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+            <p>輸入鞋號開始盤點</p>
         </div>
     </div>
 
@@ -721,13 +773,17 @@
             <span class="nav-icon">🔍</span>
             <span class="nav-label">找庫存</span>
         </div>
+        <div class="nav-item" onclick="app.switchTab('audit')">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">盤點</span>
+        </div>
         <div class="nav-item" onclick="app.switchTab('stats')">
             <span class="nav-icon">📊</span>
             <span class="nav-label">統計</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('add')">
             <span class="nav-icon">➕</span>
-            <span class="nav-label">批量登記</span>
+            <span class="nav-label">入庫</span>
         </div>
     </nav>
 
@@ -735,12 +791,9 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro - 童鞋性別特化版 (V11 - 透視版)
+         * 鞋庫掌門人 Pro (V12 - 盤點大師版)
          */
         
-        /**
-         * 雲端版 DataManager (Google Sheets)
-         */
         const dataManager = {
             // ★★★ 請將下方的網址換成你在第一步取得的 Google Apps Script 網址 ★★★
             API_URL: 'https://script.google.com/macros/s/AKfycbxqx_uPrMcbCCdPfB9hmn2HHAV2xM7NpxZyzH2Y4ochSvUiQRkU8JavOLQu65Yrw2gJ/exec',
@@ -749,11 +802,9 @@
             isLoading: false,
 
             init() {
-                // 初始化時從雲端讀取資料
                 this.fetchFromCloud();
             },
 
-            // 從雲端讀取資料
             fetchFromCloud() {
                 if(this.isLoading) return;
                 this.toggleLoading(true);
@@ -774,8 +825,6 @@
                     });
             },
 
-            // 儲存到雲端
-           // 儲存到雲端 (修正版)
             save() {
                 if(!this.API_URL.includes("google")) {
                     alert("請先設定 Google Apps Script 網址！");
@@ -784,26 +833,22 @@
                 
                 this.toggleLoading(true);
                 
-                // ★★★ 關鍵修正：將 Content-Type 改為 text/plain ★★★
-                // 這能避免 Google 擋下請求 (CORS Preflight 錯誤)
                 fetch(this.API_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // 這是必須的
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'text/plain;charset=utf-8' 
                     },
                     body: JSON.stringify(this.items)
                 }).then(() => {
-                    // 因為 no-cors 模式不會回傳狀態，我們假設成功
-                    setTimeout(() => ui.showToast("☁️ 雲端已同步 (刪除/更新)"), 800);
+                    setTimeout(() => ui.showToast("☁️ 雲端已同步"), 500);
                 }).catch(err => {
-                    ui.showToast("❌ 同步失敗，請檢查網路");
+                    ui.showToast("❌ 同步失敗");
                     console.error(err);
                 }).finally(() => {
                     this.toggleLoading(false);
                 });
             },
-            
 
             toggleLoading(show) {
                 this.isLoading = show;
@@ -811,16 +856,17 @@
                 if(show) {
                     header.innerHTML = '👟 童鞋庫存 Pro (同步中...⏳)';
                 } else {
-                    header.innerHTML = '👟 童鞋庫存 Pro (V11)';
+                    header.innerHTML = '👟 童鞋庫存 Pro (V12)';
                 }
             },
 
             refreshUI() {
-                // 強制重新渲染當前頁面
                 ui.refreshSearch();
-                // 如果在統計頁面也要重整
                 if(document.getElementById('view-stats').classList.contains('active')){
                     statsUI.render();
+                }
+                if(document.getElementById('view-audit').classList.contains('active')){
+                    auditUI.render();
                 }
             },
 
@@ -829,13 +875,13 @@
                 item.timestamp = new Date().toLocaleString();
                 if (!item.gender) item.gender = 'N'; 
                 this.items.unshift(item); 
-                this.save(); // 每次新增都同步到雲端
+                this.save(); 
                 return true;
             },
 
             remove(uid) {
                 this.items = this.items.filter(item => item._uid !== uid);
-                this.save(); // 每次刪除都同步到雲端
+                this.save();
             },
 
             search(query, mode = 'all') {
@@ -874,9 +920,7 @@
                 navigator.clipboard.writeText(dataStr).then(() => { ui.showToast("✅ 資料已複製到剪貼簿！"); });
             },
 
-            // 匯入功能可保留，作為手動備份用
             importDataProcess() {
-                // (保留原本的邏輯，但最後要呼叫 this.save())
                 const input = prompt("請貼上您之前備份的文字資料：");
                 if (!input) return;
                 try {
@@ -894,6 +938,7 @@
                 }
             }
         };
+
         const statsUI = {
             render() {
                 const items = dataManager.items;
@@ -907,26 +952,22 @@
                 document.getElementById('noStatsState').style.display = 'none';
                 document.querySelector('.stats-overview').style.display = 'grid';
 
-                // 1. 計算概況
                 const totalItems = items.length;
                 const totalValue = items.reduce((acc, curr) => acc + (parseInt(curr.price) || 0), 0);
                 
                 let boyCount = 0, girlCount = 0, neutralCount = 0;
-                const grouped = {}; // { '41336': { count: 0, gender: 'M', id: '...', sizeCounts: { '15': 3, '16': 1 } } }
+                const grouped = {}; 
 
                 items.forEach(item => {
-                    // 計數
                     if (item.gender === 'M') boyCount++;
                     else if (item.gender === 'F') girlCount++;
                     else neutralCount++;
 
-                    // 分組
                     if (!grouped[item.id]) {
                         grouped[item.id] = { count: 0, gender: item.gender, id: item.id, sizeCounts: {} };
                     }
                     grouped[item.id].count++;
                     
-                    // V11 新增：紀錄尺碼數量
                     if (!grouped[item.id].sizeCounts[item.size]) {
                         grouped[item.id].sizeCounts[item.size] = 0;
                     }
@@ -940,15 +981,13 @@
                 document.getElementById('statGirl').innerText = girlCount;
                 document.getElementById('statNeutral').innerText = neutralCount;
 
-                // 2. 生成排行榜 (含尺碼細節)
                 const rankingList = document.getElementById('rankingList');
                 rankingList.innerHTML = '';
 
-                // 排序鞋款：總數量大到小
                 const sortedGroups = Object.values(grouped).sort((a, b) => b.count - a.count);
                 const maxCount = sortedGroups.length > 0 ? sortedGroups[0].count : 1; 
 
-                sortedGroups.slice(0, 20).forEach((group, index) => { // 只顯示前20名
+                sortedGroups.slice(0, 20).forEach((group, index) => { 
                     const li = document.createElement('li');
                     li.className = 'rank-item';
                     
@@ -956,12 +995,10 @@
                     const genderIcon = group.gender === 'M' ? '👦' : (group.gender === 'F' ? '👧' : '⚪');
                     const genderColor = group.gender === 'M' ? 'var(--boy-color)' : (group.gender === 'F' ? 'var(--girl-color)' : 'var(--neutral-color)');
 
-                    // 處理尺碼排序 (數量多到少)
                     const sortedSizeEntries = Object.entries(group.sizeCounts).sort((a, b) => b[1] - a[1]);
                     
                     let sizesHtml = '';
                     sortedSizeEntries.forEach(([size, count]) => {
-                        // 庫存大於等於3雙標示為高庫存
                         const highStockClass = count >= 3 ? 'high-stock' : '';
                         sizesHtml += `<span class="rank-size-tag ${highStockClass}"><strong>${size}</strong><small>x${count}</small></span>`;
                     });
@@ -981,6 +1018,112 @@
                     `;
                     rankingList.appendChild(li);
                 });
+            }
+        };
+
+        /* V12: Audit UI (盤點模式邏輯) */
+        const auditUI = {
+            render() {
+                const query = document.getElementById('auditSearchInput').value.trim().toLowerCase();
+                const container = document.getElementById('auditList');
+                const emptyState = document.getElementById('auditEmptyState');
+                
+                container.innerHTML = '';
+                
+                if(!query) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                emptyState.style.display = 'none';
+
+                // Group items by ID to create audit cards
+                const grouped = {};
+                dataManager.items.forEach(item => {
+                    if(item.id.toLowerCase().includes(query)) {
+                        if (!grouped[item.id]) {
+                            grouped[item.id] = { 
+                                id: item.id, 
+                                gender: item.gender, 
+                                price: item.price,
+                                note: item.note,
+                                sizes: {} 
+                            };
+                        }
+                        if (!grouped[item.id].sizes[item.size]) grouped[item.id].sizes[item.size] = 0;
+                        grouped[item.id].sizes[item.size]++;
+                    }
+                });
+
+                if(Object.keys(grouped).length === 0) {
+                     container.innerHTML = `<div style="text-align:center; padding:2rem; color:#9ca3af;">找不到含有 "${query}" 的鞋款</div>`;
+                     return;
+                }
+
+                Object.values(grouped).forEach(model => {
+                    const card = document.createElement('div');
+                    card.className = 'audit-card';
+                    
+                    const genderIcon = ui.getGenderIcon(model.gender);
+                    const genderColor = model.gender === 'M' ? 'var(--boy-color)' : (model.gender === 'F' ? 'var(--girl-color)' : 'var(--neutral-color)');
+                    
+                    // Sort sizes
+                    const sortedSizes = Object.keys(model.sizes).sort((a,b) => parseFloat(a) - parseFloat(b));
+                    
+                    let rowsHtml = '';
+                    sortedSizes.forEach(size => {
+                        const count = model.sizes[size];
+                        rowsHtml += `
+                            <div class="audit-row">
+                                <span class="audit-size-label">${size}</span>
+                                <div class="stepper">
+                                    <button class="stepper-btn stepper-minus" onclick="auditUI.updateStock('${model.id}', '${size}', -1, '${model.gender}', ${model.price}, '${model.note}')">－</button>
+                                    <span class="stepper-val">${count}</span>
+                                    <button class="stepper-btn stepper-plus" onclick="auditUI.updateStock('${model.id}', '${size}', 1, '${model.gender}', ${model.price}, '${model.note}')">＋</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    card.innerHTML = `
+                        <div class="audit-header">
+                            <span class="audit-title" style="color:${genderColor}">${genderIcon} ${model.id}</span>
+                            <span class="audit-info">$${model.price} / ${model.note || '庫存'}</span>
+                        </div>
+                        <div class="audit-rows-container">
+                            ${rowsHtml}
+                        </div>
+                        <div class="add-size-row">
+                             <button class="btn-add-size" onclick="auditUI.promptAddSize('${model.id}', '${model.gender}', ${model.price}, '${model.note || '庫存'}')">＋ 新增其他尺碼</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            updateStock(id, size, change, gender, price, note) {
+                if (change > 0) {
+                    // Add item
+                    dataManager.add({ id, size, price, gender, note });
+                    // No need to show toast here to keep it fast, but dataManager.save() calls toast
+                } else {
+                    // Remove one item of this spec
+                    const targetItem = dataManager.items.find(i => i.id === id && i.size === size);
+                    if (targetItem) {
+                        dataManager.remove(targetItem._uid);
+                    } else {
+                        ui.showToast("❌ 庫存已經是 0 了");
+                    }
+                }
+                // Re-render immediately for UI feedback (Sync happens in background)
+                this.render();
+            },
+
+            promptAddSize(id, gender, price, note) {
+                const newSize = prompt(`請輸入 ${id} 要新增的尺碼：`);
+                if(newSize && newSize.trim() !== "") {
+                    dataManager.add({ id, size: newSize.trim(), price, gender, note });
+                    this.render();
+                }
             }
         };
 
@@ -1162,6 +1305,10 @@
             init() {
                 const searchInput = document.getElementById('searchInput');
                 searchInput.addEventListener('input', () => this.refreshSearch());
+                
+                // Audit search listener
+                const auditInput = document.getElementById('auditSearchInput');
+                auditInput.addEventListener('input', () => auditUI.render());
             },
 
             setFilter(mode) {
@@ -1306,6 +1453,12 @@
                 // 切換分頁時的動作
                 if (tabName === 'search') ui.refreshSearch();
                 if (tabName === 'stats') statsUI.render();
+                if (tabName === 'audit') {
+                    // 如果盤點搜尋框是空的，聚焦在上面方便輸入
+                    const auditInput = document.getElementById('auditSearchInput');
+                    auditInput.focus();
+                    auditUI.render();
+                }
             },
             deleteItem(uid) {
                 if(confirm('確認移除？')) {
