@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>童鞋庫存 Pro (V13 - 盤點全覽版)</title>
+    <title>童鞋庫存 Pro (V14 - 智能盤點版)</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -535,6 +535,13 @@
         .audit-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         .audit-info { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
         
+        /* 新增：總數標籤樣式 */
+        .audit-total-badge {
+            background: var(--primary-color); color: white;
+            padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;
+            font-weight: bold; margin-left: 8px;
+        }
+        
         .audit-rows-container { display: flex; flex-direction: column; gap: 8px; }
         .audit-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -567,7 +574,7 @@
 <body>
 
     <header>
-        <h1>👟 童鞋庫存 Pro (V13)</h1>
+        <h1>👟 童鞋庫存 Pro (V14)</h1>
         <div style="position: absolute; right: 15px; top: 15px; cursor: pointer; color: white;" onclick="dataManager.fetchFromCloud()">
     🔄 更新
 </div>
@@ -791,7 +798,7 @@
 
     <script>
         /**
-         * 鞋庫掌門人 Pro (V13 - 盤點全覽版)
+         * 鞋庫掌門人 Pro (V14 - 智能盤點版)
          */
         
         const dataManager = {
@@ -856,7 +863,7 @@
                 if(show) {
                     header.innerHTML = '👟 童鞋庫存 Pro (同步中...⏳)';
                 } else {
-                    header.innerHTML = '👟 童鞋庫存 Pro (V13)';
+                    header.innerHTML = '👟 童鞋庫存 Pro (V14)';
                 }
             },
 
@@ -1021,7 +1028,7 @@
             }
         };
 
-        /* V13: Audit UI (盤點模式 - 預設全覽) */
+        /* V14: Audit UI (智能盤點 - 含總數顯示) */
         const auditUI = {
             render() {
                 const query = document.getElementById('auditSearchInput').value.trim().toLowerCase();
@@ -1040,7 +1047,7 @@
                 // Group items by ID to create audit cards
                 const grouped = {};
                 dataManager.items.forEach(item => {
-                    // 關鍵修改：如果 query 為空，顯示全部；如果有輸入，則過濾
+                    // 如果 query 為空，顯示全部；如果有輸入，則過濾
                     if(query === '' || item.id.toLowerCase().includes(query)) {
                         if (!grouped[item.id]) {
                             grouped[item.id] = { 
@@ -1048,11 +1055,13 @@
                                 gender: item.gender, 
                                 price: item.price,
                                 note: item.note,
-                                sizes: {} 
+                                sizes: {},
+                                total: 0 // 新增總數計算
                             };
                         }
                         if (!grouped[item.id].sizes[item.size]) grouped[item.id].sizes[item.size] = 0;
                         grouped[item.id].sizes[item.size]++;
+                        grouped[item.id].total++; // 每讀到一雙就+1
                     }
                 });
 
@@ -1092,7 +1101,10 @@
 
                     card.innerHTML = `
                         <div class="audit-header">
-                            <span class="audit-title" style="color:${genderColor}">${genderIcon} ${model.id}</span>
+                            <span class="audit-title" style="color:${genderColor}">
+                                ${genderIcon} ${model.id}
+                                <span class="audit-total-badge">總數: ${model.total}</span>
+                            </span>
                             <span class="audit-info">$${model.price} / ${model.note || '庫存'}</span>
                         </div>
                         <div class="audit-rows-container">
