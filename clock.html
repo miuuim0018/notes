@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>下班薪資倒數 - 修復版</title>
+    <title>下班薪資與焦慮追蹤</title>
     <style>
-        /* CSS reset 與核心樣式 */
+        /* =========================================
+           CSS 樣式區 - 包含主視覺與統計面板樣式
+           ========================================= */
         :root {
             --bg-color: #000000;
-            --text-primary: #4cd964; /* 螢光綠 */
+            --text-primary: #4cd964; /* 進度綠 */
             --text-money: #f1c40f;   /* 金幣黃 */
             --text-sub: #888888;
-            --panel-bg: rgba(30, 30, 30, 0.95);
+            --text-danger: #ff5252;  /* 警告紅 */
+            --panel-bg: rgba(30, 30, 30, 0.98);
+            --border-color: rgba(255, 255, 255, 0.15);
         }
 
         body {
@@ -24,27 +28,31 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* 強制隱藏捲軸，避免跑版 */
+            overflow: hidden;
             position: relative;
         }
 
-        /* 確保樣式代碼不會被顯示出來的保險 */
-        style, script {
-            display: none !important;
-        }
+        /* 保險措施：隱藏源碼 */
+        style, script { display: none !important; }
 
-        /* 主要顯示區塊 */
+        /* 主顯示區塊 */
         .display-container {
             text-align: center;
             width: 100%;
             padding: 0 10px;
             box-sizing: border-box;
-            z-index: 1; /* 確保在背景之上 */
+            z-index: 1;
+            transition: filter 0.3s;
         }
 
-        /* 巨大的百分比 - 使用 vw 單位自動適應螢幕寬度 */
+        /* 模糊背景當面板開啟時 */
+        body.panel-open .display-container {
+            filter: blur(5px);
+        }
+
+        /* 巨大的百分比顯示 */
         #percentage {
-            font-size: 19vw; /* 稍微縮小一點點以防特定手機邊緣切字 */
+            font-size: 19vw;
             font-weight: 800;
             color: var(--text-primary);
             line-height: 1.1;
@@ -52,9 +60,9 @@
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
             margin-bottom: 5vh;
+            cursor: pointer; /* 點擊可切換顯示模式 */
         }
 
-        /* 標籤文字 */
         .label {
             font-size: 0.9rem;
             color: var(--text-sub);
@@ -64,12 +72,8 @@
             font-weight: 500;
         }
 
-        /* 薪資顯示區塊 */
-        #money-container {
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-
+        /* 薪資顯示 */
+        #money-container { opacity: 1; transition: opacity 0.3s; }
         #money {
             font-size: 11vw;
             font-weight: 700;
@@ -77,117 +81,157 @@
             text-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
             font-variant-numeric: tabular-nums;
         }
-
         .currency-symbol {
-            font-size: 0.6em;
-            margin-right: 5px;
-            vertical-align: top;
-            opacity: 0.8;
+            font-size: 0.6em; margin-right: 5px; vertical-align: top; opacity: 0.8;
         }
 
-        /* 設定面板 (點擊下方區域觸發) */
-        #settings-trigger-area {
+        /* 按鈕群組 */
+        .btn-group {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 6;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+
+        .icon-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.2); }
+
+        /* 通用滑出面板樣式 */
+        .slide-panel {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 15vh;
-            z-index: 5;
-            background: transparent;
-        }
-
-        #settings-panel {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            height: 85vh; /* 佔據 85% 高度 */
             background: var(--panel-bg);
-            border-top: 1px solid #333;
-            border-radius: 20px 20px 0 0;
+            border-top: 1px solid #444;
+            border-radius: 24px 24px 0 0;
             padding: 20px;
             box-sizing: border-box;
-            transform: translateY(110%); /* 預設隱藏 */
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateY(110%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10;
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
         }
 
-        /* 展開狀態 class */
-        #settings-panel.active {
-            transform: translateY(0);
-        }
+        .slide-panel.active { transform: translateY(0); }
 
-        .settings-header {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            position: relative;
-        }
-
-        .settings-header::after {
-            content: '▼ 點此收合';
-            display: block;
-            font-size: 0.7rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .input-group {
+        .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .input-group label {
-            color: #ccc;
-            font-size: 1rem;
-        }
+        .panel-title { font-size: 1.2rem; font-weight: bold; color: #fff; }
+        .close-btn { background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; padding: 0 10px;}
 
+        /* 設定表單樣式 */
+        .input-group {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .input-group label { color: #ccc; font-size: 1rem; }
         input {
-            background: #111;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            text-align: right;
-            width: 130px;
-            outline: none;
-            font-family: monospace;
+            background: #111; border: 1px solid #444; color: #fff;
+            padding: 10px 12px; border-radius: 8px; font-size: 1.1rem;
+            text-align: right; width: 140px; outline: none; font-family: monospace;
+        }
+        input:focus { border-color: var(--text-primary); }
+
+        /* 統計數據樣式 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
-        input:focus {
-            border-color: var(--text-primary);
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 5px;
+        }
+
+        /* 歷史紀錄列表 */
+        .log-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+
+        .log-time { color: #fff; font-weight: 500; }
+        .log-detail { text-align: right; }
+        .log-percent { color: var(--text-primary); font-family: monospace; }
+        .log-gap { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
+        .log-gap.long { color: var(--text-danger); } /* 太久沒看會變紅 */
+
+        .empty-state {
+            text-align: center; color: #555; margin-top: 50px; font-size: 0.9rem;
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--text-danger);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
 
         /* 頂部極簡進度條 */
         .progress-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: var(--text-primary);
-            width: 0%;
-            box-shadow: 0 0 10px var(--text-primary);
-            transition: width 0.1s linear;
-        }
-
-        /* 設定按鈕 (齒輪) - 避免使用者找不到 */
-        #gear-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 24px;
-            opacity: 0.5;
-            z-index: 6;
-            cursor: pointer;
-            background: none;
-            border: none;
+            position: absolute; top: 0; left: 0; height: 3px;
+            background: var(--text-primary); width: 0%;
+            box-shadow: 0 0 10px var(--text-primary); transition: width 0.1s linear;
         }
     </style>
 </head>
@@ -200,17 +244,22 @@
             <div class="label">Work Progress</div>
             <div id="percentage">0.00%</div>
         </div>
-
         <div id="money-container">
             <div class="label">Today's Earnings</div>
             <div id="money"><span class="currency-symbol">$</span>0.00</div>
         </div>
     </div>
 
-    <button id="gear-btn" onclick="toggleSettings()">⚙️</button>
+    <div class="btn-group">
+        <button class="icon-btn" onclick="openPanel('stats-panel')" title="查看焦慮統計">📊</button>
+        <button class="icon-btn" onclick="openPanel('settings-panel')" title="設定">⚙️</button>
+    </div>
 
-    <div id="settings-panel">
-        <div class="settings-header" onclick="toggleSettings()">設定工時與時薪</div>
+    <div id="settings-panel" class="slide-panel">
+        <div class="panel-header">
+            <div class="panel-title">工作設定</div>
+            <button class="close-btn" onclick="closeAllPanels()">✕</button>
+        </div>
         
         <div class="input-group">
             <label for="startTime">上班時間</label>
@@ -226,106 +275,325 @@
             <label for="hourlyRate">時薪 (TWD)</label>
             <input type="number" id="hourlyRate" value="190" inputmode="decimal">
         </div>
+
+        <div style="margin-top:20px; font-size:0.8rem; color:#666; line-height:1.5;">
+            * 設定會自動儲存在此手機瀏覽器中。<br>
+            * 系統會自動記錄你開啟此頁面的頻率，請查看統計圖表。
+        </div>
+    </div>
+
+    <div id="stats-panel" class="slide-panel">
+        <div class="panel-header">
+            <div class="panel-title">摸魚與焦慮追蹤</div>
+            <button class="close-btn" onclick="closeAllPanels()">✕</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-count">0</div>
+                <div class="stat-label">今日查看次數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-avg">0m</div>
+                <div class="stat-label">平均間隔時間</div>
+            </div>
+        </div>
+
+        <div class="label" style="border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">最近查看紀錄</div>
+        
+        <div class="log-list-container" id="log-list">
+            <div class="empty-state">還沒有資料，快去上班然後偷看手機！</div>
+        </div>
+
+        <button class="clear-btn" onclick="clearLogs()">清除所有紀錄</button>
     </div>
 
     <script>
-        /** * 程式邏輯區
-         * 包含：時間計算、薪資累加、本地儲存功能
+        /** * =========================================
+         * JavaScript 邏輯核心
+         * 包含：薪資計算、本地儲存、以及最新的統計系統
+         * =========================================
          */
         
+        // DOM 元素引用
         const percentageEl = document.getElementById('percentage');
         const moneyEl = document.getElementById('money');
         const topProgressEl = document.getElementById('top-progress');
-        const settingsPanel = document.getElementById('settings-panel');
-        
         const startTimeInput = document.getElementById('startTime');
         const endTimeInput = document.getElementById('endTime');
         const hourlyRateInput = document.getElementById('hourlyRate');
+        
+        // 統計相關 DOM
+        const statCountEl = document.getElementById('stat-count');
+        const statAvgEl = document.getElementById('stat-avg');
+        const logListEl = document.getElementById('log-list');
 
-        // 讀取設定
+        // 資料儲存 Key
+        const STORAGE_KEY_SETTINGS = 'salary_settings';
+        const STORAGE_KEY_LOGS = 'salary_check_logs_v2';
+
+        // 當前狀態變數
+        let currentSettings = {
+            start: '09:00',
+            end: '18:00',
+            rate: '190'
+        };
+        let checkLogs = [];
+
+        // ------------------------------------------
+        // 1. 初始化與設定管理
+        // ------------------------------------------
+        function init() {
+            loadSettings();
+            loadLogs();
+            
+            // 綁定設定變更事件
+            startTimeInput.addEventListener('change', saveSettings);
+            endTimeInput.addEventListener('change', saveSettings);
+            hourlyRateInput.addEventListener('input', saveSettings);
+
+            // 啟動主迴圈
+            updateDisplay();
+            setInterval(updateDisplay, 50); // 50ms 更新一次畫面
+            
+            // 記錄本次開啟 (如果是重新整理)
+            trackCheckIn(); 
+
+            // 監聽可見性變化 (針對手機切換 App 或鎖屏回來)
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === 'visible') {
+                    // 稍微延遲以確保 updateDisplay 已經算出最新的百分比
+                    setTimeout(trackCheckIn, 300);
+                    // 重新渲染統計數據
+                    renderStats();
+                }
+            });
+        }
+
         function loadSettings() {
-            if(localStorage.getItem('startTime')) startTimeInput.value = localStorage.getItem('startTime');
-            if(localStorage.getItem('endTime')) endTimeInput.value = localStorage.getItem('endTime');
-            if(localStorage.getItem('hourlyRate')) hourlyRateInput.value = localStorage.getItem('hourlyRate');
+            const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
+            if (saved) {
+                currentSettings = JSON.parse(saved);
+                startTimeInput.value = currentSettings.start;
+                endTimeInput.value = currentSettings.end;
+                hourlyRateInput.value = currentSettings.rate;
+            }
         }
 
-        // 儲存設定
         function saveSettings() {
-            localStorage.setItem('startTime', startTimeInput.value);
-            localStorage.setItem('endTime', endTimeInput.value);
-            localStorage.setItem('hourlyRate', hourlyRateInput.value);
-            updateDisplay(); 
+            currentSettings = {
+                start: startTimeInput.value,
+                end: endTimeInput.value,
+                rate: hourlyRateInput.value
+            };
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(currentSettings));
+            updateDisplay(); // 立即刷新計算
         }
 
-        // 格式化金錢
-        function formatMoney(amount) {
-            return amount.toLocaleString('zh-TW', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
-        }
-
-        // 切換設定面板顯示
-        function toggleSettings() {
-            settingsPanel.classList.toggle('active');
-        }
-
-        // 核心更新邏輯
+        // ------------------------------------------
+        // 2. 核心計算引擎 (薪資與進度)
+        // ------------------------------------------
         function updateDisplay() {
             const now = new Date();
-            
-            // 解析時間
-            let start = new Date();
-            const [startH, startM] = startTimeInput.value.split(':');
-            start.setHours(startH, startM, 0, 0);
+            const { start, end, rate } = currentSettings;
 
-            let end = new Date();
-            const [endH, endM] = endTimeInput.value.split(':');
-            end.setHours(endH, endM, 0, 0);
+            // 時間解析
+            let startDate = new Date();
+            const [sH, sM] = start.split(':');
+            startDate.setHours(sH, sM, 0, 0);
 
-            // 跨日處理
-            if (end < start) {
-                if (now > start) end.setDate(end.getDate() + 1);
-                else if (now < end) start.setDate(start.setDate() - 1);
+            let endDate = new Date();
+            const [eH, eM] = end.split(':');
+            endDate.setHours(eH, eM, 0, 0);
+
+            // 跨日判斷
+            if (endDate < startDate) {
+                if (now > startDate) endDate.setDate(endDate.getDate() + 1);
+                else if (now < endDate) startDate.setDate(startDate.getDate() - 1);
             }
 
-            const totalDuration = end - start; 
-            let elapsed = now - start; 
+            const totalDuration = endDate - startDate;
+            let elapsed = now - startDate;
 
-            if (elapsed < 0) elapsed = 0; 
-            if (elapsed > totalDuration) elapsed = totalDuration; 
+            // 邊界修正
+            if (elapsed < 0) elapsed = 0;
+            if (elapsed > totalDuration) elapsed = totalDuration;
 
             const percent = (elapsed / totalDuration) * 100;
             
-            const hourlyRate = parseFloat(hourlyRateInput.value) || 0;
-            const msRate = hourlyRate / 3600000; 
+            // 薪資計算
+            const hourlyRate = parseFloat(rate) || 0;
+            const msRate = hourlyRate / 3600000;
             const earned = elapsed * msRate;
 
-            // 更新 UI
-            if (now >= end) {
+            // UI 更新
+            if (now >= endDate) {
                 percentageEl.textContent = "100.00%";
-                percentageEl.style.color = "#4cd964"; 
+                percentageEl.style.color = "#4cd964";
                 moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
                 topProgressEl.style.width = "100%";
-            } else if (now < start) {
+            } else if (now < startDate) {
                 percentageEl.textContent = "WAIT...";
-                percentageEl.style.color = "#888"; 
+                percentageEl.style.color = "#888";
                 moneyEl.innerHTML = `<span class="currency-symbol">$</span>0.0000`;
                 topProgressEl.style.width = "0%";
             } else {
-                // 這裡保留小數點後 3 位，讓它跳動感適中
+                // 這裡的小數點位數決定了跳動的快感
                 percentageEl.textContent = percent.toFixed(3) + "%";
                 moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
                 topProgressEl.style.width = percent + "%";
             }
+            
+            // 把目前的計算結果存到全局變數，給 Log 使用
+            window.currentPercent = percent;
         }
 
-        // 啟動
-        loadSettings();
-        updateDisplay();
-        setInterval(updateDisplay, 50); // 每 0.05 秒更新一次
+        function formatMoney(n) {
+            return n.toLocaleString('zh-TW', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        }
 
-        // 事件監聽
-        startTimeInput.addEventListener('change', saveSettings);
-        endTimeInput.addEventListener('change', saveSettings);
-        hourlyRateInput.addEventListener('input', saveSettings);
+        // ------------------------------------------
+        // 3. 焦慮追蹤系統 (New Feature)
+        // ------------------------------------------
+        function loadLogs() {
+            const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+            if (savedLogs) {
+                checkLogs = JSON.parse(savedLogs);
+                // 只保留最近 100 筆，避免爆炸
+                if (checkLogs.length > 100) {
+                    checkLogs = checkLogs.slice(0, 100);
+                }
+            }
+        }
+
+        function trackCheckIn() {
+            const now = Date.now();
+            
+            // 冷卻機制：如果距離上次記錄小於 30 秒，不記錄 (防止誤觸或頻繁刷新)
+            if (checkLogs.length > 0) {
+                const lastLog = checkLogs[0]; // index 0 是最新的
+                if (now - lastLog.time < 30 * 1000) {
+                    return; 
+                }
+            }
+
+            // 只有在上班時間內才記錄 (簡單判斷 percent > 0 且 < 100)
+            const p = window.currentPercent || 0;
+            if (p <= 0 || p >= 100) return;
+
+            // 新增紀錄
+            const newLog = {
+                time: now,
+                percent: p
+            };
+            
+            // 放入陣列最前面
+            checkLogs.unshift(newLog);
+            
+            // 儲存
+            localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(checkLogs));
+            
+            // 更新 UI
+            renderStats();
+        }
+
+        function renderStats() {
+            // 1. 計算今日次數
+            const startOfToday = new Date();
+            startOfToday.setHours(0,0,0,0);
+            const todayLogs = checkLogs.filter(log => log.time >= startOfToday.getTime());
+            statCountEl.textContent = todayLogs.length;
+
+            // 2. 計算平均間隔 (只計算今日)
+            if (todayLogs.length > 1) {
+                let totalDiff = 0;
+                for(let i = 0; i < todayLogs.length - 1; i++) {
+                    // 因為是時間倒序，所以用前一個減後一個
+                    totalDiff += (todayLogs[i].time - todayLogs[i+1].time);
+                }
+                const avgMs = totalDiff / (todayLogs.length - 1);
+                statAvgEl.textContent = formatDuration(avgMs);
+            } else {
+                statAvgEl.textContent = "--";
+            }
+
+            // 3. 渲染列表
+            logListEl.innerHTML = '';
+            if (checkLogs.length === 0) {
+                logListEl.innerHTML = '<div class="empty-state">還沒有資料</div>';
+                return;
+            }
+
+            checkLogs.forEach((log, index) => {
+                const date = new Date(log.time);
+                const timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                
+                // 計算與上一筆的間隔 (因為是倒序，所以找 index + 1)
+                let gapStr = '';
+                let isLongGap = false;
+                if (index < checkLogs.length - 1) {
+                    const prevLog = checkLogs[index + 1];
+                    const diff = log.time - prevLog.time;
+                    gapStr = `距離上次 ${formatDuration(diff)}`;
+                    // 如果超過 60 分鐘沒看，標記一下
+                    if (diff > 60 * 60 * 1000) isLongGap = true;
+                } else {
+                    gapStr = '紀錄起點';
+                }
+
+                const item = document.createElement('div');
+                item.className = 'log-item';
+                item.innerHTML = `
+                    <div class="log-time">
+                        ${timeStr}
+                        <div class="log-gap ${isLongGap ? 'long' : ''}">${gapStr}</div>
+                    </div>
+                    <div class="log-detail">
+                        <div class="log-percent">${log.percent.toFixed(2)}%</div>
+                    </div>
+                `;
+                logListEl.appendChild(item);
+            });
+        }
+
+        function formatDuration(ms) {
+            const minutes = Math.floor(ms / 60000);
+            if (minutes < 1) return '< 1m';
+            if (minutes < 60) return `${minutes}m`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}m`;
+        }
+
+        function clearLogs() {
+            if(confirm('確定要刪除所有焦慮紀錄嗎？')) {
+                checkLogs = [];
+                localStorage.removeItem(STORAGE_KEY_LOGS);
+                renderStats();
+            }
+        }
+
+        // ------------------------------------------
+        // 4. 面板控制
+        // ------------------------------------------
+        function openPanel(id) {
+            closeAllPanels();
+            document.getElementById(id).classList.add('active');
+            document.body.classList.add('panel-open');
+            if (id === 'stats-panel') renderStats(); // 確保打開時是最新的
+        }
+
+        function closeAllPanels() {
+            document.querySelectorAll('.slide-panel').forEach(el => el.classList.remove('active'));
+            document.body.classList.remove('panel-open');
+        }
+        
+        // 點擊背景關閉面板
+        document.querySelector('.display-container').addEventListener('click', closeAllPanels);
+
+        // 啟動程式
+        init();
+
     </script>
 </body>
 </html>
