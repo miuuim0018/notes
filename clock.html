@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>全能下班計時器</title>
+    <title>全能下班計時器 - 修復版</title>
     <style>
         /* =========================================
            CSS 樣式區
@@ -30,10 +30,9 @@
             margin: 0;
             overflow: hidden;
             position: relative;
-            user-select: none; /* 防止一直點擊時選取到文字 */
+            user-select: none;
         }
 
-        /* 保險措施：隱藏源碼 */
         style, script { display: none !important; }
 
         /* 主顯示區塊 */
@@ -44,54 +43,63 @@
             box-sizing: border-box;
             z-index: 1;
             transition: filter 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 80vh; /* 固定高度讓內容置中更穩定 */
         }
 
-        /* 模糊背景當面板開啟時 */
         body.panel-open .display-container {
             filter: blur(5px);
         }
 
         /* 巨大的數字顯示區 */
         #main-display-area {
-            cursor: pointer; /* 提示可點擊 */
+            cursor: pointer;
             transition: transform 0.1s;
+            padding: 20px 0; /* 增加點擊範圍 */
         }
         
         #main-display-area:active {
-            transform: scale(0.98); /* 點擊回饋 */
+            transform: scale(0.98);
         }
 
         #display-value {
             font-weight: 800;
             color: var(--text-primary);
-            line-height: 1.1;
+            line-height: 1; /* 縮小行高，避免數字上下空白太多 */
             text-shadow: 0 0 30px rgba(76, 217, 100, 0.25);
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
-            margin-bottom: 5px;
-            /* 字體大小會由 JS 動態控制以適應不同長度的內容 */
+            margin-bottom: 15px; /* 修正點：確保數字跟下方文字有距離 */
             font-size: 18vw; 
         }
 
         .label {
             font-size: 0.9rem;
             color: var(--text-sub);
-            margin-bottom: 5vh; /* 增加與下方的距離 */
+            margin-bottom: 2vh;
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 500;
-            min-height: 1.2em; /* 避免切換文字時高度跳動 */
         }
         
+        /* 修正後的提示文字樣式 */
         .hint-text {
-            font-size: 0.7rem;
-            color: #444;
-            margin-top: -4vh;
-            margin-bottom: 4vh;
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 0; /* 移除負邊距 */
+            margin-bottom: 20px;
+            opacity: 0.8;
+            font-weight: normal;
         }
 
         /* 薪資顯示 */
-        #money-container { opacity: 1; transition: opacity 0.3s; }
+        #money-container { 
+            opacity: 1; 
+            transition: opacity 0.3s; 
+            margin-top: 20px;
+        }
         #money {
             font-size: 11vw;
             font-weight: 700;
@@ -128,10 +136,9 @@
             backdrop-filter: blur(5px);
             transition: all 0.2s;
         }
-
         .icon-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.2); }
 
-        /* 通用滑出面板樣式 */
+        /* 滑出面板 */
         .slide-panel {
             position: absolute;
             bottom: 0;
@@ -150,26 +157,19 @@
             flex-direction: column;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
         }
-
         .slide-panel.active { transform: translateY(0); }
 
         .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);
         }
-
         .panel-title { font-size: 1.2rem; font-weight: bold; color: #fff; }
         .close-btn { background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; padding: 0 10px;}
 
-        /* 設定表單樣式 */
+        /* 設定表單 */
         .input-group {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .input-group label { color: #ccc; font-size: 1rem; }
         input {
@@ -179,73 +179,40 @@
         }
         input:focus { border-color: var(--text-primary); }
 
-        /* 統計數據樣式 */
+        /* 統計 */
         .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;
         }
-
         .stat-card {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center;
         }
-
         .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
+            font-size: 1.5rem; font-weight: bold; color: var(--text-primary); font-variant-numeric: tabular-nums;
         }
-
         .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            margin-top: 5px;
+            font-size: 0.8rem; color: var(--text-sub); margin-top: 5px;
         }
 
-        /* 歷史紀錄列表 */
         .log-list-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-
         .log-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.9rem;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;
         }
-
         .log-time { color: #fff; font-weight: 500; }
         .log-detail { text-align: right; }
         .log-percent { color: var(--text-primary); font-family: monospace; }
         .log-gap { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
         .log-gap.long { color: var(--text-danger); } 
-
-        .empty-state {
-            text-align: center; color: #555; margin-top: 50px; font-size: 0.9rem;
-        }
-
+        .empty-state { text-align: center; color: #555; margin-top: 50px; font-size: 0.9rem; }
         .clear-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: rgba(255, 82, 82, 0.1);
-            color: var(--text-danger);
-            border: 1px solid rgba(255, 82, 82, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            width: 100%; padding: 12px; margin-top: 15px;
+            background: rgba(255, 82, 82, 0.1); color: var(--text-danger);
+            border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 8px; cursor: pointer; font-size: 0.9rem;
         }
 
-        /* 頂部極簡進度條 */
+        /* 頂部進度條 */
         .progress-line {
             position: absolute; top: 0; left: 0; height: 3px;
             background: var(--text-primary); width: 0%;
@@ -296,7 +263,12 @@
             <input type="number" id="hourlyRate" value="190" inputmode="decimal">
         </div>
 
-     
+        <div style="margin-top:20px; font-size:0.8rem; color:#666; line-height:1.5;">
+            * 點擊主畫面的大數字可以切換：<br>
+            百分比 / 倒數計時 / 剩餘分鐘 / 剩餘秒數
+        </div>
+    </div>
+
     <div id="stats-panel" class="slide-panel">
         <div class="panel-header">
             <div class="panel-title">摸魚與焦慮追蹤</div>
@@ -324,11 +296,6 @@
     </div>
 
     <script>
-        /** * =========================================
-         * JavaScript 邏輯核心
-         * =========================================
-         */
-        
         // DOM 元素引用
         const displayValueEl = document.getElementById('display-value');
         const displayLabelEl = document.getElementById('display-label');
@@ -351,7 +318,7 @@
         // 顯示模式定義
         const DISPLAY_MODES = [
             { id: 'percent', label: 'Work Progress', fontSize: '18vw' },
-            { id: 'countdown', label: 'Time Remaining', fontSize: '13vw' }, // 字比較多，縮小一點
+            { id: 'countdown', label: 'Time Remaining', fontSize: '13vw' },
             { id: 'minutes', label: 'Minutes Left', fontSize: '18vw' },
             { id: 'seconds', label: 'Seconds Left', fontSize: '18vw' }
         ];
@@ -359,26 +326,21 @@
         // 當前狀態
         let currentSettings = { start: '09:00', end: '18:00', rate: '190' };
         let checkLogs = [];
-        let currentModeIndex = 0; // 預設 index
+        let currentModeIndex = 0; 
 
-        // ------------------------------------------
-        // 1. 初始化
-        // ------------------------------------------
+        // 初始化
         function init() {
             loadSettings();
             loadLogs();
-            loadMode(); // 讀取上次的顯示模式
+            loadMode(); 
             
-            // 綁定設定變更事件
             startTimeInput.addEventListener('change', saveSettings);
             endTimeInput.addEventListener('change', saveSettings);
             hourlyRateInput.addEventListener('input', saveSettings);
 
-            // 啟動主迴圈
             updateDisplay();
             setInterval(updateDisplay, 50); 
             
-            // 焦慮紀錄
             trackCheckIn(); 
 
             document.addEventListener("visibilitychange", () => {
@@ -389,9 +351,7 @@
             });
         }
 
-        // ------------------------------------------
-        // 2. 模式切換邏輯 (New!)
-        // ------------------------------------------
+        // 模式切換邏輯
         function loadMode() {
             const savedIndex = localStorage.getItem(STORAGE_KEY_MODE);
             if (savedIndex !== null) {
@@ -404,7 +364,7 @@
             currentModeIndex = (currentModeIndex + 1) % DISPLAY_MODES.length;
             localStorage.setItem(STORAGE_KEY_MODE, currentModeIndex);
             updateModeStyle();
-            updateDisplay(); // 立即刷新數值
+            updateDisplay(); 
         }
 
         function updateModeStyle() {
@@ -413,14 +373,11 @@
             displayValueEl.style.fontSize = mode.fontSize;
         }
 
-        // ------------------------------------------
-        // 3. 核心計算引擎 (含多模式輸出)
-        // ------------------------------------------
+        // 核心計算
         function updateDisplay() {
             const now = new Date();
             const { start, end, rate } = currentSettings;
 
-            // 時間解析
             let startDate = new Date();
             const [sH, sM] = start.split(':');
             startDate.setHours(sH, sM, 0, 0);
@@ -429,7 +386,6 @@
             const [eH, eM] = end.split(':');
             endDate.setHours(eH, eM, 0, 0);
 
-            // 跨日判斷
             if (endDate < startDate) {
                 if (now > startDate) endDate.setDate(endDate.getDate() + 1);
                 else if (now < endDate) startDate.setDate(startDate.getDate() - 1);
@@ -439,23 +395,19 @@
             let elapsed = now - startDate;
             let remaining = endDate - now;
 
-            // 邊界修正
             if (elapsed < 0) elapsed = 0;
             if (elapsed > totalDuration) elapsed = totalDuration;
             if (remaining < 0) remaining = 0;
 
             const percent = (elapsed / totalDuration) * 100;
             
-            // 薪資計算
             const hourlyRate = parseFloat(rate) || 0;
             const msRate = hourlyRate / 3600000;
             const earned = elapsed * msRate;
 
-            // 更新薪資與進度條 (永遠不變)
             moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
             topProgressEl.style.width = percent + "%";
 
-            // 根據模式渲染主畫面
             const modeId = DISPLAY_MODES[currentModeIndex].id;
             let mainText = "";
 
@@ -486,8 +438,6 @@
                 }
             }
             displayValueEl.textContent = mainText;
-            
-            // 存全域變數給 Log 用
             window.currentPercent = percent;
         }
 
@@ -499,7 +449,6 @@
             hours = (hours < 10) ? "0" + hours : hours;
             minutes = (minutes < 10) ? "0" + minutes : minutes;
             seconds = (seconds < 10) ? "0" + seconds : seconds;
-
             return hours + ":" + minutes + ":" + seconds;
         }
 
@@ -507,9 +456,7 @@
             return n.toLocaleString('zh-TW', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
         }
 
-        // ------------------------------------------
-        // 4. 設定與資料存取
-        // ------------------------------------------
+        // 設定與資料存取
         function loadSettings() {
             const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
             if (saved) {
@@ -530,9 +477,7 @@
             updateDisplay(); 
         }
 
-        // ------------------------------------------
-        // 5. 焦慮追蹤 (Log)
-        // ------------------------------------------
+        // 焦慮追蹤 (Log)
         function loadLogs() {
             const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
             if (savedLogs) {
@@ -545,7 +490,7 @@
             const now = Date.now();
             if (checkLogs.length > 0) {
                 const lastLog = checkLogs[0];
-                if (now - lastLog.time < 30 * 1000) return; // 30秒冷卻
+                if (now - lastLog.time < 30 * 1000) return; 
             }
             const p = window.currentPercent || 0;
             if (p <= 0 || p >= 100) return;
@@ -623,7 +568,6 @@
             }
         }
 
-        // 面板 UI 控制
         function openPanel(id) {
             closeAllPanels();
             document.getElementById(id).classList.add('active');
@@ -637,13 +581,11 @@
         }
         
         document.querySelector('.display-container').addEventListener('click', (e) => {
-            // 如果點擊的是顯示區域本身(非子元素)或顯示數值，才切換。避免誤觸
-            if (e.target.closest('#main-display-area')) return; // main-display-area 有自己的 onclick
+            if (e.target.closest('#main-display-area')) return; 
             closeAllPanels();
         });
 
         init();
-
     </script>
 </body>
 </html>
