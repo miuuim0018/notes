@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>全能下班計時器 - 修復版</title>
+    <title>全能下班計時器 - 極簡版</title>
     <style>
         /* =========================================
            CSS 樣式區
@@ -46,7 +46,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 80vh; /* 固定高度讓內容置中更穩定 */
+            height: 80vh;
         }
 
         body.panel-open .display-container {
@@ -57,7 +57,7 @@
         #main-display-area {
             cursor: pointer;
             transition: transform 0.1s;
-            padding: 20px 0; /* 增加點擊範圍 */
+            padding: 20px 0;
         }
         
         #main-display-area:active {
@@ -67,11 +67,12 @@
         #display-value {
             font-weight: 800;
             color: var(--text-primary);
-            line-height: 1; /* 縮小行高，避免數字上下空白太多 */
+            line-height: 1;
             text-shadow: 0 0 30px rgba(76, 217, 100, 0.25);
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
-            margin-bottom: 15px; /* 修正點：確保數字跟下方文字有距離 */
+            /* 移除提示文字後，稍微增加一點下方留白，保持視覺平衡 */
+            margin-bottom: 2vh; 
             font-size: 18vw; 
         }
 
@@ -84,21 +85,11 @@
             font-weight: 500;
         }
         
-        /* 修正後的提示文字樣式 */
-        .hint-text {
-            font-size: 0.8rem;
-            color: #555;
-            margin-top: 0; /* 移除負邊距 */
-            margin-bottom: 20px;
-            opacity: 0.8;
-            font-weight: normal;
-        }
-
         /* 薪資顯示 */
         #money-container { 
             opacity: 1; 
             transition: opacity 0.3s; 
-            margin-top: 20px;
+            margin-top: 3vh; /* 增加間距讓它跟上面的大數字分開 */
         }
         #money {
             font-size: 11vw;
@@ -228,7 +219,6 @@
         <div id="main-display-area" onclick="toggleDisplayMode()">
             <div class="label" id="display-label">Work Progress</div>
             <div id="display-value">0.00%</div>
-            <div class="hint-text">↑ 點擊數字切換單位 ↑</div>
         </div>
 
         <div id="money-container">
