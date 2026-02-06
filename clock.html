@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>下班薪資與焦慮追蹤</title>
+    <title>全能下班計時器</title>
     <style>
         /* =========================================
-           CSS 樣式區 - 包含主視覺與統計面板樣式
+           CSS 樣式區
            ========================================= */
         :root {
             --bg-color: #000000;
@@ -30,6 +30,7 @@
             margin: 0;
             overflow: hidden;
             position: relative;
+            user-select: none; /* 防止一直點擊時選取到文字 */
         }
 
         /* 保險措施：隱藏源碼 */
@@ -50,26 +51,43 @@
             filter: blur(5px);
         }
 
-        /* 巨大的百分比顯示 */
-        #percentage {
-            font-size: 19vw;
+        /* 巨大的數字顯示區 */
+        #main-display-area {
+            cursor: pointer; /* 提示可點擊 */
+            transition: transform 0.1s;
+        }
+        
+        #main-display-area:active {
+            transform: scale(0.98); /* 點擊回饋 */
+        }
+
+        #display-value {
             font-weight: 800;
             color: var(--text-primary);
             line-height: 1.1;
             text-shadow: 0 0 30px rgba(76, 217, 100, 0.25);
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
-            margin-bottom: 5vh;
-            cursor: pointer; /* 點擊可切換顯示模式 */
+            margin-bottom: 5px;
+            /* 字體大小會由 JS 動態控制以適應不同長度的內容 */
+            font-size: 18vw; 
         }
 
         .label {
             font-size: 0.9rem;
             color: var(--text-sub);
-            margin-bottom: 5px;
+            margin-bottom: 5vh; /* 增加與下方的距離 */
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 500;
+            min-height: 1.2em; /* 避免切換文字時高度跳動 */
+        }
+        
+        .hint-text {
+            font-size: 0.7rem;
+            color: #444;
+            margin-top: -4vh;
+            margin-bottom: 4vh;
         }
 
         /* 薪資顯示 */
@@ -119,7 +137,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 85vh; /* 佔據 85% 高度 */
+            height: 85vh;
             background: var(--panel-bg);
             border-top: 1px solid #444;
             border-radius: 24px 24px 0 0;
@@ -209,7 +227,7 @@
         .log-detail { text-align: right; }
         .log-percent { color: var(--text-primary); font-family: monospace; }
         .log-gap { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
-        .log-gap.long { color: var(--text-danger); } /* 太久沒看會變紅 */
+        .log-gap.long { color: var(--text-danger); } 
 
         .empty-state {
             text-align: center; color: #555; margin-top: 50px; font-size: 0.9rem;
@@ -240,10 +258,12 @@
     <div class="progress-line" id="top-progress"></div>
 
     <div class="display-container">
-        <div>
-            <div class="label">Work Progress</div>
-            <div id="percentage">0.00%</div>
+        <div id="main-display-area" onclick="toggleDisplayMode()">
+            <div class="label" id="display-label">Work Progress</div>
+            <div id="display-value">0.00%</div>
+            <div class="hint-text">↑ 點擊數字切換單位 ↑</div>
         </div>
+
         <div id="money-container">
             <div class="label">Today's Earnings</div>
             <div id="money"><span class="currency-symbol">$</span>0.00</div>
@@ -277,8 +297,8 @@
         </div>
 
         <div style="margin-top:20px; font-size:0.8rem; color:#666; line-height:1.5;">
-            * 設定會自動儲存在此手機瀏覽器中。<br>
-            * 系統會自動記錄你開啟此頁面的頻率，請查看統計圖表。
+            * 點擊主畫面的大數字可以切換：<br>
+            百分比 / 倒數計時 / 剩餘分鐘 / 剩餘秒數
         </div>
     </div>
 
@@ -302,7 +322,7 @@
         <div class="label" style="border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">最近查看紀錄</div>
         
         <div class="log-list-container" id="log-list">
-            <div class="empty-state">還沒有資料，快去上班然後偷看手機！</div>
+            <div class="empty-state">還沒有資料</div>
         </div>
 
         <button class="clear-btn" onclick="clearLogs()">清除所有紀錄</button>
@@ -311,12 +331,12 @@
     <script>
         /** * =========================================
          * JavaScript 邏輯核心
-         * 包含：薪資計算、本地儲存、以及最新的統計系統
          * =========================================
          */
         
         // DOM 元素引用
-        const percentageEl = document.getElementById('percentage');
+        const displayValueEl = document.getElementById('display-value');
+        const displayLabelEl = document.getElementById('display-label');
         const moneyEl = document.getElementById('money');
         const topProgressEl = document.getElementById('top-progress');
         const startTimeInput = document.getElementById('startTime');
@@ -329,23 +349,30 @@
         const logListEl = document.getElementById('log-list');
 
         // 資料儲存 Key
-        const STORAGE_KEY_SETTINGS = 'salary_settings';
+        const STORAGE_KEY_SETTINGS = 'salary_settings_v3';
         const STORAGE_KEY_LOGS = 'salary_check_logs_v2';
+        const STORAGE_KEY_MODE = 'salary_display_mode';
 
-        // 當前狀態變數
-        let currentSettings = {
-            start: '09:00',
-            end: '18:00',
-            rate: '190'
-        };
+        // 顯示模式定義
+        const DISPLAY_MODES = [
+            { id: 'percent', label: 'Work Progress', fontSize: '18vw' },
+            { id: 'countdown', label: 'Time Remaining', fontSize: '13vw' }, // 字比較多，縮小一點
+            { id: 'minutes', label: 'Minutes Left', fontSize: '18vw' },
+            { id: 'seconds', label: 'Seconds Left', fontSize: '18vw' }
+        ];
+
+        // 當前狀態
+        let currentSettings = { start: '09:00', end: '18:00', rate: '190' };
         let checkLogs = [];
+        let currentModeIndex = 0; // 預設 index
 
         // ------------------------------------------
-        // 1. 初始化與設定管理
+        // 1. 初始化
         // ------------------------------------------
         function init() {
             loadSettings();
             loadLogs();
+            loadMode(); // 讀取上次的顯示模式
             
             // 綁定設定變更事件
             startTimeInput.addEventListener('change', saveSettings);
@@ -354,44 +381,45 @@
 
             // 啟動主迴圈
             updateDisplay();
-            setInterval(updateDisplay, 50); // 50ms 更新一次畫面
+            setInterval(updateDisplay, 50); 
             
-            // 記錄本次開啟 (如果是重新整理)
+            // 焦慮紀錄
             trackCheckIn(); 
 
-            // 監聽可見性變化 (針對手機切換 App 或鎖屏回來)
             document.addEventListener("visibilitychange", () => {
                 if (document.visibilityState === 'visible') {
-                    // 稍微延遲以確保 updateDisplay 已經算出最新的百分比
                     setTimeout(trackCheckIn, 300);
-                    // 重新渲染統計數據
                     renderStats();
                 }
             });
         }
 
-        function loadSettings() {
-            const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
-            if (saved) {
-                currentSettings = JSON.parse(saved);
-                startTimeInput.value = currentSettings.start;
-                endTimeInput.value = currentSettings.end;
-                hourlyRateInput.value = currentSettings.rate;
+        // ------------------------------------------
+        // 2. 模式切換邏輯 (New!)
+        // ------------------------------------------
+        function loadMode() {
+            const savedIndex = localStorage.getItem(STORAGE_KEY_MODE);
+            if (savedIndex !== null) {
+                currentModeIndex = parseInt(savedIndex, 10);
             }
+            updateModeStyle();
         }
 
-        function saveSettings() {
-            currentSettings = {
-                start: startTimeInput.value,
-                end: endTimeInput.value,
-                rate: hourlyRateInput.value
-            };
-            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(currentSettings));
-            updateDisplay(); // 立即刷新計算
+        function toggleDisplayMode() {
+            currentModeIndex = (currentModeIndex + 1) % DISPLAY_MODES.length;
+            localStorage.setItem(STORAGE_KEY_MODE, currentModeIndex);
+            updateModeStyle();
+            updateDisplay(); // 立即刷新數值
+        }
+
+        function updateModeStyle() {
+            const mode = DISPLAY_MODES[currentModeIndex];
+            displayLabelEl.textContent = mode.label;
+            displayValueEl.style.fontSize = mode.fontSize;
         }
 
         // ------------------------------------------
-        // 2. 核心計算引擎 (薪資與進度)
+        // 3. 核心計算引擎 (含多模式輸出)
         // ------------------------------------------
         function updateDisplay() {
             const now = new Date();
@@ -414,10 +442,12 @@
 
             const totalDuration = endDate - startDate;
             let elapsed = now - startDate;
+            let remaining = endDate - now;
 
             // 邊界修正
             if (elapsed < 0) elapsed = 0;
             if (elapsed > totalDuration) elapsed = totalDuration;
+            if (remaining < 0) remaining = 0;
 
             const percent = (elapsed / totalDuration) * 100;
             
@@ -426,26 +456,56 @@
             const msRate = hourlyRate / 3600000;
             const earned = elapsed * msRate;
 
-            // UI 更新
+            // 更新薪資與進度條 (永遠不變)
+            moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
+            topProgressEl.style.width = percent + "%";
+
+            // 根據模式渲染主畫面
+            const modeId = DISPLAY_MODES[currentModeIndex].id;
+            let mainText = "";
+
             if (now >= endDate) {
-                percentageEl.textContent = "100.00%";
-                percentageEl.style.color = "#4cd964";
-                moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
-                topProgressEl.style.width = "100%";
+                mainText = "下班啦!";
+                displayValueEl.style.color = "#4cd964";
             } else if (now < startDate) {
-                percentageEl.textContent = "WAIT...";
-                percentageEl.style.color = "#888";
-                moneyEl.innerHTML = `<span class="currency-symbol">$</span>0.0000`;
-                topProgressEl.style.width = "0%";
+                mainText = "Wait...";
+                displayValueEl.style.color = "#888";
             } else {
-                // 這裡的小數點位數決定了跳動的快感
-                percentageEl.textContent = percent.toFixed(3) + "%";
-                moneyEl.innerHTML = `<span class="currency-symbol">$</span>${formatMoney(earned)}`;
-                topProgressEl.style.width = percent + "%";
+                displayValueEl.style.color = "#4cd964";
+                
+                switch (modeId) {
+                    case 'percent':
+                        mainText = percent.toFixed(3) + "%";
+                        break;
+                    case 'countdown':
+                        mainText = msToTime(remaining);
+                        break;
+                    case 'minutes':
+                        const totalMins = (remaining / 60000).toFixed(1);
+                        mainText = totalMins + "m";
+                        break;
+                    case 'seconds':
+                        const totalSecs = Math.floor(remaining / 1000);
+                        mainText = totalSecs + "s";
+                        break;
+                }
             }
+            displayValueEl.textContent = mainText;
             
-            // 把目前的計算結果存到全局變數，給 Log 使用
+            // 存全域變數給 Log 用
             window.currentPercent = percent;
+        }
+
+        function msToTime(duration) {
+            let seconds = Math.floor((duration / 1000) % 60);
+            let minutes = Math.floor((duration / (1000 * 60)) % 60);
+            let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+            hours = (hours < 10) ? "0" + hours : hours;
+            minutes = (minutes < 10) ? "0" + minutes : minutes;
+            seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+            return hours + ":" + minutes + ":" + seconds;
         }
 
         function formatMoney(n) {
@@ -453,62 +513,62 @@
         }
 
         // ------------------------------------------
-        // 3. 焦慮追蹤系統 (New Feature)
+        // 4. 設定與資料存取
+        // ------------------------------------------
+        function loadSettings() {
+            const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
+            if (saved) {
+                currentSettings = JSON.parse(saved);
+                startTimeInput.value = currentSettings.start;
+                endTimeInput.value = currentSettings.end;
+                hourlyRateInput.value = currentSettings.rate;
+            }
+        }
+
+        function saveSettings() {
+            currentSettings = {
+                start: startTimeInput.value,
+                end: endTimeInput.value,
+                rate: hourlyRateInput.value
+            };
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(currentSettings));
+            updateDisplay(); 
+        }
+
+        // ------------------------------------------
+        // 5. 焦慮追蹤 (Log)
         // ------------------------------------------
         function loadLogs() {
             const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
             if (savedLogs) {
                 checkLogs = JSON.parse(savedLogs);
-                // 只保留最近 100 筆，避免爆炸
-                if (checkLogs.length > 100) {
-                    checkLogs = checkLogs.slice(0, 100);
-                }
+                if (checkLogs.length > 100) checkLogs = checkLogs.slice(0, 100);
             }
         }
 
         function trackCheckIn() {
             const now = Date.now();
-            
-            // 冷卻機制：如果距離上次記錄小於 30 秒，不記錄 (防止誤觸或頻繁刷新)
             if (checkLogs.length > 0) {
-                const lastLog = checkLogs[0]; // index 0 是最新的
-                if (now - lastLog.time < 30 * 1000) {
-                    return; 
-                }
+                const lastLog = checkLogs[0];
+                if (now - lastLog.time < 30 * 1000) return; // 30秒冷卻
             }
-
-            // 只有在上班時間內才記錄 (簡單判斷 percent > 0 且 < 100)
             const p = window.currentPercent || 0;
             if (p <= 0 || p >= 100) return;
 
-            // 新增紀錄
-            const newLog = {
-                time: now,
-                percent: p
-            };
-            
-            // 放入陣列最前面
-            checkLogs.unshift(newLog);
-            
-            // 儲存
+            checkLogs.unshift({ time: now, percent: p });
             localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(checkLogs));
-            
-            // 更新 UI
             renderStats();
         }
 
         function renderStats() {
-            // 1. 計算今日次數
             const startOfToday = new Date();
             startOfToday.setHours(0,0,0,0);
             const todayLogs = checkLogs.filter(log => log.time >= startOfToday.getTime());
             statCountEl.textContent = todayLogs.length;
 
-            // 2. 計算平均間隔 (只計算今日)
             if (todayLogs.length > 1) {
                 let totalDiff = 0;
                 for(let i = 0; i < todayLogs.length - 1; i++) {
-                    // 因為是時間倒序，所以用前一個減後一個
                     totalDiff += (todayLogs[i].time - todayLogs[i+1].time);
                 }
                 const avgMs = totalDiff / (todayLogs.length - 1);
@@ -517,7 +577,6 @@
                 statAvgEl.textContent = "--";
             }
 
-            // 3. 渲染列表
             logListEl.innerHTML = '';
             if (checkLogs.length === 0) {
                 logListEl.innerHTML = '<div class="empty-state">還沒有資料</div>';
@@ -527,15 +586,11 @@
             checkLogs.forEach((log, index) => {
                 const date = new Date(log.time);
                 const timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                let gapStr = '', isLongGap = false;
                 
-                // 計算與上一筆的間隔 (因為是倒序，所以找 index + 1)
-                let gapStr = '';
-                let isLongGap = false;
                 if (index < checkLogs.length - 1) {
-                    const prevLog = checkLogs[index + 1];
-                    const diff = log.time - prevLog.time;
+                    const diff = log.time - checkLogs[index + 1].time;
                     gapStr = `距離上次 ${formatDuration(diff)}`;
-                    // 如果超過 60 分鐘沒看，標記一下
                     if (diff > 60 * 60 * 1000) isLongGap = true;
                 } else {
                     gapStr = '紀錄起點';
@@ -573,14 +628,12 @@
             }
         }
 
-        // ------------------------------------------
-        // 4. 面板控制
-        // ------------------------------------------
+        // 面板 UI 控制
         function openPanel(id) {
             closeAllPanels();
             document.getElementById(id).classList.add('active');
             document.body.classList.add('panel-open');
-            if (id === 'stats-panel') renderStats(); // 確保打開時是最新的
+            if (id === 'stats-panel') renderStats();
         }
 
         function closeAllPanels() {
@@ -588,10 +641,12 @@
             document.body.classList.remove('panel-open');
         }
         
-        // 點擊背景關閉面板
-        document.querySelector('.display-container').addEventListener('click', closeAllPanels);
+        document.querySelector('.display-container').addEventListener('click', (e) => {
+            // 如果點擊的是顯示區域本身(非子元素)或顯示數值，才切換。避免誤觸
+            if (e.target.closest('#main-display-area')) return; // main-display-area 有自己的 onclick
+            closeAllPanels();
+        });
 
-        // 啟動程式
         init();
 
     </script>
