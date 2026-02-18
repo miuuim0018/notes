@@ -3,153 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bingo Pop-up Picker</title>
+    <title>Smart Bingo (Auto-Detect)</title>
     <style>
         :root {
             --primary: #3498db;
             --secondary: #2c3e50;
-            --accent: #e67e22;
-            --bg: #f5f6fa;
-            --cell-bg: #fff;
-            --radius: 8px;
+            --accent: #f1c40f; /* Gold for win */
+            --delete: #e74c3c;
+            --bg: #f4f6f7;
+            --radius: 12px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: var(--secondary);
         }
 
-        h1 { margin: 0 0 15px 0; color: var(--secondary); text-align: center; }
+        h1 { margin: 0 0 10px 0; text-align: center; }
 
         .container {
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%; max-width: 500px; background: white;
+            padding: 20px; border-radius: var(--radius);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
         }
 
         .hidden { display: none !important; }
 
         /* BUTTONS */
         .btn {
-            width: 100%; padding: 12px; border: none; border-radius: var(--radius);
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
             font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;
-            transition: opacity 0.2s;
+            transition: transform 0.1s;
         }
-        .btn:active { transform: translateY(2px); }
+        .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-host { background: #8e44ad; color: white; }
-        .btn-danger { background: #e74c3c; color: white; }
         .btn-outline { background: transparent; border: 2px solid #bdc3c7; color: #7f8c8d; }
-
-        /* INPUT */
+        
+        /* SETUP INPUT */
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input[type="number"] {
             width: 100%; padding: 10px; font-size: 1.2rem; text-align: center;
-            border: 2px solid #ddd; border-radius: var(--radius);
+            border: 2px solid #ddd; border-radius: 8px;
         }
 
-        /* BINGO GRID */
+        /* GRID SYSTEM */
         .bingo-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 15px;
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 6px; margin: 15px 0;
         }
 
         .cell {
-            aspect-ratio: 1;
-            background: #ecf0f1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #7f8c8d;
-            cursor: pointer;
-            border: 2px solid transparent;
+            aspect-ratio: 1; background: #ecf0f1; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: bold; color: #95a5a6;
+            cursor: pointer; user-select: none; position: relative;
+            transition: background 0.2s, color 0.2s;
         }
 
-        .cell.filled {
-            background: white;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+        /* Selection Mode States */
+        .cell.filled { background: white; border: 2px solid var(--primary); color: var(--primary); }
 
+        /* Game Mode States */
+        .cell.game-mode { border: 2px solid transparent; background: white; color: var(--secondary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* MARKED (Red X) */
         .cell.game-mode.marked {
-            background: #e74c3c;
-            color: white;
-            border-color: #e74c3c;
-            position: relative;
+            background: #ff7675; color: white;
         }
-        .cell.game-mode.marked::after { content: '✕'; position: absolute; font-size: 1.5rem; opacity: 0.7; }
+        .cell.game-mode.marked::after {
+            content: '✕'; position: absolute; font-size: 1.5rem; opacity: 0.6;
+        }
 
-        /* POPUP OVERLAY */
+        /* WINNING LINE (Gold) */
+        .cell.game-mode.win {
+            background: var(--accent) !important;
+            color: #d35400 !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* GAME STATS BAR */
+        .stats-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #2c3e50; color: white; padding: 10px 15px;
+            border-radius: 8px; margin-bottom: 15px;
+        }
+        .line-count {
+            background: var(--accent); color: #d35400; padding: 2px 8px;
+            border-radius: 4px; font-weight: bold;
+        }
+
+        /* POPUP PICKER */
         #picker-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: end; /* Slide up from bottom on mobile */
-            justify-content: center;
+            background: rgba(0,0,0,0.5); z-index: 900;
+            display: flex; align-items: end; justify-content: center;
         }
-        
         .picker-content {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            max-height: 80vh;
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.3s ease-out;
+            background: white; width: 100%; max-width: 500px;
+            border-radius: 20px 20px 0 0; padding: 20px;
+            max-height: 80vh; display: flex; flex-direction: column;
         }
-
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .picker-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; font-weight: bold; font-size: 1.2rem;
-        }
-
         .number-pad {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            overflow-y: auto;
-            padding-bottom: 20px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+            overflow-y: auto; padding-bottom: 20px;
         }
-
         .num-btn {
-            aspect-ratio: 1.2;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--secondary);
-            cursor: pointer;
+            aspect-ratio: 1.2; background: white; border: 1px solid #ddd;
+            border-radius: 6px; font-size: 1rem; font-weight: bold;
         }
-        
-        .num-btn:active { background: var(--primary); color: white; }
-        
-        .num-btn.used {
-            background: #ecf0f1; color: #bdc3c7; 
-            border-color: transparent; pointer-events: none;
+        .num-btn.used { background: #eee; color: #ccc; pointer-events: none; }
+
+        /* BINGO CELEBRATION MODAL */
+        #bingo-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--accent);
         }
+        .bingo-text { font-size: 5rem; font-weight: 900; text-shadow: 0 0 20px gold; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* HOST STYLES */
         .host-draw {
@@ -157,20 +144,18 @@
             text-align: center; padding: 20px; background: #f3e5f5;
             border-radius: var(--radius); margin-bottom: 20px;
         }
-        .host-history {
-            display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
-        }
-        .hist-item {
+        .history-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+        .hist-dot {
             aspect-ratio: 1; background: #eee; font-size: 0.8rem;
             display: flex; align-items: center; justify-content: center; border-radius: 4px;
         }
-        .hist-item.active { background: #8e44ad; color: white; }
+        .hist-dot.active { background: #8e44ad; color: white; }
 
     </style>
 </head>
 <body>
 
-    <h1>Bingo Party 🎉</h1>
+    <h1>Smart Bingo 👑</h1>
 
     <div id="setup-panel" class="container">
         <div class="input-group">
@@ -185,9 +170,9 @@
         <p style="text-align:center; color:#7f8c8d; margin-top:0;">點擊格子選擇數字</p>
         <div class="bingo-grid" id="select-grid"></div>
         
-        <div style="display:flex; justify-content:space-between; margin-top:10px;">
-            <button class="btn btn-outline" style="width:48%" onclick="randomFillRemaining()">🎲 隨機補滿</button>
-            <button class="btn btn-outline" style="width:48%" onclick="resetCard()">🗑️ 全部清空</button>
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <button class="btn btn-outline" onclick="randomFillRemaining()">🎲 隨機補滿</button>
+            <button class="btn btn-outline" onclick="resetCard()">🗑️ 清空</button>
         </div>
         
         <button id="lock-btn" class="btn btn-primary" style="margin-top:15px; opacity:0.5;" onclick="startGame()" disabled>
@@ -197,134 +182,112 @@
     </div>
 
     <div id="player-game" class="container hidden">
-        <h2 style="text-align:center;">Bingo Card</h2>
+        <div class="stats-bar">
+            <span>賓果連線數</span>
+            <span id="line-counter" class="line-count">0</span>
+        </div>
+        
         <div class="bingo-grid" id="game-grid"></div>
+        
+        <p style="text-align:center; font-size:0.9rem; color:#95a5a6;">
+            點擊標記，連線會自動發光 ✨
+        </p>
         <button class="btn btn-outline" onclick="if(confirm('確定要退出嗎？')) location.reload()">退出遊戲</button>
     </div>
 
     <div id="host-panel" class="container hidden">
-        <h2 style="color:#8e44ad; margin-top:0;">主持人模式</h2>
+        <h2 style="color:#8e44ad; margin-top:0;">主持人</h2>
         <div class="host-draw" id="host-display">Ready</div>
         <button class="btn btn-host" onclick="drawNumber()">抽出號碼</button>
         <div style="margin-top:20px;">
             <p>歷史紀錄:</p>
-            <div class="host-history" id="history-board"></div>
+            <div class="history-grid" id="host-history"></div>
         </div>
         <button class="btn btn-outline" style="margin-top:20px;" onclick="location.reload()">結束</button>
     </div>
 
-    <div id="picker-overlay" class="hidden" onclick="closePicker(event)">
-        <div class="picker-content" onclick="event.stopPropagation()">
-            <div class="picker-header">
-                <span>選擇數字</span>
-                <button onclick="closePickerDirect()" style="background:none; border:none; font-size:1.5rem;">&times;</button>
+    <div id="picker-overlay" class="hidden" onclick="if(event.target.id==='picker-overlay') this.classList.add('hidden')">
+        <div class="picker-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <span style="font-weight:bold; font-size:1.2rem;">選擇數字</span>
+                <button onclick="document.getElementById('picker-overlay').classList.add('hidden')" style="border:none; bg:none; font-size:1.5rem;">&times;</button>
             </div>
             <div class="number-pad" id="number-pad"></div>
-            <button class="btn btn-danger" id="clear-cell-btn" style="margin-top:10px;" onclick="clearCurrentCell()">清除此格</button>
+            <button class="btn btn-outline" style="margin-top:10px; color:#e74c3c; border-color:#e74c3c;" onclick="clearCurrentCell()">清除此格</button>
         </div>
+    </div>
+
+    <div id="bingo-modal" class="hidden" onclick="this.classList.add('hidden')">
+        <div class="bingo-text">BINGO!</div>
+        <p style="color:white; margin-top:20px;">點擊畫面繼續</p>
     </div>
 
     <script>
         // GLOBAL
         let maxNumber = 50;
         let cardData = new Array(25).fill(null);
+        let markedState = new Array(25).fill(false); // New: Track marks
         let currentEditingIndex = -1;
+        let hasBingoed = false; // To show animation only once (optional)
 
         // --- SETUP ---
         function initHost() {
             if(!validateSetup()) return;
-            document.getElementById('setup-panel').classList.add('hidden');
-            document.getElementById('host-panel').classList.remove('hidden');
+            switchScreen('host-panel');
             renderHistoryBoard();
         }
 
         function initPlayer() {
             if(!validateSetup()) return;
-            document.getElementById('setup-panel').classList.add('hidden');
-            document.getElementById('player-select').classList.remove('hidden');
+            switchScreen('player-select');
             renderSelectGrid();
         }
 
         function validateSetup() {
             const val = parseInt(document.getElementById('max-num-input').value);
-            if(val < 25) { alert("數字至少要25個喔！"); return false; }
+            if(val < 25) { alert("數字至少要 25 個！"); return false; }
             maxNumber = val;
             return true;
         }
 
-        // --- PLAYER SELECT LOGIC ---
+        function switchScreen(id) {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById('setup-panel').classList.add('hidden');
+        }
+
+        // --- SELECTION LOGIC ---
         function renderSelectGrid() {
             const grid = document.getElementById('select-grid');
             grid.innerHTML = '';
-            
             cardData.forEach((num, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                if(num) {
-                    cell.innerText = num;
-                    cell.classList.add('filled');
-                } else {
-                    cell.innerText = ''; // Empty
-                }
-                
-                // Click to open picker
+                if(num) { cell.innerText = num; cell.classList.add('filled'); }
                 cell.onclick = () => openPicker(index);
                 grid.appendChild(cell);
             });
-            updateLockBtn();
+            checkLock();
         }
 
-        // --- POPUP PICKER LOGIC ---
         function openPicker(index) {
             currentEditingIndex = index;
-            const overlay = document.getElementById('picker-overlay');
             const pad = document.getElementById('number-pad');
-            const clearBtn = document.getElementById('clear-cell-btn');
-            
             pad.innerHTML = '';
-            overlay.classList.remove('hidden');
+            document.getElementById('picker-overlay').classList.remove('hidden');
 
-            // Render 1 to MaxNumber
             for(let i=1; i<=maxNumber; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'num-btn';
                 btn.innerText = i;
-                
-                // If number is used elsewhere, disable it
-                // Note: If it's used in the CURRENT cell, don't disable it (so we see what we have)
-                if(cardData.includes(i) && cardData[index] !== i) {
-                    btn.classList.add('used');
-                }
-
+                if(cardData.includes(i) && cardData[index] !== i) btn.classList.add('used');
                 btn.onclick = () => {
-                    selectNumber(i);
+                    cardData[index] = i;
+                    document.getElementById('picker-overlay').classList.add('hidden');
+                    renderSelectGrid();
                 };
                 pad.appendChild(btn);
             }
-
-            // If current cell is empty, hide "Clear" button to save space
-            if(cardData[index] === null) {
-                clearBtn.style.display = 'none';
-            } else {
-                clearBtn.style.display = 'block';
-            }
-        }
-
-        function closePicker(e) {
-            // Close if clicking outside the content box
-            if(e.target.id === 'picker-overlay') {
-                document.getElementById('picker-overlay').classList.add('hidden');
-            }
-        }
-        
-        function closePickerDirect() {
-            document.getElementById('picker-overlay').classList.add('hidden');
-        }
-
-        function selectNumber(num) {
-            cardData[currentEditingIndex] = num;
-            document.getElementById('picker-overlay').classList.add('hidden');
-            renderSelectGrid();
         }
 
         function clearCurrentCell() {
@@ -335,61 +298,119 @@
 
         function randomFillRemaining() {
             let available = [];
-            for(let i=1; i<=maxNumber; i++) {
-                if(!cardData.includes(i)) available.push(i);
-            }
+            for(let i=1; i<=maxNumber; i++) if(!cardData.includes(i)) available.push(i);
             // Shuffle
-            for (let i = available.length - 1; i > 0; i--) {
+            for(let i = available.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [available[i], available[j]] = [available[j], available[i]];
             }
-            
             let ptr = 0;
-            for(let i=0; i<25; i++) {
-                if(cardData[i] === null && ptr < available.length) {
-                    cardData[i] = available[ptr++];
-                }
-            }
+            for(let i=0; i<25; i++) if(cardData[i] === null && ptr < available.length) cardData[i] = available[ptr++];
             renderSelectGrid();
         }
 
         function resetCard() {
-            if(confirm('要清空所有格子嗎？')) {
-                cardData.fill(null);
-                renderSelectGrid();
-            }
+            if(confirm('清空卡片？')) { cardData.fill(null); renderSelectGrid(); }
         }
 
-        function updateLockBtn() {
+        function checkLock() {
             const filled = cardData.filter(n => n).length;
             const btn = document.getElementById('lock-btn');
-            if(filled === 25) {
-                btn.disabled = false;
-                btn.style.opacity = 1;
-                btn.innerText = "🔒 鎖定並開始遊戲";
-            } else {
-                btn.disabled = true;
-                btn.style.opacity = 0.5;
-                btn.innerText = `還差 ${25 - filled} 格`;
-            }
+            btn.disabled = filled !== 25;
+            btn.style.opacity = filled === 25 ? 1 : 0.5;
         }
 
-        // --- PLAYER GAME LOGIC ---
+        // --- GAME LOGIC (SMART RECOGNITION) ---
         function startGame() {
-            if(!confirm("確定鎖定卡片嗎？開始後不能修改喔！")) return;
-            document.getElementById('player-select').classList.add('hidden');
-            document.getElementById('player-game').classList.remove('hidden');
-            
+            if(!confirm("確定鎖定？")) return;
+            switchScreen('player-game');
+            renderGameGrid();
+        }
+
+        function renderGameGrid() {
             const grid = document.getElementById('game-grid');
-            cardData.forEach(num => {
+            grid.innerHTML = '';
+            cardData.forEach((num, index) => {
                 const cell = document.createElement('div');
-                cell.className = 'cell game-mode filled';
+                cell.className = 'cell game-mode';
+                cell.id = `gc-${index}`; // Add ID for line highlighting
                 cell.innerText = num;
-                cell.onclick = function() {
-                    this.classList.toggle('marked');
-                };
+                cell.onclick = () => toggleMark(index);
                 grid.appendChild(cell);
             });
+        }
+
+        function toggleMark(index) {
+            markedState[index] = !markedState[index];
+            const cell = document.getElementById(`gc-${index}`);
+            
+            if(markedState[index]) cell.classList.add('marked');
+            else cell.classList.remove('marked');
+
+            checkWin(); // Trigger recognition
+        }
+
+        function checkWin() {
+            // Reset visual wins
+            document.querySelectorAll('.cell.game-mode').forEach(c => c.classList.remove('win'));
+            
+            let lines = 0;
+            let winningIndices = new Set();
+
+            // Rows
+            for(let r=0; r<5; r++) {
+                let rowIndices = [];
+                let full = true;
+                for(let c=0; c<5; c++) {
+                    let idx = r*5 + c;
+                    rowIndices.push(idx);
+                    if(!markedState[idx]) full = false;
+                }
+                if(full) {
+                    lines++;
+                    rowIndices.forEach(idx => winningIndices.add(idx));
+                }
+            }
+
+            // Cols
+            for(let c=0; c<5; c++) {
+                let colIndices = [];
+                let full = true;
+                for(let r=0; r<5; r++) {
+                    let idx = r*5 + c;
+                    colIndices.push(idx);
+                    if(!markedState[idx]) full = false;
+                }
+                if(full) {
+                    lines++;
+                    colIndices.forEach(idx => winningIndices.add(idx));
+                }
+            }
+
+            // Diagonals
+            const d1 = [0, 6, 12, 18, 24];
+            if(d1.every(idx => markedState[idx])) {
+                lines++;
+                d1.forEach(idx => winningIndices.add(idx));
+            }
+
+            const d2 = [4, 8, 12, 16, 20];
+            if(d2.every(idx => markedState[idx])) {
+                lines++;
+                d2.forEach(idx => winningIndices.add(idx));
+            }
+
+            // Update UI
+            document.getElementById('line-counter').innerText = lines;
+            winningIndices.forEach(idx => {
+                document.getElementById(`gc-${idx}`).classList.add('win');
+            });
+
+            // Trigger Bingo Animation (First time getting > 0 lines)
+            if(lines > 0 && !hasBingoed) {
+                document.getElementById('bingo-modal').classList.remove('hidden');
+                hasBingoed = true; // prevent spamming
+            }
         }
 
         // --- HOST LOGIC ---
@@ -397,44 +418,35 @@
         let isAnimating = false;
 
         function renderHistoryBoard() {
-            const board = document.getElementById('history-board');
+            const board = document.getElementById('host-history');
             board.innerHTML = '';
             board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(maxNumber))}, 1fr)`;
-            
             for(let i=1; i<=maxNumber; i++) {
-                const item = document.createElement('div');
-                item.className = 'hist-item';
-                item.id = `h-${i}`;
-                item.innerText = i;
-                board.appendChild(item);
+                const d = document.createElement('div');
+                d.className = 'hist-dot'; d.id = `h-${i}`; d.innerText = i;
+                board.appendChild(d);
             }
         }
 
         function drawNumber() {
             if(isAnimating) return;
-            if(hostDrawn.length >= maxNumber) { alert('所有號碼已開出'); return; }
-
+            if(hostDrawn.length >= maxNumber) { alert('結束'); return; }
             isAnimating = true;
-            const display = document.getElementById('host-display');
-            let count = 0;
-            const timer = setInterval(() => {
-                display.innerText = Math.floor(Math.random() * maxNumber) + 1;
-                count++;
-                if(count > 10) {
-                    clearInterval(timer);
-                    finalizeDraw();
-                }
+            const disp = document.getElementById('host-display');
+            let c=0;
+            const t = setInterval(() => {
+                disp.innerText = Math.floor(Math.random()*maxNumber)+1;
+                c++;
+                if(c>10) { clearInterval(t); finalizeDraw(); }
             }, 50);
         }
 
         function finalizeDraw() {
-            let num;
-            do { num = Math.floor(Math.random() * maxNumber) + 1; }
-            while (hostDrawn.includes(num));
-            
-            hostDrawn.push(num);
-            document.getElementById('host-display').innerText = num;
-            document.getElementById(`h-${num}`).classList.add('active');
+            let n;
+            do { n = Math.floor(Math.random()*maxNumber)+1; } while(hostDrawn.includes(n));
+            hostDrawn.push(n);
+            document.getElementById('host-display').innerText = n;
+            document.getElementById(`h-${n}`).classList.add('active');
             isAnimating = false;
         }
     </script>
