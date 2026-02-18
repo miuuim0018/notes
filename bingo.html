@@ -3,349 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>序列點擊賓果</title>
+    <title>Bingo Pop-up Picker</title>
     <style>
         :root {
             --primary: #3498db;
             --secondary: #2c3e50;
             --accent: #e67e22;
-            --delete: #e74c3c;
             --bg: #f5f6fa;
-            --text: #2f3640;
-            --radius: 12px;
+            --cell-bg: #fff;
+            --radius: 8px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
 
-        h1 { margin: 0; font-size: 1.5rem; color: var(--secondary); }
-        
+        h1 { margin: 0 0 15px 0; color: var(--secondary); text-align: center; }
+
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
             background: white;
             padding: 20px;
             border-radius: var(--radius);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            margin-top: 15px;
-            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .hidden { display: none !important; }
 
-        /* STATUS BAR */
-        .status-bar {
-            background: var(--secondary);
-            color: white;
-            padding: 15px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* BUTTONS */
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: var(--radius);
+            font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;
+            transition: opacity 0.2s;
         }
-        .next-indicator { font-size: 1.2rem; font-weight: bold; }
-        .next-number { 
-            color: var(--accent); font-size: 1.5rem; background: white; 
-            padding: 2px 10px; border-radius: 6px; margin-left: 5px;
+        .btn:active { transform: translateY(2px); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-host { background: #8e44ad; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-outline { background: transparent; border: 2px solid #bdc3c7; color: #7f8c8d; }
+
+        /* INPUT */
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="number"] {
+            width: 100%; padding: 10px; font-size: 1.2rem; text-align: center;
+            border: 2px solid #ddd; border-radius: var(--radius);
         }
 
-        /* GRID */
+        /* BINGO GRID */
         .bingo-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 15px;
         }
 
         .cell {
             aspect-ratio: 1;
             background: #ecf0f1;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .cell.filled {
+            background: white;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .cell.game-mode.marked {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+            position: relative;
+        }
+        .cell.game-mode.marked::after { content: '✕'; position: absolute; font-size: 1.5rem; opacity: 0.7; }
+
+        /* POPUP OVERLAY */
+        #picker-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: end; /* Slide up from bottom on mobile */
+            justify-content: center;
+        }
+        
+        .picker-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .picker-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; font-weight: bold; font-size: 1.2rem;
+        }
+
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .num-btn {
+            aspect-ratio: 1.2;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--secondary);
             cursor: pointer;
-            user-select: none;
-            transition: all 0.1s;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .num-btn:active { background: var(--primary); color: white; }
+        
+        .num-btn.used {
+            background: #ecf0f1; color: #bdc3c7; 
+            border-color: transparent; pointer-events: none;
         }
 
-        /* Filling Mode Styles */
-        .cell.filled {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
+        /* HOST STYLES */
+        .host-draw {
+            font-size: 5rem; font-weight: 800; color: #8e44ad;
+            text-align: center; padding: 20px; background: #f3e5f5;
+            border-radius: var(--radius); margin-bottom: 20px;
         }
-        .cell:active { transform: scale(0.95); }
+        .host-history {
+            display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+        }
+        .hist-item {
+            aspect-ratio: 1; background: #eee; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; border-radius: 4px;
+        }
+        .hist-item.active { background: #8e44ad; color: white; }
 
-        /* Game Mode Styles */
-        .cell.game-mode { cursor: pointer; }
-        .cell.game-mode.marked {
-            background: var(--delete);
-            color: white;
-            border-color: var(--delete);
-        }
-        .cell.game-mode.marked::after {
-            content: '✕'; font-size: 2rem; position: absolute; opacity: 0.6;
-        }
-
-        /* BUTTONS */
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-outline { background: transparent; border: 2px solid #bdc3c7; color: #7f8c8d; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Setup Inputs */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        input[type="number"] {
-            width: 100%; padding: 12px; font-size: 1.2rem; 
-            text-align: center; border: 2px solid #ddd; border-radius: 8px;
-        }
-
-        /* Instruction text */
-        .instruction {
-            font-size: 0.9rem; color: #7f8c8d; margin-top: 5px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>Bingo Sequence</h1>
+    <h1>Bingo Party 🎉</h1>
 
     <div id="setup-panel" class="container">
-        <h2>遊戲設定</h2>
         <div class="input-group">
             <label>最大數字 (Max Number)</label>
-            <input type="number" id="max-num" value="50">
+            <input type="number" id="max-num-input" value="50" min="25" max="99">
         </div>
-        <button class="btn btn-primary" onclick="initSelection()">開始填寫卡片</button>
-        <p class="instruction">設定範圍後，進入填寫模式。</p>
+        <button class="btn btn-host" onclick="initHost()">我是主持人</button>
+        <button class="btn btn-primary" onclick="initPlayer()">我是玩家</button>
     </div>
 
-    <div id="selection-panel" class="container hidden">
-        <div class="status-bar">
-            <span>填寫進度: <span id="progress">0/25</span></span>
-            <div class="next-indicator">下一號: <span id="next-num-display" class="next-number">1</span></div>
-        </div>
-
-        <div class="bingo-grid" id="select-grid">
-            </div>
-
-        <p class="instruction">👆 單擊填入數字，✌️ 連按兩下刪除</p>
+    <div id="player-select" class="container hidden">
+        <p style="text-align:center; color:#7f8c8d; margin-top:0;">點擊格子選擇數字</p>
+        <div class="bingo-grid" id="select-grid"></div>
         
-        <div style="margin-top: 20px;">
-            <button class="btn btn-outline" onclick="autoFillRemaining()">✨ 剩下的隨機補滿</button>
-            <button id="start-btn" class="btn btn-success" onclick="startGame()" disabled>🔒 鎖定並開始遊戲</button>
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <button class="btn btn-outline" style="width:48%" onclick="randomFillRemaining()">🎲 隨機補滿</button>
+            <button class="btn btn-outline" style="width:48%" onclick="resetCard()">🗑️ 全部清空</button>
         </div>
+        
+        <button id="lock-btn" class="btn btn-primary" style="margin-top:15px; opacity:0.5;" onclick="startGame()" disabled>
+            🔒 鎖定並開始
+        </button>
+        <button class="btn btn-outline" style="margin-top:10px; border:none;" onclick="location.reload()">回首頁</button>
     </div>
 
-    <div id="game-panel" class="container hidden">
-        <div class="status-bar" style="justify-content: center;">
-            <span style="font-size: 1.2rem;">🎮 遊戲進行中</span>
-        </div>
-        
-        <div class="bingo-grid" id="game-grid">
-            </div>
+    <div id="player-game" class="container hidden">
+        <h2 style="text-align:center;">Bingo Card</h2>
+        <div class="bingo-grid" id="game-grid"></div>
+        <button class="btn btn-outline" onclick="if(confirm('確定要退出嗎？')) location.reload()">退出遊戲</button>
+    </div>
 
-        <button class="btn btn-outline" onclick="if(confirm('要重新開始嗎？')) location.reload()">退出遊戲</button>
+    <div id="host-panel" class="container hidden">
+        <h2 style="color:#8e44ad; margin-top:0;">主持人模式</h2>
+        <div class="host-draw" id="host-display">Ready</div>
+        <button class="btn btn-host" onclick="drawNumber()">抽出號碼</button>
+        <div style="margin-top:20px;">
+            <p>歷史紀錄:</p>
+            <div class="host-history" id="history-board"></div>
+        </div>
+        <button class="btn btn-outline" style="margin-top:20px;" onclick="location.reload()">結束</button>
+    </div>
+
+    <div id="picker-overlay" class="hidden" onclick="closePicker(event)">
+        <div class="picker-content" onclick="event.stopPropagation()">
+            <div class="picker-header">
+                <span>選擇數字</span>
+                <button onclick="closePickerDirect()" style="background:none; border:none; font-size:1.5rem;">&times;</button>
+            </div>
+            <div class="number-pad" id="number-pad"></div>
+            <button class="btn btn-danger" id="clear-cell-btn" style="margin-top:10px;" onclick="clearCurrentCell()">清除此格</button>
+        </div>
     </div>
 
     <script>
+        // GLOBAL
         let maxNumber = 50;
         let cardData = new Array(25).fill(null);
-        let clickTimer = null;
-        let lastClickIndex = -1;
+        let currentEditingIndex = -1;
 
         // --- SETUP ---
-        function initSelection() {
-            const val = parseInt(document.getElementById('max-num').value);
-            if (val < 25) { alert("數字太少無法填滿卡片！至少 25。"); return; }
-            maxNumber = val;
-            
+        function initHost() {
+            if(!validateSetup()) return;
             document.getElementById('setup-panel').classList.add('hidden');
-            document.getElementById('selection-panel').classList.remove('hidden');
-            renderSelectionGrid();
-            updateNextNumber();
+            document.getElementById('host-panel').classList.remove('hidden');
+            renderHistoryBoard();
         }
 
-        // --- CORE LOGIC: NEXT NUMBER ---
-        function getNextAvailableNumber() {
-            // Find the smallest number starting from 1 that is NOT in cardData
-            for (let i = 1; i <= maxNumber; i++) {
-                if (!cardData.includes(i)) {
-                    return i;
-                }
-            }
-            return null; // Full or logic error
+        function initPlayer() {
+            if(!validateSetup()) return;
+            document.getElementById('setup-panel').classList.add('hidden');
+            document.getElementById('player-select').classList.remove('hidden');
+            renderSelectGrid();
         }
 
-        function updateNextNumber() {
-            const next = getNextAvailableNumber();
-            const display = document.getElementById('next-num-display');
-            const startBtn = document.getElementById('start-btn');
-            const progress = document.getElementById('progress');
-
-            // Update Progress
-            const count = cardData.filter(n => n !== null).length;
-            progress.innerText = `${count}/25`;
-
-            if (next === null || count === 25) {
-                display.innerText = "完成";
-                display.style.color = "#27ae60";
-                startBtn.disabled = false;
-                startBtn.style.opacity = "1";
-            } else {
-                display.innerText = next;
-                display.style.color = "#e67e22";
-                startBtn.disabled = true;
-                startBtn.style.opacity = "0.5";
-            }
+        function validateSetup() {
+            const val = parseInt(document.getElementById('max-num-input').value);
+            if(val < 25) { alert("數字至少要25個喔！"); return false; }
+            maxNumber = val;
+            return true;
         }
 
-        // --- INTERACTION ---
-        function handleCellClick(index) {
-            const now = new Date().getTime();
-            
-            // Logic for Double Click detection
-            if (lastClickIndex === index && (now - clickTimer) < 300) {
-                // Double Click Detected -> DELETE
-                deleteNumber(index);
-                lastClickIndex = -1; // Reset
-            } else {
-                // Single Click Detected (Wait slightly to ensure it's not a double click? 
-                // No, for responsiveness we execute immediately. Double click will just override.)
-                
-                // If cell is empty, fill it
-                if (cardData[index] === null) {
-                    fillNumber(index);
-                } 
-                // If cell is full, single click does nothing (waiting for potential double click)
-                
-                clickTimer = now;
-                lastClickIndex = index;
-            }
-        }
-
-        function fillNumber(index) {
-            const next = getNextAvailableNumber();
-            if (next === null) return; // Full
-
-            cardData[index] = next;
-            
-            // Visual Update
-            updateCellVisual(index);
-            updateNextNumber();
-        }
-
-        function deleteNumber(index) {
-            if (cardData[index] === null) return;
-            
-            cardData[index] = null;
-            
-            // Visual Update
-            updateCellVisual(index);
-            updateNextNumber();
-        }
-
-        function updateCellVisual(index) {
-            const cell = document.getElementById(`cell-${index}`);
-            const val = cardData[index];
-            
-            if (val !== null) {
-                cell.innerText = val;
-                cell.classList.add('filled');
-            } else {
-                cell.innerText = '';
-                cell.classList.remove('filled');
-            }
-        }
-
-        function renderSelectionGrid() {
+        // --- PLAYER SELECT LOGIC ---
+        function renderSelectGrid() {
             const grid = document.getElementById('select-grid');
             grid.innerHTML = '';
             
-            for (let i = 0; i < 25; i++) {
+            cardData.forEach((num, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.id = `cell-${i}`;
+                if(num) {
+                    cell.innerText = num;
+                    cell.classList.add('filled');
+                } else {
+                    cell.innerText = ''; // Empty
+                }
                 
-                // Custom Click Handler for Double Tap support
-                cell.addEventListener('click', () => handleCellClick(i));
-                
+                // Click to open picker
+                cell.onclick = () => openPicker(index);
                 grid.appendChild(cell);
+            });
+            updateLockBtn();
+        }
+
+        // --- POPUP PICKER LOGIC ---
+        function openPicker(index) {
+            currentEditingIndex = index;
+            const overlay = document.getElementById('picker-overlay');
+            const pad = document.getElementById('number-pad');
+            const clearBtn = document.getElementById('clear-cell-btn');
+            
+            pad.innerHTML = '';
+            overlay.classList.remove('hidden');
+
+            // Render 1 to MaxNumber
+            for(let i=1; i<=maxNumber; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'num-btn';
+                btn.innerText = i;
+                
+                // If number is used elsewhere, disable it
+                // Note: If it's used in the CURRENT cell, don't disable it (so we see what we have)
+                if(cardData.includes(i) && cardData[index] !== i) {
+                    btn.classList.add('used');
+                }
+
+                btn.onclick = () => {
+                    selectNumber(i);
+                };
+                pad.appendChild(btn);
+            }
+
+            // If current cell is empty, hide "Clear" button to save space
+            if(cardData[index] === null) {
+                clearBtn.style.display = 'none';
+            } else {
+                clearBtn.style.display = 'block';
             }
         }
 
-        function autoFillRemaining() {
-            // Find all available numbers
-            let available = [];
-            for (let i = 1; i <= maxNumber; i++) {
-                if (!cardData.includes(i)) available.push(i);
+        function closePicker(e) {
+            // Close if clicking outside the content box
+            if(e.target.id === 'picker-overlay') {
+                document.getElementById('picker-overlay').classList.add('hidden');
             }
+        }
+        
+        function closePickerDirect() {
+            document.getElementById('picker-overlay').classList.add('hidden');
+        }
 
+        function selectNumber(num) {
+            cardData[currentEditingIndex] = num;
+            document.getElementById('picker-overlay').classList.add('hidden');
+            renderSelectGrid();
+        }
+
+        function clearCurrentCell() {
+            cardData[currentEditingIndex] = null;
+            document.getElementById('picker-overlay').classList.add('hidden');
+            renderSelectGrid();
+        }
+
+        function randomFillRemaining() {
+            let available = [];
+            for(let i=1; i<=maxNumber; i++) {
+                if(!cardData.includes(i)) available.push(i);
+            }
             // Shuffle
             for (let i = available.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [available[i], available[j]] = [available[j], available[i]];
             }
-
-            // Fill empty slots
+            
             let ptr = 0;
-            for (let i = 0; i < 25; i++) {
-                if (cardData[i] === null && ptr < available.length) {
+            for(let i=0; i<25; i++) {
+                if(cardData[i] === null && ptr < available.length) {
                     cardData[i] = available[ptr++];
-                    updateCellVisual(i);
                 }
             }
-            updateNextNumber();
+            renderSelectGrid();
         }
 
-        // --- GAME MODE ---
+        function resetCard() {
+            if(confirm('要清空所有格子嗎？')) {
+                cardData.fill(null);
+                renderSelectGrid();
+            }
+        }
+
+        function updateLockBtn() {
+            const filled = cardData.filter(n => n).length;
+            const btn = document.getElementById('lock-btn');
+            if(filled === 25) {
+                btn.disabled = false;
+                btn.style.opacity = 1;
+                btn.innerText = "🔒 鎖定並開始遊戲";
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = 0.5;
+                btn.innerText = `還差 ${25 - filled} 格`;
+            }
+        }
+
+        // --- PLAYER GAME LOGIC ---
         function startGame() {
-            if (!confirm("確定鎖定卡片並開始遊戲嗎？")) return;
-
-            document.getElementById('selection-panel').classList.add('hidden');
-            document.getElementById('game-panel').classList.remove('hidden');
-
+            if(!confirm("確定鎖定卡片嗎？開始後不能修改喔！")) return;
+            document.getElementById('player-select').classList.add('hidden');
+            document.getElementById('player-game').classList.remove('hidden');
+            
             const grid = document.getElementById('game-grid');
-            grid.innerHTML = '';
-
             cardData.forEach(num => {
                 const cell = document.createElement('div');
-                cell.className = 'cell game-mode filled'; // Use filled style
+                cell.className = 'cell game-mode filled';
                 cell.innerText = num;
                 cell.onclick = function() {
                     this.classList.toggle('marked');
                 };
                 grid.appendChild(cell);
             });
+        }
+
+        // --- HOST LOGIC ---
+        let hostDrawn = [];
+        let isAnimating = false;
+
+        function renderHistoryBoard() {
+            const board = document.getElementById('history-board');
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(maxNumber))}, 1fr)`;
+            
+            for(let i=1; i<=maxNumber; i++) {
+                const item = document.createElement('div');
+                item.className = 'hist-item';
+                item.id = `h-${i}`;
+                item.innerText = i;
+                board.appendChild(item);
+            }
+        }
+
+        function drawNumber() {
+            if(isAnimating) return;
+            if(hostDrawn.length >= maxNumber) { alert('所有號碼已開出'); return; }
+
+            isAnimating = true;
+            const display = document.getElementById('host-display');
+            let count = 0;
+            const timer = setInterval(() => {
+                display.innerText = Math.floor(Math.random() * maxNumber) + 1;
+                count++;
+                if(count > 10) {
+                    clearInterval(timer);
+                    finalizeDraw();
+                }
+            }, 50);
+        }
+
+        function finalizeDraw() {
+            let num;
+            do { num = Math.floor(Math.random() * maxNumber) + 1; }
+            while (hostDrawn.includes(num));
+            
+            hostDrawn.push(num);
+            document.getElementById('host-display').innerText = num;
+            document.getElementById(`h-${num}`).classList.add('active');
+            isAnimating = false;
         }
     </script>
 </body>
